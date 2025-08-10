@@ -1,13 +1,16 @@
 import React, { useState } from 'react';
+import WalletTab from './WalletTab';
 
 const ProfilePage = ({ 
     setShowProfilePage, 
     myPackages,
     userTrips,
     setSelectedPackage,
-    setSelectedTrip
+    setSelectedTrip,
+    userBalance
 }) => {
     const [activeTab, setActiveTab] = useState('packages');
+    const [walletExpanded, setWalletExpanded] = useState(false);
 
     const activePackages = myPackages.filter(pkg => pkg.status === 'active' || pkg.status === 'waiting');
     const completedPackages = myPackages.filter(pkg => pkg.status === 'completed');
@@ -149,6 +152,114 @@ const ProfilePage = ({
                 <div style={{ width: 50 }}></div>
             </div>
 
+            <div 
+                style={{
+                    background: 'var(--tg-theme-secondary-bg-color, #232e3c)',
+                    border: '0.5px solid var(--tg-theme-hint-color, #708499)',
+                    borderRadius: 12,
+                    padding: '12px 16px',
+                    marginBottom: 20,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease'
+                }}
+                onClick={() => setWalletExpanded(!walletExpanded)}
+            >
+                <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center'
+                }}>
+                    <div style={{
+                        fontSize: 14,
+                        color: 'var(--tg-theme-hint-color, #708499)'
+                    }}>💰 Баланс</div>
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 12
+                    }}>
+                        <div style={{
+                            fontSize: 16,
+                            fontWeight: 600,
+                            color: 'var(--tg-theme-text-color, #ffffff)'
+                        }}>
+                            ₽{(userBalance.available + userBalance.frozen + userBalance.pending).toLocaleString()}
+                        </div>
+                        <div style={{
+                            fontSize: 12,
+                            color: 'var(--tg-theme-hint-color, #708499)',
+                            transform: walletExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+                            transition: 'transform 0.2s ease'
+                        }}>
+                            ▼
+                        </div>
+                    </div>
+                </div>
+                
+                {walletExpanded && (
+                    <div style={{
+                        marginTop: 12,
+                        paddingTop: 12,
+                        borderTop: '0.5px solid var(--tg-theme-hint-color, #708499)'
+                    }}>
+                        <div style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            gap: 8,
+                            fontSize: 12
+                        }}>
+                            <div style={{ textAlign: 'center' }}>
+                                <div style={{
+                                    color: '#4BB34B',
+                                    fontWeight: 600,
+                                    marginBottom: 2
+                                }}>₽{userBalance.available.toLocaleString()}</div>
+                                <div style={{ color: 'var(--tg-theme-hint-color, #708499)' }}>Доступно</div>
+                            </div>
+                            <div style={{ textAlign: 'center' }}>
+                                <div style={{
+                                    color: '#FF8C00',
+                                    fontWeight: 600,
+                                    marginBottom: 2
+                                }}>₽{userBalance.frozen.toLocaleString()}</div>
+                                <div style={{ color: 'var(--tg-theme-hint-color, #708499)' }}>Заморожено</div>
+                            </div>
+                            <div style={{ textAlign: 'center' }}>
+                                <div style={{
+                                    color: '#FFD700',
+                                    fontWeight: 600,
+                                    marginBottom: 2
+                                }}>₽{userBalance.pending.toLocaleString()}</div>
+                                <div style={{ color: 'var(--tg-theme-hint-color, #708499)' }}>Ожидают</div>
+                            </div>
+                        </div>
+                        
+                        {userBalance.available > 0 && (
+                            <button 
+                                style={{
+                                    background: 'var(--tg-theme-button-color, #5288c1)',
+                                    color: 'var(--tg-theme-button-text-color, #ffffff)',
+                                    border: 'none',
+                                    borderRadius: 6,
+                                    padding: '8px 12px',
+                                    fontSize: 12,
+                                    fontWeight: 500,
+                                    cursor: 'pointer',
+                                    width: '100%',
+                                    marginTop: 12
+                                }}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    alert(`Запрос на вывод ₽${userBalance.available} отправлен`);
+                                }}
+                            >
+                                💳 Вывести ₽{userBalance.available.toLocaleString()}
+                            </button>
+                        )}
+                    </div>
+                )}
+            </div>
+
             <div style={styles.tabs}>
                 <button 
                     style={{
@@ -157,7 +268,7 @@ const ProfilePage = ({
                     }}
                     onClick={() => setActiveTab('packages')}
                 >
-                    📦 Мои посылки ({myPackages.length})
+                    📦 Посылки ({myPackages.length})
                 </button>
                 <button 
                     style={{
@@ -166,7 +277,7 @@ const ProfilePage = ({
                     }}
                     onClick={() => setActiveTab('trips')}
                 >
-                    ✈️ Мои поездки ({userTrips.length})
+                    ✈️ Поездки ({userTrips.length})
                 </button>
             </div>
 

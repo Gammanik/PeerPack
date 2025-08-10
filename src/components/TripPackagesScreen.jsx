@@ -12,6 +12,7 @@ const TripPackagesScreen = ({
     const pendingPackages = tripPackages.filter(pkg => pkg.status === 'pending');
     const acceptedPackages = tripPackages.filter(pkg => pkg.status === 'accepted');
     const deliveredPackages = tripPackages.filter(pkg => pkg.status === 'delivered');
+    const confirmedPackages = tripPackages.filter(pkg => pkg.status === 'confirmed');
 
     const styles = {
         container: {
@@ -93,6 +94,10 @@ const TripPackagesScreen = ({
             animation: 'pulse 2s infinite'
         },
         deliveredPackageCard: {
+            background: 'rgba(255, 140, 0, 0.1)',
+            border: '0.5px solid rgba(255, 140, 0, 0.3)'
+        },
+        confirmedPackageCard: {
             background: 'rgba(75, 179, 75, 0.1)',
             border: '0.5px solid rgba(75, 179, 75, 0.3)'
         },
@@ -282,7 +287,7 @@ const TripPackagesScreen = ({
                                 }}
                                 onClick={() => onMarkDelivered(packageReq.id)}
                             >
-                                Отметить как доставленную
+                                ✅ Отметить как доставленную
                             </button>
                         </div>
                     ))}
@@ -290,15 +295,60 @@ const TripPackagesScreen = ({
             )}
 
             {deliveredPackages.length > 0 && (
-                <div>
+                <div style={{ marginBottom: 24 }}>
                     <div style={styles.sectionTitle}>
-                        ✅ Доставленные ({deliveredPackages.length})
+                        ⏳ Ожидают подтверждения ({deliveredPackages.length})
                     </div>
                     
                     {deliveredPackages.map(packageReq => (
                         <div key={packageReq.id} style={{
                             ...styles.packageCard,
                             ...styles.deliveredPackageCard
+                        }}>
+                            <div style={styles.cardHeader}>
+                                <div style={styles.senderInfo}>
+                                    <img src={packageReq.senderAvatar} alt={packageReq.senderName} style={styles.avatar} />
+                                    <div style={styles.senderName}>{packageReq.senderName}</div>
+                                </div>
+                                <div style={{
+                                    fontSize: 12,
+                                    padding: '4px 8px',
+                                    borderRadius: 6,
+                                    background: '#FF8C00',
+                                    color: 'white',
+                                    fontWeight: 500
+                                }}>
+                                    ₽{packageReq.reward}
+                                </div>
+                            </div>
+
+                            <div style={styles.packageInfo}>
+                                📦 {packageReq.packageDescription}
+                            </div>
+
+                            <div style={{
+                                fontSize: 12,
+                                color: '#FF8C00',
+                                fontWeight: 500,
+                                marginTop: 8
+                            }}>
+                                ⏳ Ожидание подтверждения от получателя
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
+
+            {confirmedPackages.length > 0 && (
+                <div>
+                    <div style={styles.sectionTitle}>
+                        ✅ Подтвержденные ({confirmedPackages.length})
+                    </div>
+                    
+                    {confirmedPackages.map(packageReq => (
+                        <div key={packageReq.id} style={{
+                            ...styles.packageCard,
+                            ...styles.confirmedPackageCard
                         }}>
                             <div style={styles.cardHeader}>
                                 <div style={styles.senderInfo}>

@@ -68,13 +68,33 @@ const SearchCouriers = () => {
             reward: 1000,
             pickupLocation: 'Пулково, зал отправления',
             deliveryLocation: 'Кольцово, зал прилета',
-            status: 'delivered',
+            status: 'confirmed',
             timestamp: Date.now() - 86400000,
             deliveredAt: Date.now() - 3600000,
             confirmedAt: Date.now() - 1800000,
             isNew: false
+        },
+        {
+            id: 4,
+            tripId: 1,
+            senderName: 'Олег Васильев',
+            senderAvatar: 'https://i.pravatar.cc/100?img=55',
+            packageDescription: 'Контракты',
+            message: 'Важные документы для сделки',
+            reward: 1200,
+            pickupLocation: 'Шереметьево, терминал B',
+            deliveryLocation: 'Казань, зал прилета',
+            status: 'delivered',
+            timestamp: Date.now() - 14400000,
+            deliveredAt: Date.now() - 1800000,
+            isNew: false
         }
     ]);
+    const [userBalance, setUserBalance] = useState({
+        available: 2600,
+        frozen: 1800,
+        pending: 1200
+    });
     const [userTrips, setUserTrips] = useState([
         {
             id: 1,
@@ -746,6 +766,7 @@ const SearchCouriers = () => {
                         userTrips={userTrips}
                         setSelectedPackage={setSelectedPackage}
                         setSelectedTrip={setSelectedTrip}
+                        userBalance={userBalance}
                     />
                 )
             ) : mode === 'search' ? (
