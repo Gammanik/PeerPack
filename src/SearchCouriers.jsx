@@ -10,6 +10,8 @@ import RequestForm from './components/RequestForm';
 import AboutPage from './components/AboutPage';
 import ProfilePage from './components/ProfilePage';
 import PackageDetails from './components/PackageDetails';
+import TripPackagesScreen from './components/TripPackagesScreen';
+import CourierContactScreen from './components/CourierContactScreen';
 
 const SearchCouriers = () => {
     const [from, setFrom] = useState('Москва');
@@ -25,8 +27,57 @@ const SearchCouriers = () => {
     const [showAboutPage, setShowAboutPage] = useState(false);
     const [showProfilePage, setShowProfilePage] = useState(false);
     const [selectedPackage, setSelectedPackage] = useState(null);
+    const [selectedTrip, setSelectedTrip] = useState(null);
+    const [selectedCourierForContact, setSelectedCourierForContact] = useState(null);
+    const [packageRequests, setPackageRequests] = useState([
+        {
+            id: 1,
+            tripId: 1,
+            senderName: 'Анна Петрова',
+            senderAvatar: 'https://i.pravatar.cc/100?img=25',
+            packageDescription: 'Документы для банка',
+            message: 'Срочно нужно передать документы в офис',
+            reward: 800,
+            pickupLocation: 'Шереметьево, терминал D',
+            deliveryLocation: 'Пулково, зал прилета',
+            status: 'pending',
+            timestamp: Date.now() - 3600000,
+            isNew: true
+        },
+        {
+            id: 2,
+            tripId: 1,
+            senderName: 'Игорь Смирнов',
+            senderAvatar: 'https://i.pravatar.cc/100?img=32',
+            packageDescription: 'Небольшой подарок',
+            message: 'Подарок жене на день рождения',
+            reward: 600,
+            pickupLocation: 'Шереметьево, терминал C',
+            deliveryLocation: 'Пулково, зал прилета',
+            status: 'accepted',
+            timestamp: Date.now() - 7200000,
+            isNew: false
+        },
+        {
+            id: 3,
+            tripId: 2,
+            senderName: 'Мария Козлова',
+            senderAvatar: 'https://i.pravatar.cc/100?img=41',
+            packageDescription: 'Лекарства',
+            message: 'Важные медикаменты для мамы',
+            reward: 1000,
+            pickupLocation: 'Пулково, зал отправления',
+            deliveryLocation: 'Кольцово, зал прилета',
+            status: 'delivered',
+            timestamp: Date.now() - 86400000,
+            deliveredAt: Date.now() - 3600000,
+            confirmedAt: Date.now() - 1800000,
+            isNew: false
+        }
+    ]);
     const [userTrips, setUserTrips] = useState([
         {
+            id: 1,
             name: 'Никита',
             from: 'Москва',
             to: 'Казань',
@@ -44,6 +95,7 @@ const SearchCouriers = () => {
             isUserTrip: true
         },
         {
+            id: 2,
             name: 'Никита',
             from: 'Санкт-Петербург',
             to: 'Екатеринбург',
@@ -421,6 +473,9 @@ const SearchCouriers = () => {
     useEffect(() => {
         injectCSS();
         
+        // Делаем packageRequests доступными глобально для ProfilePage
+        window.packageRequests = packageRequests;
+        
         const interval = setInterval(() => {
             setCurrentTime(new Date());
         }, 60000);
@@ -435,7 +490,7 @@ const SearchCouriers = () => {
             clearInterval(interval);
             window.removeEventListener('switchToAddTrip', handleSwitchToAddTrip);
         };
-    }, []);
+    }, [packageRequests]);
 
     useEffect(() => {
         const timer = setInterval(simulateStatusChange, 10000);
@@ -641,14 +696,47 @@ const SearchCouriers = () => {
                     animatedStats={animatedStats}
                 />
             ) : showProfilePage ? (
-                selectedPackage ? (
+                selectedCourierForContact ? (
+                    <CourierContactScreen 
+                        courier={selectedCourierForContact.courier}
+                        packageData={selectedCourierForContact.package}
+                        onBack={() => setSelectedCourierForContact(null)}
+                        onPaymentConfirm={() => {
+                            setSelectedCourierForContact(null);
+                            setSelectedPackage(null);
+                            setShowProfilePage(false);
+                        }}
+                    />
+                ) : selectedTrip ? (
+                    <TripPackagesScreen 
+                        trip={selectedTrip}
+                        packageRequests={packageRequests}
+                        onBack={() => setSelectedTrip(null)}
+                        onAcceptPackage={(packageId) => {
+                            setPackageRequests(prev => prev.map(pkg => 
+                                pkg.id === packageId 
+                                    ? { ...pkg, status: 'accepted', isNew: false }
+                                    : pkg
+                            ));
+                        }}
+                        onMarkDelivered={(packageId) => {
+                            setPackageRequests(prev => prev.map(pkg => 
+                                pkg.id === packageId 
+                                    ? { ...pkg, status: 'delivered', deliveredAt: Date.now() }
+                                    : pkg
+                            ));
+                        }}
+                        setPackageRequests={setPackageRequests}
+                    />
+                ) : selectedPackage ? (
                     <PackageDetails 
                         packageData={selectedPackage}
                         setSelectedPackage={setSelectedPackage}
                         onSelectCourier={(packageId, courier) => {
-                            console.log('Выбран курьер:', courier.courierName, 'для посылки:', packageId);
-                            setSelectedPackage(null);
-                            setShowProfilePage(false);
+                            setSelectedCourierForContact({ 
+                                courier, 
+                                package: selectedPackage 
+                            });
                         }}
                     />
                 ) : (
@@ -657,6 +745,7 @@ const SearchCouriers = () => {
                         myPackages={myPackages}
                         userTrips={userTrips}
                         setSelectedPackage={setSelectedPackage}
+                        setSelectedTrip={setSelectedTrip}
                     />
                 )
             ) : mode === 'search' ? (

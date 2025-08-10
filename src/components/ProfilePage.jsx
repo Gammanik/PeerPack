@@ -4,7 +4,8 @@ const ProfilePage = ({
     setShowProfilePage, 
     myPackages,
     userTrips,
-    setSelectedPackage
+    setSelectedPackage,
+    setSelectedTrip
 }) => {
     const [activeTab, setActiveTab] = useState('packages');
 
@@ -276,29 +277,75 @@ const ProfilePage = ({
                 </div>
             ) : (
                 <div>
-                    {userTrips.map((trip, index) => (
-                        <div key={index} style={styles.userTripCard}>
-                            <div style={styles.cardHeader}>
-                                <div style={styles.route}>{trip.from} → {trip.to}</div>
-                                <div style={{
-                                    ...styles.status,
-                                    backgroundColor: '#708499',
-                                    color: 'white'
-                                }}>
-                                    Ваша поездка
+                    {userTrips.map((trip, index) => {
+                        // Получаем заявки для этой поездки из props (нужно передать)
+                        const tripRequests = (window.packageRequests || []).filter(req => req.tripId === trip.id);
+                        const newRequests = tripRequests.filter(req => req.isNew && req.status === 'pending');
+                        const totalRequests = tripRequests.length;
+                        
+                        return (
+                            <div 
+                                key={trip.id} 
+                                style={{
+                                    ...styles.userTripCard,
+                                    cursor: 'pointer',
+                                    ...(newRequests.length > 0 ? {
+                                        border: '0.5px solid rgba(255, 215, 0, 0.6)',
+                                        background: 'rgba(255, 215, 0, 0.05)'
+                                    } : {})
+                                }}
+                                onClick={() => setSelectedTrip && setSelectedTrip(trip)}
+                            >
+                                <div style={styles.cardHeader}>
+                                    <div style={styles.route}>{trip.from} → {trip.to}</div>
+                                    <div style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: 8
+                                    }}>
+                                        {newRequests.length > 0 && (
+                                            <div style={{
+                                                background: '#FFD700',
+                                                color: '#1a1a1a',
+                                                padding: '2px 6px',
+                                                borderRadius: 8,
+                                                fontSize: 10,
+                                                fontWeight: 600
+                                            }}>
+                                                {newRequests.length} NEW
+                                            </div>
+                                        )}
+                                        <div style={{
+                                            ...styles.status,
+                                            backgroundColor: totalRequests > 0 ? '#4BB34B' : '#708499',
+                                            color: 'white'
+                                        }}>
+                                            {totalRequests > 0 ? `${totalRequests} заявок` : 'Ваша поездка'}
+                                        </div>
+                                    </div>
                                 </div>
+                                <div style={styles.details}>
+                                    🛫 {trip.airport} • 🕐 {trip.time}
+                                </div>
+                                <div style={styles.details}>
+                                    🗓 {trip.date} • ₽{trip.price}
+                                </div>
+                                <div style={styles.message}>
+                                    💬 {trip.tripComment}
+                                </div>
+                                {totalRequests > 0 && (
+                                    <div style={{
+                                        marginTop: 8,
+                                        fontSize: 12,
+                                        color: 'var(--tg-theme-link-color, #64b5ef)',
+                                        fontWeight: 500
+                                    }}>
+                                        👆 Нажмите для просмотра заявок на доставку
+                                    </div>
+                                )}
                             </div>
-                            <div style={styles.details}>
-                                🛫 {trip.airport} • 🕐 {trip.time}
-                            </div>
-                            <div style={styles.details}>
-                                🗓 {trip.date} • ₽{trip.price}
-                            </div>
-                            <div style={styles.message}>
-                                💬 {trip.tripComment}
-                            </div>
-                        </div>
-                    ))}
+                        );
+                    })}
 
                     {userTrips.length === 0 && (
                         <div style={styles.emptyState}>
@@ -306,7 +353,6 @@ const ProfilePage = ({
                             <button
                                 onClick={() => {
                                     setShowProfilePage(false);
-                                    // Переключаемся в режим добавления поездки
                                     window.dispatchEvent(new CustomEvent('switchToAddTrip'));
                                 }}
                                 style={{
