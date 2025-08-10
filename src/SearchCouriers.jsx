@@ -16,7 +16,17 @@ const couriers = [
         avatar: 'https://i.pravatar.cc/100?img=12',
         tripsCount: 47,
         rating: 4.9,
-        reviewsCount: 32
+        reviewsCount: 32,
+        pastTrips: [
+            { from: 'Москва', to: 'Санкт-Петербург', date: '2025-06-15', success: true },
+            { from: 'Санкт-Петербург', to: 'Москва', date: '2025-06-10', success: true },
+            { from: 'Москва', to: 'Екатеринбург', date: '2025-05-20', success: true }
+        ],
+        reviews: [
+            { rating: 5, text: 'Отличный курьер! Быстро и аккуратно доставил документы.', date: '2025-06-16' },
+            { rating: 5, text: 'Все супер, рекомендую!', date: '2025-06-11' },
+            { rating: 4, text: 'Хорошо, но немного задержался с уведомлением о получении.', date: '2025-05-22' }
+        ]
     },
     {
         name: 'Анна',
@@ -28,7 +38,15 @@ const couriers = [
         avatar: 'https://i.pravatar.cc/100?img=25',
         tripsCount: 23,
         rating: 4.7,
-        reviewsCount: 18
+        reviewsCount: 18,
+        pastTrips: [
+            { from: 'Казань', to: 'Екатеринбург', date: '2025-06-20', success: true },
+            { from: 'Екатеринбург', to: 'Москва', date: '2025-06-05', success: true }
+        ],
+        reviews: [
+            { rating: 5, text: 'Очень ответственная! Постоянно держала в курсе.', date: '2025-06-21' },
+            { rating: 4, text: 'Все хорошо, спасибо!', date: '2025-06-06' }
+        ]
     },
     {
         name: 'Олег',
@@ -40,7 +58,17 @@ const couriers = [
         avatar: 'https://i.pravatar.cc/100?img=33',
         tripsCount: 89,
         rating: 5.0,
-        reviewsCount: 67
+        reviewsCount: 67,
+        pastTrips: [
+            { from: 'Москва', to: 'Сочи', date: '2025-06-25', success: true },
+            { from: 'Сочи', to: 'Москва', date: '2025-06-15', success: true },
+            { from: 'Москва', to: 'Краснодар', date: '2025-06-01', success: true }
+        ],
+        reviews: [
+            { rating: 5, text: 'Профессионал высшего класса! Уже не первый раз пользуюсь услугами.', date: '2025-06-26' },
+            { rating: 5, text: 'Идеально! Быстро, надежно, безопасно.', date: '2025-06-16' },
+            { rating: 5, text: 'Рекомендую всем! Очень надежный курьер.', date: '2025-06-02' }
+        ]
     }
 ];
 
@@ -56,6 +84,15 @@ const SearchCouriers = () => {
         date: '',
         time: '',
         airport: ''
+    });
+    const [selectedCourier, setSelectedCourier] = useState(null);
+    const [showModal, setShowModal] = useState(false);
+    const [showRequestForm, setShowRequestForm] = useState(false);
+    const [sentRequests, setSentRequests] = useState([]);
+    const [requestForm, setRequestForm] = useState({
+        message: '',
+        reward: 5,
+        packageDescription: ''
     });
 
     // Получаем уникальные города из доступных маршрутов курьеров
@@ -107,7 +144,9 @@ const SearchCouriers = () => {
                 avatar: `https://i.pravatar.cc/100?img=${Math.floor(Math.random() * 70) + 1}`,
                 tripsCount: 1,
                 rating: 5.0,
-                reviewsCount: 0
+                reviewsCount: 0,
+                pastTrips: [],
+                reviews: []
             };
             couriers.push(tripToAdd);
             setNewTrip({
@@ -122,6 +161,38 @@ const SearchCouriers = () => {
         } else {
             alert('Пожалуйста, заполните все поля');
         }
+    };
+
+    const handleCourierClick = (courier) => {
+        setSelectedCourier(courier);
+        setShowModal(true);
+    };
+
+    const handleSendRequest = () => {
+        if (requestForm.message && requestForm.packageDescription) {
+            const request = {
+                id: Date.now(),
+                courierId: selectedCourier.name + selectedCourier.date,
+                courierName: selectedCourier.name,
+                route: `${selectedCourier.from} → ${selectedCourier.to}`,
+                date: selectedCourier.date,
+                message: requestForm.message,
+                reward: requestForm.reward,
+                packageDescription: requestForm.packageDescription,
+                status: 'pending'
+            };
+            setSentRequests(prev => [...prev, request]);
+            setRequestForm({ message: '', reward: 5, packageDescription: '' });
+            setShowRequestForm(false);
+            setShowModal(false);
+            alert('Заявка отправлена курьеру!');
+        } else {
+            alert('Пожалуйста, заполните все поля');
+        }
+    };
+
+    const isRequestSent = (courier) => {
+        return sentRequests.some(req => req.courierId === courier.name + courier.date);
     };
 
     return (
@@ -162,13 +233,20 @@ const SearchCouriers = () => {
                         {results.length === 0 ? (
                             <p style={{ color: '#aaa' }}>Курьеры не найдены.</p>
                         ) : results.map(c => (
-                            <div key={c.name + c.date} style={styles.card}>
+                            <div 
+                                key={c.name + c.date} 
+                                style={{...styles.card, cursor: 'pointer'}}
+                                onClick={() => handleCourierClick(c)}
+                            >
                                 <img src={c.avatar} alt={c.name} style={styles.avatar} />
                                 <div style={styles.cardContent}>
                                     <div style={styles.courierHeader}>
                                         <strong>{c.name}</strong>
                                         <div style={styles.courierStats}>
                                             <span style={styles.trips}>{c.tripsCount} поездок</span>
+                                            {isRequestSent(c) && (
+                                                <span style={styles.requestSent}>Заявка отправлена</span>
+                                            )}
                                         </div>
                                     </div>
                                     <div style={styles.rating}>
@@ -267,6 +345,152 @@ const SearchCouriers = () => {
                         </button>
                     </div>
                 </>
+            )}
+
+            {/* Модальное окно с деталями курьера */}
+            {showModal && selectedCourier && (
+                <div style={styles.modalOverlay} onClick={() => setShowModal(false)}>
+                    <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
+                        <div style={styles.modalHeader}>
+                            <h3>{selectedCourier.name}</h3>
+                            <button 
+                                style={styles.closeButton}
+                                onClick={() => setShowModal(false)}
+                            >
+                                ✕
+                            </button>
+                        </div>
+                        
+                        <div style={styles.modalContent}>
+                            <div style={styles.courierInfo}>
+                                <img src={selectedCourier.avatar} alt={selectedCourier.name} style={styles.modalAvatar} />
+                                <div>
+                                    <div style={styles.rating}>
+                                        <span style={styles.stars}>{renderStars(selectedCourier.rating)}</span>
+                                        <span style={styles.ratingText}>{selectedCourier.rating} ({selectedCourier.reviewsCount} отзывов)</span>
+                                    </div>
+                                    <p style={styles.trips}>{selectedCourier.tripsCount} успешных поездок</p>
+                                </div>
+                            </div>
+
+                            <div style={styles.tripInfo}>
+                                <h4>Предстоящая поездка</h4>
+                                <p><strong>{selectedCourier.from} → {selectedCourier.to}</strong></p>
+                                <p>{selectedCourier.date}, {selectedCourier.time}</p>
+                                <p>Аэропорт: {selectedCourier.airport}</p>
+                            </div>
+
+                            <div style={styles.pastTripsSection}>
+                                <h4>Последние поездки</h4>
+                                {selectedCourier.pastTrips.map((trip, index) => (
+                                    <div key={index} style={styles.pastTrip}>
+                                        <span>{trip.from} → {trip.to}</span>
+                                        <span style={styles.tripDate}>{trip.date}</span>
+                                        <span style={styles.tripStatus}>✓</span>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div style={styles.reviewsSection}>
+                                <h4>Отзывы</h4>
+                                {selectedCourier.reviews.map((review, index) => (
+                                    <div key={index} style={styles.review}>
+                                        <div style={styles.reviewHeader}>
+                                            <span style={styles.stars}>{renderStars(review.rating)}</span>
+                                            <span style={styles.reviewDate}>{review.date}</span>
+                                        </div>
+                                        <p style={styles.reviewText}>{review.text}</p>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {!isRequestSent(selectedCourier) && (
+                                <button 
+                                    style={styles.requestButton}
+                                    onClick={() => setShowRequestForm(true)}
+                                >
+                                    Отправить заявку на доставку
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Модальное окно с формой заявки */}
+            {showRequestForm && selectedCourier && (
+                <div style={styles.modalOverlay} onClick={() => setShowRequestForm(false)}>
+                    <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
+                        <div style={styles.modalHeader}>
+                            <h3>Заявка на доставку</h3>
+                            <button 
+                                style={styles.closeButton}
+                                onClick={() => setShowRequestForm(false)}
+                            >
+                                ✕
+                            </button>
+                        </div>
+                        
+                        <div style={styles.modalContent}>
+                            <p><strong>Курьер:</strong> {selectedCourier.name}</p>
+                            <p><strong>Маршрут:</strong> {selectedCourier.from} → {selectedCourier.to}</p>
+                            <p><strong>Дата:</strong> {selectedCourier.date}</p>
+                            
+                            <div style={styles.formGroup}>
+                                <label style={styles.label}>Описание посылки</label>
+                                <textarea
+                                    value={requestForm.packageDescription}
+                                    onChange={(e) => setRequestForm({...requestForm, packageDescription: e.target.value})}
+                                    placeholder="Опишите что нужно доставить (размер, вес, хрупкость)"
+                                    style={styles.textarea}
+                                />
+                            </div>
+
+                            <div style={styles.formGroup}>
+                                <label style={styles.label}>Сообщение курьеру</label>
+                                <textarea
+                                    value={requestForm.message}
+                                    onChange={(e) => setRequestForm({...requestForm, message: e.target.value})}
+                                    placeholder="Дополнительная информация, особые пожелания"
+                                    style={styles.textarea}
+                                />
+                            </div>
+
+                            <div style={styles.formGroup}>
+                                <label style={styles.label}>Вознаграждение (в звездах)</label>
+                                <div style={styles.rewardSelector}>
+                                    {[1,2,3,4,5,6,7,8,9,10].map(num => (
+                                        <button
+                                            key={num}
+                                            style={{
+                                                ...styles.rewardButton,
+                                                ...(requestForm.reward === num ? styles.rewardButtonActive : {})
+                                            }}
+                                            onClick={() => setRequestForm({...requestForm, reward: num})}
+                                        >
+                                            {num}★
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div style={styles.modalButtons}>
+                                <button 
+                                    style={styles.cancelButton}
+                                    onClick={() => setShowRequestForm(false)}
+                                >
+                                    Отмена
+                                </button>
+                                <button 
+                                    style={styles.sendButton}
+                                    onClick={handleSendRequest}
+                                >
+                                    Отправить заявку
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             )}
         </div>
     );
@@ -440,6 +664,181 @@ const styles = {
     ratingText: {
         fontSize: 12,
         color: '#aaa'
+    },
+    requestSent: {
+        fontSize: 11,
+        color: '#00bfa6',
+        backgroundColor: 'rgba(0, 191, 166, 0.1)',
+        padding: '2px 6px',
+        borderRadius: 4,
+        marginLeft: 8
+    },
+    modalOverlay: {
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0,0,0,0.7)',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 1000
+    },
+    modal: {
+        backgroundColor: '#2b2b2b',
+        borderRadius: 16,
+        padding: 0,
+        maxWidth: 500,
+        width: '90%',
+        maxHeight: '80vh',
+        overflow: 'hidden',
+        boxShadow: '0 10px 30px rgba(0,0,0,0.5)'
+    },
+    modalHeader: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: '20px 20px 10px',
+        borderBottom: '1px solid #3a3a3a'
+    },
+    closeButton: {
+        background: 'transparent',
+        border: 'none',
+        color: '#aaa',
+        fontSize: 20,
+        cursor: 'pointer'
+    },
+    modalContent: {
+        padding: 20,
+        maxHeight: 'calc(80vh - 70px)',
+        overflowY: 'auto'
+    },
+    courierInfo: {
+        display: 'flex',
+        gap: 15,
+        marginBottom: 20,
+        alignItems: 'center'
+    },
+    modalAvatar: {
+        width: 60,
+        height: 60,
+        borderRadius: '50%',
+        objectFit: 'cover'
+    },
+    tripInfo: {
+        marginBottom: 20,
+        padding: 15,
+        backgroundColor: '#1c1c1c',
+        borderRadius: 8
+    },
+    pastTripsSection: {
+        marginBottom: 20
+    },
+    pastTrip: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: '8px 0',
+        borderBottom: '1px solid #3a3a3a'
+    },
+    tripDate: {
+        fontSize: 12,
+        color: '#aaa'
+    },
+    tripStatus: {
+        color: '#00bfa6',
+        fontSize: 14
+    },
+    reviewsSection: {
+        marginBottom: 20
+    },
+    review: {
+        padding: '10px 0',
+        borderBottom: '1px solid #3a3a3a'
+    },
+    reviewHeader: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 5
+    },
+    reviewDate: {
+        fontSize: 11,
+        color: '#aaa'
+    },
+    reviewText: {
+        fontSize: 14,
+        color: '#ddd',
+        margin: 0
+    },
+    requestButton: {
+        width: '100%',
+        padding: 12,
+        backgroundColor: '#00bfa6',
+        color: 'black',
+        border: 'none',
+        borderRadius: 10,
+        fontWeight: 'bold',
+        fontSize: 16,
+        cursor: 'pointer'
+    },
+    formGroup: {
+        marginBottom: 15
+    },
+    textarea: {
+        width: '100%',
+        padding: 10,
+        background: '#1c1c1c',
+        border: '1px solid #3a3a3a',
+        borderRadius: 8,
+        color: 'white',
+        fontSize: 14,
+        minHeight: 80,
+        resize: 'vertical'
+    },
+    rewardSelector: {
+        display: 'flex',
+        gap: 8,
+        flexWrap: 'wrap'
+    },
+    rewardButton: {
+        padding: '8px 12px',
+        background: '#1c1c1c',
+        color: '#aaa',
+        border: '1px solid #3a3a3a',
+        borderRadius: 6,
+        cursor: 'pointer',
+        fontSize: 14
+    },
+    rewardButtonActive: {
+        background: '#00bfa6',
+        color: 'black',
+        border: '1px solid #00bfa6'
+    },
+    modalButtons: {
+        display: 'flex',
+        gap: 10,
+        marginTop: 20
+    },
+    cancelButton: {
+        flex: 1,
+        padding: 12,
+        background: 'transparent',
+        color: '#aaa',
+        border: '1px solid #3a3a3a',
+        borderRadius: 10,
+        cursor: 'pointer'
+    },
+    sendButton: {
+        flex: 1,
+        padding: 12,
+        backgroundColor: '#00bfa6',
+        color: 'black',
+        border: 'none',
+        borderRadius: 10,
+        fontWeight: 'bold',
+        cursor: 'pointer'
     }
 };
 
