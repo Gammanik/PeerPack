@@ -1,4 +1,59 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+
+// Добавляем CSS анимации
+const injectCSS = () => {
+    if (document.getElementById('courier-animations')) return;
+    
+    const style = document.createElement('style');
+    style.id = 'courier-animations';
+    style.textContent = `
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        .card-hover:hover {
+            transform: scale(1.02) !important;
+            box-shadow: 0 8px 25px rgba(0,191,166,0.15) !important;
+        }
+        
+        .button-hover:hover {
+            transform: scale(1.05) !important;
+            box-shadow: 0 5px 15px rgba(0,191,166,0.3) !important;
+        }
+        
+        .modal-enter {
+            animation: modalSlideIn 0.3s ease-out;
+        }
+        
+        @keyframes modalSlideIn {
+            from { opacity: 0; transform: scale(0.9) translateY(-20px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        
+        .status-update {
+            animation: statusChange 0.6s ease-out;
+        }
+        
+        @keyframes statusChange {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+    `;
+    document.head.appendChild(style);
+};
 
 const cities = [
     "Москва", "Санкт-Петербург", "Казань", "Екатеринбург",
@@ -73,9 +128,11 @@ const couriers = [
 ];
 
 const SearchCouriers = () => {
-    const [from, setFrom] = useState('');
-    const [to, setTo] = useState('');
+    const [from, setFrom] = useState('Москва');
+    const [to, setTo] = useState('Санкт-Петербург');
     const [results, setResults] = useState([]);
+    const [selectedDate, setSelectedDate] = useState('');
+    const [showDatePicker, setShowDatePicker] = useState(false);
     const [mode, setMode] = useState('search'); // 'search' or 'add'
     const [newTrip, setNewTrip] = useState({
         name: '',
@@ -179,7 +236,9 @@ const SearchCouriers = () => {
                 message: requestForm.message,
                 reward: requestForm.reward,
                 packageDescription: requestForm.packageDescription,
-                status: 'pending'
+                status: 'pending', // pending, declined, accepted, delivered
+                courierComment: '', // Комментарий от доставщика
+                createdAt: new Date().toISOString()
             };
             setSentRequests(prev => [...prev, request]);
             setRequestForm({ message: '', reward: 5, packageDescription: '' });
@@ -191,8 +250,116 @@ const SearchCouriers = () => {
         }
     };
 
+    const getRequestStatus = (courier) => {
+        const request = sentRequests.find(req => req.courierId === courier.name + courier.date);
+        return request ? request.status : null;
+    };
+
     const isRequestSent = (courier) => {
         return sentRequests.some(req => req.courierId === courier.name + courier.date);
+    };
+
+    // Функция для имитации изменения статуса заявки (в реальном приложении это будет через API)
+    const simulateStatusChange = () => {
+        setSentRequests(prev => prev.map(req => {
+            if (req.status === 'pending' && Math.random() > 0.7) {
+                const statuses = ['accepted', 'declined'];
+                const newStatus = statuses[Math.floor(Math.random() * statuses.length)];
+                const comments = {
+                    'accepted': [
+                        'Отлично! С удовольствием доставлю вашу посылку.',
+                        'Принимаю заявку. Свяжемся перед вылетом.',
+                        'Согласен! Место в багаже есть.',
+                        'Хорошо, буду рад помочь с доставкой.'
+                    ],
+                    'declined': [
+                        'К сожалению, багаж уже забит.',
+                        'Извините, не смогу взять хрупкие вещи.',
+                        'К сожалению, не подходит по размеру.',
+                        'Простите, планы изменились.'
+                    ]
+                };
+                return { 
+                    ...req, 
+                    status: newStatus,
+                    courierComment: comments[newStatus][Math.floor(Math.random() * comments[newStatus].length)]
+                };
+            }
+            if (req.status === 'accepted' && Math.random() > 0.8) {
+                return { 
+                    ...req, 
+                    status: 'delivered',
+                    courierComment: req.courierComment + ' Посылка доставлена успешно!'
+                };
+            }
+            return req;
+        }));
+    };
+
+    // Имитация обновления статусов каждые 10 секунд
+    useEffect(() => {
+        const interval = setInterval(simulateStatusChange, 10000);
+        return () => clearInterval(interval);
+    }, []);
+
+    // Функции для отображения статусов
+    const getStatusText = (status) => {
+        switch (status) {
+            case 'pending': return 'Ожидание ответа';
+            case 'accepted': return 'Принята';
+            case 'declined': return 'Отказано';
+            case 'delivered': return 'Доставлено';
+            default: return '';
+        }
+    };
+
+    const getStatusStyle = (status) => {
+        const baseStyle = {
+            fontSize: 11,
+            padding: '2px 6px',
+            borderRadius: 4,
+            marginLeft: 8
+        };
+        
+        switch (status) {
+            case 'pending': return { ...baseStyle, color: '#ffa726', backgroundColor: 'rgba(255, 167, 38, 0.1)' };
+            case 'accepted': return { ...baseStyle, color: '#66bb6a', backgroundColor: 'rgba(102, 187, 106, 0.1)' };
+            case 'declined': return { ...baseStyle, color: '#ef5350', backgroundColor: 'rgba(239, 83, 80, 0.1)' };
+            case 'delivered': return { ...baseStyle, color: '#00bfa6', backgroundColor: 'rgba(0, 191, 166, 0.1)' };
+            default: return baseStyle;
+        }
+    };
+
+    // Инициализация CSS и автоматический поиск при загрузке компонента
+    useEffect(() => {
+        injectCSS();
+        handleSearch();
+    }, []);
+
+    // Функции для работы с датами
+    const getDatePresets = () => {
+        const today = new Date();
+        const tomorrow = new Date(today);
+        tomorrow.setDate(today.getDate() + 1);
+        const nextWeek = new Date(today);
+        nextWeek.setDate(today.getDate() + 7);
+        
+        return [
+            { label: 'Сегодня', value: today.toISOString().split('T')[0] },
+            { label: 'Завтра', value: tomorrow.toISOString().split('T')[0] },
+            { label: 'Через неделю', value: nextWeek.toISOString().split('T')[0] },
+            { label: 'Любая дата', value: '' }
+        ];
+    };
+
+    const formatDate = (dateStr) => {
+        if (!dateStr) return 'Любая дата';
+        const date = new Date(dateStr);
+        return date.toLocaleDateString('ru-RU', { 
+            day: 'numeric', 
+            month: 'short',
+            weekday: 'short'
+        });
     };
 
     return (
@@ -226,16 +393,71 @@ const SearchCouriers = () => {
                                 <option key={city} value={city} />
                             ))}
                         </datalist>
-                        <button style={styles.button} onClick={handleSearch}>Найти</button>
+                        
+                        <label style={styles.label}>Дата отправления</label>
+                        <div style={styles.datePickerContainer}>
+                            <button
+                                style={styles.dateButton}
+                                onClick={() => setShowDatePicker(!showDatePicker)}
+                            >
+                                {formatDate(selectedDate)} 📅
+                            </button>
+                            
+                            {showDatePicker && (
+                                <div style={styles.dateDropdown}>
+                                    <div style={styles.datePresets}>
+                                        {getDatePresets().map((preset, index) => (
+                                            <button
+                                                key={index}
+                                                style={{
+                                                    ...styles.datePreset,
+                                                    ...(selectedDate === preset.value ? styles.datePresetActive : {})
+                                                }}
+                                                onClick={() => {
+                                                    setSelectedDate(preset.value);
+                                                    setShowDatePicker(false);
+                                                }}
+                                            >
+                                                {preset.label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <div style={styles.dateSeparator}>или выберите дату</div>
+                                    <input
+                                        type="date"
+                                        value={selectedDate}
+                                        onChange={(e) => {
+                                            setSelectedDate(e.target.value);
+                                            setShowDatePicker(false);
+                                        }}
+                                        style={styles.dateInput}
+                                        min={new Date().toISOString().split('T')[0]}
+                                    />
+                                </div>
+                            )}
+                        </div>
+                        
+                        <button 
+                            className="button-hover"
+                            style={styles.button} 
+                            onClick={handleSearch}
+                        >
+                            Найти курьеров
+                        </button>
                     </div>
 
                     <div style={{ width: '100%', maxWidth: 400, marginTop: 30 }}>
                         {results.length === 0 ? (
                             <p style={{ color: '#aaa' }}>Курьеры не найдены.</p>
-                        ) : results.map(c => (
+                        ) : results.map((c, index) => (
                             <div 
                                 key={c.name + c.date} 
-                                style={{...styles.card, cursor: 'pointer'}}
+                                className="card-hover"
+                                style={{
+                                    ...styles.card, 
+                                    cursor: 'pointer',
+                                    animationDelay: `${index * 0.1}s`
+                                }}
                                 onClick={() => handleCourierClick(c)}
                             >
                                 <img src={c.avatar} alt={c.name} style={styles.avatar} />
@@ -244,8 +466,10 @@ const SearchCouriers = () => {
                                         <strong>{c.name}</strong>
                                         <div style={styles.courierStats}>
                                             <span style={styles.trips}>{c.tripsCount} поездок</span>
-                                            {isRequestSent(c) && (
-                                                <span style={styles.requestSent}>Заявка отправлена</span>
+                                            {getRequestStatus(c) && (
+                                                <span style={getStatusStyle(getRequestStatus(c))}>
+                                                    {getStatusText(getRequestStatus(c))}
+                                                </span>
                                             )}
                                         </div>
                                     </div>
@@ -350,7 +574,7 @@ const SearchCouriers = () => {
             {/* Модальное окно с деталями курьера */}
             {showModal && selectedCourier && (
                 <div style={styles.modalOverlay} onClick={() => setShowModal(false)}>
-                    <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
+                    <div className="modal-enter" style={styles.modal} onClick={(e) => e.stopPropagation()}>
                         <div style={styles.modalHeader}>
                             <h3>{selectedCourier.name}</h3>
                             <button 
@@ -404,8 +628,30 @@ const SearchCouriers = () => {
                                 ))}
                             </div>
 
+                            {/* Показать статус и комментарий заявки, если есть */}
+                            {getRequestStatus(selectedCourier) && (
+                                <div style={styles.requestStatusSection}>
+                                    <h4>Статус вашей заявки</h4>
+                                    <div style={{
+                                        ...styles.requestStatus,
+                                        ...getStatusStyle(getRequestStatus(selectedCourier))
+                                    }}>
+                                        {getStatusText(getRequestStatus(selectedCourier))}
+                                    </div>
+                                    {sentRequests.find(req => req.courierId === selectedCourier.name + selectedCourier.date)?.courierComment && (
+                                        <div style={styles.courierCommentBox}>
+                                            <strong>Комментарий от {selectedCourier.name}:</strong>
+                                            <p style={styles.courierComment}>
+                                                {sentRequests.find(req => req.courierId === selectedCourier.name + selectedCourier.date)?.courierComment}
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
                             {!isRequestSent(selectedCourier) && (
                                 <button 
+                                    className="button-hover"
                                     style={styles.requestButton}
                                     onClick={() => setShowRequestForm(true)}
                                 >
@@ -420,7 +666,7 @@ const SearchCouriers = () => {
             {/* Модальное окно с формой заявки */}
             {showRequestForm && selectedCourier && (
                 <div style={styles.modalOverlay} onClick={() => setShowRequestForm(false)}>
-                    <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
+                    <div className="modal-enter" style={styles.modal} onClick={(e) => e.stopPropagation()}>
                         <div style={styles.modalHeader}>
                             <h3>Заявка на доставку</h3>
                             <button 
@@ -482,6 +728,7 @@ const SearchCouriers = () => {
                                     Отмена
                                 </button>
                                 <button 
+                                    className="button-hover"
                                     style={styles.sendButton}
                                     onClick={handleSendRequest}
                                 >
@@ -611,7 +858,9 @@ const styles = {
         width: '100%',
         fontWeight: 'bold',
         fontSize: 16,
-        cursor: 'pointer'
+        cursor: 'pointer',
+        transition: 'all 0.3s ease',
+        transform: 'scale(1)'
     },
     card: {
         display: 'flex',
@@ -622,7 +871,11 @@ const styles = {
         borderRadius: 14,
         border: '1px solid #3a3a3a',
         marginBottom: 15,
-        boxShadow: '0 0 10px rgba(0,0,0,0.2)'
+        boxShadow: '0 0 10px rgba(0,0,0,0.2)',
+        transition: 'all 0.3s ease',
+        transform: 'scale(1)',
+        opacity: 1,
+        animation: 'slideIn 0.5s ease-out'
     },
     avatar: {
         width: 48,
@@ -839,6 +1092,104 @@ const styles = {
         borderRadius: 10,
         fontWeight: 'bold',
         cursor: 'pointer'
+    },
+    // Стили для пикера дат
+    datePickerContainer: {
+        position: 'relative',
+        marginBottom: 15
+    },
+    dateButton: {
+        width: '100%',
+        padding: 12,
+        background: '#1c1c1c',
+        color: 'white',
+        border: '1px solid #3a3a3a',
+        borderRadius: 8,
+        cursor: 'pointer',
+        fontSize: 15,
+        textAlign: 'left',
+        transition: 'all 0.2s ease'
+    },
+    dateDropdown: {
+        position: 'absolute',
+        top: '100%',
+        left: 0,
+        right: 0,
+        background: '#2b2b2b',
+        border: '1px solid #3a3a3a',
+        borderRadius: 8,
+        padding: 15,
+        zIndex: 100,
+        boxShadow: '0 10px 25px rgba(0,0,0,0.3)',
+        animation: 'slideIn 0.2s ease-out'
+    },
+    datePresets: {
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: 8,
+        marginBottom: 15
+    },
+    datePreset: {
+        padding: '8px 12px',
+        background: '#1c1c1c',
+        color: '#aaa',
+        border: '1px solid #3a3a3a',
+        borderRadius: 6,
+        cursor: 'pointer',
+        fontSize: 14,
+        transition: 'all 0.2s ease'
+    },
+    datePresetActive: {
+        background: '#00bfa6',
+        color: 'black',
+        border: '1px solid #00bfa6'
+    },
+    dateSeparator: {
+        textAlign: 'center',
+        color: '#aaa',
+        fontSize: 12,
+        marginBottom: 10,
+        padding: '5px 0',
+        borderTop: '1px solid #3a3a3a'
+    },
+    dateInput: {
+        width: '100%',
+        padding: 10,
+        background: '#1c1c1c',
+        border: '1px solid #3a3a3a',
+        borderRadius: 6,
+        color: 'white',
+        fontSize: 14
+    },
+    // Стили для комментариев от курьеров
+    requestStatusSection: {
+        marginTop: 20,
+        padding: 15,
+        background: '#1c1c1c',
+        borderRadius: 8,
+        border: '1px solid #3a3a3a'
+    },
+    requestStatus: {
+        display: 'inline-block',
+        padding: '6px 12px',
+        borderRadius: 6,
+        fontSize: 14,
+        fontWeight: 'bold',
+        marginBottom: 10
+    },
+    courierCommentBox: {
+        marginTop: 15,
+        padding: 12,
+        background: '#2b2b2b',
+        borderRadius: 8,
+        border: '1px solid #3a3a3a'
+    },
+    courierComment: {
+        margin: '8px 0 0 0',
+        color: '#ddd',
+        fontSize: 14,
+        lineHeight: 1.4,
+        fontStyle: 'italic'
     }
 };
 
