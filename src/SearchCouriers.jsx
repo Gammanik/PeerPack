@@ -66,6 +66,51 @@ const injectCSS = () => {
             color: #ddd !important;
         }
         
+        @keyframes logoGlow {
+            0% { filter: drop-shadow(0 0 15px rgba(255,215,0,0.6)); }
+            100% { filter: drop-shadow(0 0 25px rgba(255,215,0,1)) drop-shadow(0 0 35px rgba(0,191,166,0.4)); }
+        }
+        
+        @keyframes shimmerText {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        
+        @keyframes slideUp {
+            from { transform: translateY(100px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .back-to-top:hover {
+            transform: scale(1.1) translateY(-2px) !important;
+            box-shadow: 0 12px 30px rgba(0,191,166,0.5) !important;
+        }
+        
+        .edit-search-button:hover {
+            background: rgba(0,191,166,0.3) !important;
+            transform: scale(1.05) !important;
+        }
+        
+        .compact-logo-btn:hover {
+            background: rgba(255,215,0,0.1) !important;
+            transform: scale(1.05) !important;
+        }
+        
+        .back-from-about:hover {
+            background: rgba(255,255,255,0.2) !important;
+            color: white !important;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: 0 8px 25px rgba(0,191,166,0.2) !important;
+        }
+        
+        .vision-card:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: 0 8px 25px rgba(255,215,0,0.2) !important;
+        }
+        
         .search-input:focus {
             border-color: #00bfa6 !important;
             box-shadow: 0 0 0 3px rgba(0,191,166,0.1) !important;
@@ -259,6 +304,15 @@ const SearchCouriers = () => {
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [sortBy, setSortBy] = useState('time'); // time, price, rating
     const [showSortMenu, setShowSortMenu] = useState(false);
+    const [searchCollapsed, setSearchCollapsed] = useState(false);
+    const [showBackToTop, setShowBackToTop] = useState(false);
+    const [showAboutPage, setShowAboutPage] = useState(false);
+    const [animatedStats, setAnimatedStats] = useState({
+        trips: 0,
+        rating: 0,
+        couriers: 0,
+        totalTrips: 0
+    });
     const [mode, setMode] = useState('search'); // 'search' or 'add'
     const [newTrip, setNewTrip] = useState({
         name: '',
@@ -338,6 +392,17 @@ const SearchCouriers = () => {
         );
         const sorted = sortCouriers(filtered, sortBy);
         setResults(sorted);
+        
+        // На мобильных - скрываем поиск и скроллим к результатам
+        if (window.innerWidth <= 768 && filtered.length > 0) {
+            setTimeout(() => {
+                setSearchCollapsed(true);
+                const resultsSection = document.querySelector('.results-section');
+                if (resultsSection) {
+                    resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }, 100);
+        }
     };
 
     const handleAddTrip = () => {
@@ -501,6 +566,66 @@ const SearchCouriers = () => {
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, [showSortMenu]);
+    
+    // Отслеживание скролла для кнопки "Наверх"
+    useEffect(() => {
+        const handleScroll = () => {
+            setShowBackToTop(window.scrollY > 300);
+        };
+        
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+    
+    // Плавный возврат к поиску
+    const scrollToSearch = () => {
+        setSearchCollapsed(false);
+        setShowAboutPage(false);
+        setTimeout(() => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }, 100);
+    };
+    
+    // Анимация счетчиков статистики
+    const animateCounter = (start, end, duration, callback) => {
+        const startTime = Date.now();
+        const timer = setInterval(() => {
+            const elapsed = Date.now() - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const current = Math.floor(start + (end - start) * progress);
+            callback(current);
+            if (progress >= 1) clearInterval(timer);
+        }, 16);
+    };
+    
+    // Запуск анимации при открытии страницы About
+    useEffect(() => {
+        if (showAboutPage) {
+            // Обнуляем счетчики
+            setAnimatedStats({ trips: 0, rating: 0, couriers: 0, totalTrips: 0 });
+            
+            // Запускаем анимации с задержкой
+            setTimeout(() => {
+                animateCounter(0, 5200000, 2000, (val) => 
+                    setAnimatedStats(prev => ({ ...prev, trips: val })));
+            }, 300);
+            
+            setTimeout(() => {
+                animateCounter(0, 48, 1500, (val) => 
+                    setAnimatedStats(prev => ({ ...prev, rating: val / 10 })));
+            }, 600);
+            
+            setTimeout(() => {
+                animateCounter(0, 125000, 2500, (val) => 
+                    setAnimatedStats(prev => ({ ...prev, couriers: val })));
+            }, 900);
+            
+            setTimeout(() => {
+                animateCounter(0, 8500000, 2800, (val) => 
+                    setAnimatedStats(prev => ({ ...prev, totalTrips: val })));
+            }, 1200);
+        }
+    }, [showAboutPage]);
 
     // Функции для работы с датами
     const getDatePresets = () => {
@@ -529,16 +654,132 @@ const SearchCouriers = () => {
     };
 
     return (
-        <div style={styles.page}>
-            <div style={styles.header}>
-                <h1 style={styles.title}>Найти курьера</h1>
-                <p style={styles.subtitle}>Передайте посылку с попутчиками</p>
-            </div>
+        <div style={{
+            ...styles.page,
+            paddingTop: searchCollapsed ? '80px' : '20px'
+        }}>
+            {/* Мобильная компактная шапка для результатов */}
+            {searchCollapsed && (
+                <div style={styles.compactHeader}>
+                    <div style={styles.compactHeaderContent}>
+                        <div style={styles.compactLogo}>⚡</div>
+                        <div style={styles.routeDisplay}>{from} → {to}</div>
+                        <button 
+                            className="edit-search-button"
+                            style={styles.editSearchButton}
+                            onClick={scrollToSearch}
+                        >
+                            изменить
+                        </button>
+                    </div>
+                </div>
+            )}
+            
+            {/* Компактный логотип в поиске */}
+            {!searchCollapsed && !showAboutPage && (
+                <div style={styles.compactLogoSection}>
+                    <button 
+                        style={styles.compactLogoButton}
+                        onClick={() => setShowAboutPage(true)}
+                        className="compact-logo-btn"
+                    >
+                        <span style={styles.compactLogoIcon}>⚡</span>
+                        <span style={styles.compactBrandText}>PeerPack</span>
+                    </button>
+                </div>
+            )}
+            
 
-            {mode === 'search' ? (
+            {showAboutPage ? (
+                <div style={styles.aboutPage}>
+                    <div style={styles.aboutHeader}>
+                        <button 
+                            style={styles.backFromAboutButton}
+                            onClick={() => setShowAboutPage(false)}
+                            className="back-from-about"
+                        >
+                            ← Назад
+                        </button>
+                        <div style={styles.aboutTitle}>
+                            <div style={styles.aboutLogo}>⚡</div>
+                            <h1 style={styles.aboutBrandTitle}>PeerPack</h1>
+                        </div>
+                    </div>
+                    
+                    <div style={styles.aboutContent}>
+                        <div style={styles.missionSection}>
+                            <h2 style={styles.sectionTitle}>О компании</h2>
+                            <p style={styles.missionText}>
+                                Мы соединяем людей через доверие и взаимопомощь. 
+                                Каждая посылка — это возможность помочь и заработать. 
+                                Просто, безопасно, надежно.
+                            </p>
+                        </div>
+                        
+                        <div style={styles.statsSection}>
+                            <h2 style={styles.sectionTitle}>Наши достижения</h2>
+                            <div style={styles.statsGrid}>
+                                <div className="stat-card" style={styles.statCard}>
+                                    <div style={styles.statIcon}>🚀</div>
+                                    <div style={styles.statNumber}>
+                                        {animatedStats.trips.toLocaleString()}
+                                    </div>
+                                    <div style={styles.statLabel}>успешных доставок</div>
+                                </div>
+                                
+                                <div className="stat-card" style={styles.statCard}>
+                                    <div style={styles.statIcon}>⭐</div>
+                                    <div style={styles.statNumber}>
+                                        {animatedStats.rating.toFixed(1)}
+                                    </div>
+                                    <div style={styles.statLabel}>средний рейтинг</div>
+                                </div>
+                                
+                                <div className="stat-card" style={styles.statCard}>
+                                    <div style={styles.statIcon}>🤝</div>
+                                    <div style={styles.statNumber}>
+                                        {animatedStats.couriers.toLocaleString()}
+                                    </div>
+                                    <div style={styles.statLabel}>доставщиков в сети</div>
+                                </div>
+                                
+                                <div className="stat-card" style={styles.statCard}>
+                                    <div style={styles.statIcon}>✈️</div>
+                                    <div style={styles.statNumber}>
+                                        {animatedStats.totalTrips.toLocaleString()}
+                                    </div>
+                                    <div style={styles.statLabel}>общее количество поездок</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style={styles.visionSection}>
+                            <h2 style={styles.sectionTitle}>Наша миссия</h2>
+                            <div style={styles.visionGrid}>
+                                <div className="vision-card" style={styles.visionCard}>
+                                    <div style={styles.visionIcon}>⚡</div>
+                                    <div style={styles.visionTitle}>Удобство</div>
+                                    <div style={styles.visionText}>Простое объявление и быстрый поиск доставщика</div>
+                                </div>
+                                <div className="vision-card" style={styles.visionCard}>
+                                    <div style={styles.visionIcon}>🔒</div>
+                                    <div style={styles.visionTitle}>Надежность</div>
+                                    <div style={styles.visionText}>Проверенные доставщики с рейтингом и отзывами</div>
+                                </div>
+                                <div className="vision-card" style={styles.visionCard}>
+                                    <div style={styles.visionIcon}>🌍</div>
+                                    <div style={styles.visionTitle}>Экономия</div>
+                                    <div style={styles.visionText}>Дешевле курьерских служб благодаря P2P модели</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            ) : mode === 'search' ? (
                 <>
-                    <div className="search-container" style={styles.searchContainer}>
-                        <label style={styles.label}>Откуда</label>
+                    {!searchCollapsed && (
+                        <div className="search-container" style={styles.searchContainer}>
+                        <label style={styles.label}>Откуда отправить</label>
                         <input
                             className="search-input"
                             list="available-cities"
@@ -547,7 +788,7 @@ const SearchCouriers = () => {
                             placeholder="Например, Москва"
                             style={styles.input}
                         />
-                        <label style={styles.label}>Куда</label>
+                        <label style={styles.label}>Куда доставить</label>
                         <input
                             className="search-input"
                             list="available-cities"
@@ -610,10 +851,11 @@ const SearchCouriers = () => {
                             style={styles.searchButton} 
                             onClick={handleSearch}
                         >
-                            <span style={styles.searchButtonIcon}>🔍</span>
-                            Найти курьеров
+                            <span style={styles.searchButtonIcon}>📦</span>
+                            Передать посылку
                         </button>
-                    </div>
+                        </div>
+                    )}
 
                     {/* Минимальная опциональная сортировка */}
                     {results.length > 1 && (
@@ -677,9 +919,9 @@ const SearchCouriers = () => {
                         </div>
                     )}
 
-                    <div style={{ width: '100%', maxWidth: 400, marginTop: results.length > 0 ? 15 : 30 }}>
+                    <div className="results-section" style={{ width: '100%', maxWidth: 400, marginTop: results.length > 0 ? 15 : 30 }}>
                         {results.length === 0 ? (
-                            <p style={{ color: '#aaa' }}>Курьеры не найдены.</p>
+                            <p style={{ color: '#aaa' }}>Доставщики не найдены.</p>
                         ) : results.map((c, index) => (
                             <div 
                                 key={c.name + c.date} 
@@ -739,7 +981,7 @@ const SearchCouriers = () => {
                             style={styles.courierLink}
                             onClick={() => setMode('add')}
                         >
-                            Вы доставитель? Добавить поездку
+                            Вы доставщик? Добавить поездку
                         </button>
                     </div>
                 </>
@@ -988,20 +1230,35 @@ const SearchCouriers = () => {
                     </div>
                 </div>
             )}
+            
+            {/* Кнопка наверх */}
+            {showBackToTop && (
+                <button 
+                    style={styles.backToTopButton}
+                    onClick={scrollToSearch}
+                    className="back-to-top"
+                >
+                    <span style={styles.backToTopIcon}>↑</span>
+                    <span style={styles.backToTopText}>поиск</span>
+                </button>
+            )}
         </div>
     );
 };
 
 const styles = {
     page: {
-        background: '#1e1e1e',
+        background: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0f0f0f 100%)',
         color: '#fff',
         minHeight: '100vh',
-        padding: '30px 15px',
+        padding: '20px 15px',
+        paddingTop: '20px',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        fontFamily: 'system-ui, sans-serif'
+        fontFamily: 'system-ui, -apple-system, sans-serif',
+        position: 'relative',
+        overflow: 'hidden'
     },
     modeToggle: {
         display: 'flex',
@@ -1027,66 +1284,81 @@ const styles = {
         color: 'black',
         fontWeight: 'bold'
     },
+    // Основная шапка с фирменным стилем
     header: {
         width: '100%',
         maxWidth: 500,
         marginBottom: 30,
-        background: 'linear-gradient(135deg, #1c1c1c 0%, #2b2b2b 100%)',
-        borderRadius: 20,
-        padding: 24,
-        border: '1px solid #3a3a3a',
-        boxShadow: '0 8px 32px rgba(0,0,0,0.3)'
+        background: 'linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 50%, #0a0a0a 100%)',
+        borderRadius: 24,
+        padding: 30,
+        border: '2px solid rgba(255,215,0,0.2)',
+        boxShadow: '0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05)',
+        position: 'relative',
+        overflow: 'hidden'
     },
     headerContent: {
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 20
+        position: 'relative',
+        zIndex: 2
     },
-    logoSection: {
+    brandSection: {
         display: 'flex',
         alignItems: 'center',
-        gap: 16
+        gap: 16,
+        marginBottom: 24
     },
-    logo: {
-        fontSize: 32,
-        filter: 'drop-shadow(0 0 8px rgba(0,191,166,0.3))'
+    mainLogo: {
+        fontSize: 40,
+        filter: 'drop-shadow(0 0 15px rgba(255,215,0,0.8))',
+        animation: 'logoGlow 3s ease-in-out infinite alternate'
     },
-    title: {
-        fontSize: 24,
-        fontWeight: 700,
+    brandInfo: {
+        flex: 1
+    },
+    brandTitle: {
+        fontSize: 28,
+        fontWeight: 800,
         margin: 0,
-        marginBottom: 4,
-        background: 'linear-gradient(135deg, #00bfa6, #00d4aa)',
+        marginBottom: 6,
+        background: 'linear-gradient(135deg, #FFD700, #00bfa6, #FFD700)',
         WebkitBackgroundClip: 'text',
         WebkitTextFillColor: 'transparent',
-        backgroundClip: 'text'
+        backgroundClip: 'text',
+        backgroundSize: '200% 100%',
+        animation: 'shimmerText 3s ease-in-out infinite'
     },
-    subtitle: {
-        fontSize: 14,
+    brandTagline: {
+        fontSize: 13,
         color: '#aaa',
         margin: 0,
-        lineHeight: 1.4
+        lineHeight: 1.4,
+        fontWeight: 500
     },
-    statsBar: {
+    trustIndicators: {
         display: 'flex',
-        justifyContent: 'space-around',
-        paddingTop: 16,
-        borderTop: '1px solid #3a3a3a'
+        justifyContent: 'space-between',
+        gap: 8
     },
-    stat: {
-        textAlign: 'center',
+    trustBadge: {
+        background: 'rgba(0,191,166,0.1)',
+        border: '1px solid rgba(0,191,166,0.3)',
+        borderRadius: 12,
+        padding: '8px 12px',
         display: 'flex',
         flexDirection: 'column',
-        gap: 2
+        alignItems: 'center',
+        gap: 4,
+        flex: 1,
+        minWidth: 0
     },
-    statNumber: {
-        fontSize: 20,
-        fontWeight: 700,
-        color: '#00bfa6'
+    trustIcon: {
+        fontSize: 16
     },
-    statLabel: {
-        fontSize: 11,
-        color: '#aaa',
+    trustText: {
+        fontSize: 10,
+        color: '#00bfa6',
+        fontWeight: 600,
+        textAlign: 'center',
         lineHeight: 1.2
     },
     searchButton: {
@@ -1679,6 +1951,252 @@ const styles = {
     },
     reviewsCount: {
         color: '#aaa'
+    },
+    
+    // Компактная мобильная шапка
+    compactHeader: {
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        background: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%)',
+        backdropFilter: 'blur(20px)',
+        border: 'none',
+        borderBottom: '1px solid rgba(255,255,255,0.1)',
+        padding: '12px 20px',
+        zIndex: 100,
+        boxShadow: '0 4px 20px rgba(0,0,0,0.4)'
+    },
+    compactHeaderContent: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        maxWidth: 400,
+        margin: '0 auto'
+    },
+    compactLogo: {
+        fontSize: 20,
+        filter: 'drop-shadow(0 0 10px rgba(255,215,0,0.6))',
+        animation: 'pulse 2s infinite'
+    },
+    routeDisplay: {
+        fontSize: 16,
+        fontWeight: 600,
+        color: '#00bfa6'
+    },
+    editSearchButton: {
+        background: 'rgba(0,191,166,0.2)',
+        color: '#00bfa6',
+        border: '1px solid rgba(0,191,166,0.3)',
+        padding: '6px 12px',
+        borderRadius: 20,
+        fontSize: 12,
+        cursor: 'pointer',
+        transition: 'all 0.2s ease'
+    },
+    
+    // Кнопка наверх
+    backToTopButton: {
+        position: 'fixed',
+        bottom: 30,
+        right: 20,
+        background: 'linear-gradient(135deg, #00bfa6, #00d4aa)',
+        color: 'black',
+        border: 'none',
+        borderRadius: 25,
+        padding: '12px 16px',
+        cursor: 'pointer',
+        boxShadow: '0 8px 25px rgba(0,191,166,0.4)',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 6,
+        fontSize: 12,
+        fontWeight: 700,
+        transition: 'all 0.3s ease',
+        zIndex: 50,
+        animation: 'slideUp 0.3s ease-out'
+    },
+    backToTopIcon: {
+        fontSize: 16,
+        fontWeight: 'bold'
+    },
+    backToTopText: {
+        fontSize: 12,
+        fontWeight: 700
+    },
+    
+    // Компактный логотип в поиске
+    compactLogoSection: {
+        width: '100%',
+        display: 'flex',
+        justifyContent: 'center',
+        marginBottom: 20
+    },
+    compactLogoButton: {
+        background: 'transparent',
+        border: 'none',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 8,
+        padding: '8px 12px',
+        borderRadius: 20,
+        cursor: 'pointer',
+        transition: 'all 0.3s ease'
+    },
+    compactLogoIcon: {
+        fontSize: 18,
+        filter: 'drop-shadow(0 0 8px rgba(255,215,0,0.6))'
+    },
+    compactBrandText: {
+        fontSize: 16,
+        fontWeight: 700,
+        color: '#FFD700',
+        textShadow: '0 0 10px rgba(255,215,0,0.3)'
+    },
+    
+    // Страница About
+    aboutPage: {
+        width: '100%',
+        maxWidth: 500,
+        minHeight: 'calc(100vh - 40px)',
+        background: 'linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 50%, #0a0a0a 100%)',
+        borderRadius: 24,
+        padding: 30,
+        border: '2px solid rgba(255,215,0,0.2)',
+        boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
+        position: 'relative',
+        overflow: 'hidden',
+        animation: 'slideIn 0.5s ease-out'
+    },
+    aboutHeader: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginBottom: 30,
+        paddingBottom: 20,
+        borderBottom: '1px solid rgba(255,255,255,0.1)'
+    },
+    backFromAboutButton: {
+        background: 'rgba(255,255,255,0.1)',
+        color: '#aaa',
+        border: '1px solid rgba(255,255,255,0.2)',
+        padding: '8px 12px',
+        borderRadius: 20,
+        fontSize: 14,
+        cursor: 'pointer',
+        transition: 'all 0.2s ease'
+    },
+    aboutTitle: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: 12
+    },
+    aboutLogo: {
+        fontSize: 28,
+        filter: 'drop-shadow(0 0 15px rgba(255,215,0,0.8))',
+        animation: 'logoGlow 3s ease-in-out infinite alternate'
+    },
+    aboutBrandTitle: {
+        fontSize: 24,
+        fontWeight: 800,
+        margin: 0,
+        background: 'linear-gradient(135deg, #FFD700, #00bfa6, #FFD700)',
+        WebkitBackgroundClip: 'text',
+        WebkitTextFillColor: 'transparent',
+        backgroundClip: 'text',
+        backgroundSize: '200% 100%',
+        animation: 'shimmerText 3s ease-in-out infinite'
+    },
+    aboutContent: {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 30
+    },
+    
+    // Секция миссии
+    missionSection: {
+        textAlign: 'center'
+    },
+    sectionTitle: {
+        fontSize: 20,
+        fontWeight: 700,
+        color: '#FFD700',
+        marginBottom: 16,
+        textShadow: '0 0 10px rgba(255,215,0,0.3)'
+    },
+    missionText: {
+        fontSize: 14,
+        lineHeight: 1.6,
+        color: '#ddd',
+        margin: 0
+    },
+    
+    // Секция статистики
+    statsSection: {
+        textAlign: 'center'
+    },
+    statsGrid: {
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: 16
+    },
+    statCard: {
+        background: 'rgba(0,191,166,0.1)',
+        border: '1px solid rgba(0,191,166,0.3)',
+        borderRadius: 16,
+        padding: 20,
+        textAlign: 'center',
+        transition: 'all 0.3s ease',
+        animation: 'slideIn 0.6s ease-out'
+    },
+    statIcon: {
+        fontSize: 24,
+        marginBottom: 8
+    },
+    statNumber: {
+        fontSize: 20,
+        fontWeight: 800,
+        color: '#00bfa6',
+        marginBottom: 4,
+        textShadow: '0 0 10px rgba(0,191,166,0.3)'
+    },
+    statLabel: {
+        fontSize: 11,
+        color: '#aaa',
+        lineHeight: 1.2
+    },
+    
+    // Секция видения
+    visionSection: {
+        textAlign: 'center'
+    },
+    visionGrid: {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 16
+    },
+    visionCard: {
+        background: 'rgba(255,215,0,0.05)',
+        border: '1px solid rgba(255,215,0,0.2)',
+        borderRadius: 16,
+        padding: 20,
+        textAlign: 'center',
+        animation: 'slideIn 0.8s ease-out'
+    },
+    visionIcon: {
+        fontSize: 20,
+        marginBottom: 8
+    },
+    visionTitle: {
+        fontSize: 14,
+        fontWeight: 700,
+        color: '#FFD700',
+        marginBottom: 6
+    },
+    visionText: {
+        fontSize: 12,
+        color: '#ccc',
+        lineHeight: 1.4
     }
 };
 
