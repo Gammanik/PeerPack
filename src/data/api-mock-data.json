@@ -55,7 +55,7 @@
     },
 
     "GET /api/user/packages": {
-      "description": "Get user's packages (sent packages)",
+      "description": "Get user's package templates and active deliveries",
       "headers": {
         "Authorization": "Bearer {token}"
       },
@@ -66,27 +66,65 @@
             "from": "Москва",
             "to": "Санкт-Петербург", 
             "description": "Документы в папке",
-            "message": "Нужно доставить документы для офиса",
             "reward": 800,
-            "status": "active",
+            "status": "template",
             "created_at": "2025-08-08T10:00:00Z",
-            "responses": [
+            "usage_count": 3,
+            "active_requests": [
               {
-                "id": "response_001",
                 "courier_id": "courier_ivan_001",
                 "courier_name": "Иван",
-                "courier_avatar": "https://i.pravatar.cc/100?img=12", 
-                "courier_rating": 4.9,
-                "date": "2025-08-11",
-                "time": "15:00 → 17:30",
-                "airport": "Шереметьево → Пулково",
-                "price": 800,
+                "status": "pending",
+                "message": "Срочно нужно в офис"
+              },
+              {
+                "courier_id": "courier_elena_002", 
+                "courier_name": "Елена",
                 "status": "accepted",
-                "comment": "Принимаю! Доставлю аккуратно, буду на связи.",
-                "timestamp": "2025-08-09T14:00:00Z",
-                "is_new": false
+                "message": "Утренний рейс предпочтительно"
               }
             ]
+          },
+          {
+            "id": "pkg_002",
+            "from": "Москва",
+            "to": "Казань",
+            "description": "Медикаменты",
+            "reward": 1000, 
+            "status": "template",
+            "created_at": "2025-08-07T15:00:00Z",
+            "usage_count": 1,
+            "active_requests": []
+          }
+        ]
+      }
+    },
+
+    "GET /api/packages/{package_id}/responses": {
+      "description": "Get courier responses for a specific package template",
+      "path_params": {
+        "package_id": "string"
+      },
+      "headers": {
+        "Authorization": "Bearer {token}"
+      },
+      "response": {
+        "responses": [
+          {
+            "id": "response_001",
+            "courier_id": "courier_ivan_001",
+            "courier_name": "Иван",
+            "courier_avatar": "https://i.pravatar.cc/100?img=12",
+            "courier_rating": 4.9,
+            "date": "2025-08-11",
+            "time": "15:00 → 17:30", 
+            "airport": "Шереметьево → Пулково",
+            "price": 800,
+            "status": "accepted",
+            "comment": "Принимаю! Доставлю аккуратно, буду на связи.",
+            "message": "Срочно нужно в офис",
+            "timestamp": "2025-08-09T14:00:00Z",
+            "is_new": false
           }
         ]
       }
@@ -353,7 +391,7 @@
     },
 
     "POST /api/packages": {
-      "description": "Create new package delivery request",
+      "description": "Create new package template (first time creation)",
       "headers": {
         "Authorization": "Bearer {token}"
       },
@@ -361,15 +399,52 @@
         "from": "Москва",
         "to": "Санкт-Петербург",
         "description": "Документы в папке",
-        "message": "Нужно доставить документы для офиса",
-        "reward": 800,
-        "pickup_location": "Красная площадь, 1", 
-        "delivery_location": "Невский проспект, 28",
-        "date_from": "2025-08-11",
-        "date_to": "2025-08-13"
+        "reward": 800
       },
       "response": {
         "success": true,
+        "package_id": "pkg_001"
+      }
+    },
+
+    "POST /api/packages/{package_id}/send-to-courier": {
+      "description": "Send existing package template to a specific courier",
+      "path_params": {
+        "package_id": "string"
+      },
+      "headers": {
+        "Authorization": "Bearer {token}"
+      },
+      "request_body": {
+        "courier_id": "courier_ivan_001",
+        "message": "Срочно нужно в офис"
+      },
+      "response": {
+        "success": true,
+        "request_id": "req_001"
+      }
+    },
+
+    "POST /api/couriers/{courier_id}/send-package": {
+      "description": "Send package request to courier (can be new or existing template)",
+      "path_params": {
+        "courier_id": "string"
+      },
+      "headers": {
+        "Authorization": "Bearer {token}"
+      },
+      "request_body": {
+        "package_id": "pkg_001",
+        "is_new_package": false,
+        "package_data": {
+          "description": "Документы в папке",
+          "reward": 800
+        },
+        "message": "Дополнительное сообщение курьеру"
+      },
+      "response": {
+        "success": true,
+        "request_id": "req_001",
         "package_id": "pkg_001"
       }
     },

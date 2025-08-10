@@ -160,7 +160,6 @@ const SearchCouriers = () => {
             from: 'Москва',
             to: 'Санкт-Петербург',
             description: 'Документы в папке',
-            message: 'Нужно доставить документы для офиса',
             reward: 800,
             status: 'active',
             createdAt: Date.now() - 172800000,
@@ -198,48 +197,42 @@ const SearchCouriers = () => {
         {
             id: 2,
             from: 'Москва',
-            to: 'Санкт-Петербург',
-            description: 'Небольшая коробка с подарком',
-            message: 'Подарок для мамы, очень важно!',
-            reward: 1200,
-            status: 'waiting',
-            createdAt: Date.now() - 43200000,
+            to: 'Казань',
+            description: 'Медикаменты',
+            reward: 1000,
+            status: 'template',
+            createdAt: Date.now() - 259200000,
             responses: []
         },
         {
             id: 3,
+            from: 'Санкт-Петербург',
+            to: 'Москва',
+            description: 'Сувениры из поездки',
+            reward: 600,
+            status: 'template',
+            createdAt: Date.now() - 86400000,
+            responses: []
+        },
+        {
+            id: 4,
             from: 'Москва',
             to: 'Санкт-Петербург',
-            description: 'Медикаменты',
-            message: 'Срочные лекарства',
-            reward: 600,
+            description: 'Документы (завершено)',
+            reward: 800,
             status: 'completed',
-            createdAt: Date.now() - 259200000,
+            createdAt: Date.now() - 432000000,
             selectedCourier: 'Анастасия',
-            responses: [
-                {
-                    courierId: 'Максим2025-08-16',
-                    courierName: 'Максим',
-                    courierAvatar: 'https://i.pravatar.cc/100?img=68',
-                    courierRating: 4.6,
-                    date: '2025-08-16',
-                    time: '12:00 → 14:30',
-                    airport: 'Домодедово → Пулково',
-                    price: 600,
-                    status: 'declined',
-                    comment: 'Извините, не смогу взять медикаменты - нет специальных условий хранения.',
-                    timestamp: Date.now() - 172800000,
-                    isNew: false
-                }
-            ]
+            responses: []
         }
     ]);
     const [sentRequests, setSentRequests] = useState([]);
     const [requestForm, setRequestForm] = useState({
         message: '',
-        reward: 5,
+        reward: 800,
         packageDescription: ''
     });
+    const [useExistingPackage, setUseExistingPackage] = useState(false);
 
     const availableCities = getAvailableCities(couriers);
 
@@ -310,6 +303,29 @@ const SearchCouriers = () => {
 
     const handleSendRequest = () => {
         if (selectedCourier) {
+            // Создаем или обновляем шаблон посылки если это новая посылка
+            if (!useExistingPackage && requestForm.packageDescription) {
+                const packageExists = myPackages.find(pkg => 
+                    pkg.description === requestForm.packageDescription && 
+                    pkg.from === selectedCourier.from && 
+                    pkg.to === selectedCourier.to
+                );
+                
+                if (!packageExists) {
+                    const newPackageTemplate = {
+                        id: Date.now(),
+                        from: selectedCourier.from,
+                        to: selectedCourier.to,
+                        description: requestForm.packageDescription,
+                        reward: requestForm.reward,
+                        status: 'template',
+                        createdAt: Date.now(),
+                        responses: []
+                    };
+                    setMyPackages([...myPackages, newPackageTemplate]);
+                }
+            }
+            
             const newRequest = {
                 id: Date.now(),
                 courierId: selectedCourier.name + selectedCourier.date,
@@ -323,7 +339,7 @@ const SearchCouriers = () => {
                 packageDescription: requestForm.packageDescription,
             };
             setSentRequests([...sentRequests, newRequest]);
-            setRequestForm({ message: '', reward: 5, packageDescription: '' });
+            setRequestForm({ message: '', reward: 800, packageDescription: '' });
         }
     };
 
@@ -977,6 +993,9 @@ const SearchCouriers = () => {
                 requestForm={requestForm}
                 setRequestForm={setRequestForm}
                 handleSendRequest={handleSendRequest}
+                myPackages={myPackages}
+                useExistingPackage={useExistingPackage}
+                setUseExistingPackage={setUseExistingPackage}
             />
 
             {showBackToTop && (

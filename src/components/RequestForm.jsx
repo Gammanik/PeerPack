@@ -6,8 +6,12 @@ const RequestForm = ({
     setShowRequestForm,
     requestForm,
     setRequestForm,
-    handleSendRequest
+    handleSendRequest,
+    myPackages,
+    useExistingPackage,
+    setUseExistingPackage
 }) => {
+    const [selectedPackageTemplate, setSelectedPackageTemplate] = React.useState(null);
     const styles = {
         modalOverlay: {
             position: 'fixed',
@@ -154,43 +158,130 @@ const RequestForm = ({
                         <p><strong>Маршрут:</strong> {selectedCourier.from} → {selectedCourier.to}</p>
                         <p><strong>Дата:</strong> {selectedCourier.date}</p>
                     </div>
-                    
-                    <div style={styles.formGroup}>
-                        <label style={styles.label}>Описание посылки</label>
-                        <textarea
-                            value={requestForm.packageDescription}
-                            onChange={(e) => setRequestForm({...requestForm, packageDescription: e.target.value})}
-                            placeholder="Опишите что нужно доставить (размер, вес, хрупкость)"
-                            style={styles.textarea}
-                        />
-                    </div>
 
                     <div style={styles.formGroup}>
-                        <label style={styles.label}>Сообщение курьеру</label>
+                        <div style={{
+                            display: 'flex',
+                            gap: 8,
+                            marginBottom: 12
+                        }}>
+                            <button
+                                style={{
+                                    ...styles.rewardButton,
+                                    flex: 1,
+                                    ...(!useExistingPackage ? styles.rewardButtonActive : {})
+                                }}
+                                onClick={() => {
+                                    setUseExistingPackage(false);
+                                    setSelectedPackageTemplate(null);
+                                }}
+                            >
+                                📝 Новая посылка
+                            </button>
+                            <button
+                                style={{
+                                    ...styles.rewardButton,
+                                    flex: 1,
+                                    ...(useExistingPackage ? styles.rewardButtonActive : {})
+                                }}
+                                onClick={() => setUseExistingPackage(true)}
+                            >
+                                📦 Из шаблонов ({myPackages.length})
+                            </button>
+                        </div>
+                    </div>
+
+                    {useExistingPackage ? (
+                        <div style={styles.formGroup}>
+                            <label style={styles.label}>Выберите посылку</label>
+                            <div style={{ maxHeight: 200, overflowY: 'auto' }}>
+                                {myPackages.map(pkg => (
+                                    <div
+                                        key={pkg.id}
+                                        style={{
+                                            ...styles.rewardButton,
+                                            width: '100%',
+                                            textAlign: 'left',
+                                            marginBottom: 8,
+                                            padding: 12,
+                                            cursor: 'pointer',
+                                            ...(selectedPackageTemplate?.id === pkg.id ? styles.rewardButtonActive : {})
+                                        }}
+                                        onClick={() => {
+                                            setSelectedPackageTemplate(pkg);
+                                            setRequestForm({
+                                                ...requestForm,
+                                                packageDescription: pkg.description,
+                                                reward: pkg.reward,
+                                                message: ''
+                                            });
+                                        }}
+                                    >
+                                        <div style={{ fontWeight: 600, marginBottom: 4 }}>
+                                            {pkg.from} → {pkg.to}
+                                        </div>
+                                        <div style={{ fontSize: 12, opacity: 0.7 }}>
+                                            📦 {pkg.description} • ₽{pkg.reward}
+                                        </div>
+                                    </div>
+                                ))}
+                                {myPackages.length === 0 && (
+                                    <div style={{
+                                        textAlign: 'center',
+                                        color: 'var(--tg-theme-hint-color, #708499)',
+                                        fontSize: 14,
+                                        padding: 20
+                                    }}>
+                                        У вас пока нет созданных посылок
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    ) : (
+                        <>
+                            <div style={styles.formGroup}>
+                                <label style={styles.label}>Описание посылки</label>
+                                <textarea
+                                    value={requestForm.packageDescription}
+                                    onChange={(e) => setRequestForm({...requestForm, packageDescription: e.target.value})}
+                                    placeholder="Опишите что нужно доставить (размер, вес, хрупкость)"
+                                    style={styles.textarea}
+                                />
+                            </div>
+
+                            <div style={styles.formGroup}>
+                                <label style={styles.label}>Вознаграждение (₽)</label>
+                                <div style={styles.rewardSelector}>
+                                    {[500, 600, 800, 1000, 1200, 1500, 2000].map(amount => (
+                                        <button
+                                            key={amount}
+                                            style={{
+                                                ...styles.rewardButton,
+                                                ...(requestForm.reward === amount ? styles.rewardButtonActive : {})
+                                            }}
+                                            onClick={() => setRequestForm({...requestForm, reward: amount})}
+                                        >
+                                            ₽{amount}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </>
+                    )}
+
+                    <div style={styles.formGroup}>
+                        <label style={styles.label}>
+                            {useExistingPackage ? 'Дополнительное сообщение курьеру' : 'Сообщение курьеру'}
+                        </label>
                         <textarea
                             value={requestForm.message}
                             onChange={(e) => setRequestForm({...requestForm, message: e.target.value})}
-                            placeholder="Дополнительная информация, особые пожелания"
+                            placeholder={useExistingPackage ? 
+                                "Дополнительные пожелания или уточнения для этого курьера" : 
+                                "Дополнительная информация, особые пожелания"
+                            }
                             style={styles.textarea}
                         />
-                    </div>
-
-                    <div style={styles.formGroup}>
-                        <label style={styles.label}>Вознаграждение (в звездах)</label>
-                        <div style={styles.rewardSelector}>
-                            {[1,2,3,4,5,6,7,8,9,10].map(num => (
-                                <button
-                                    key={num}
-                                    style={{
-                                        ...styles.rewardButton,
-                                        ...(requestForm.reward === num ? styles.rewardButtonActive : {})
-                                    }}
-                                    onClick={() => setRequestForm({...requestForm, reward: num})}
-                                >
-                                    {num}★
-                                </button>
-                            ))}
-                        </div>
                     </div>
 
                     <div style={styles.modalButtons}>

@@ -12,7 +12,7 @@ const ProfilePage = ({
     const [activeTab, setActiveTab] = useState('packages');
     const [walletExpanded, setWalletExpanded] = useState(false);
 
-    const activePackages = myPackages.filter(pkg => pkg.status === 'active' || pkg.status === 'waiting');
+    const packageTemplates = myPackages.filter(pkg => pkg.status === 'template' || pkg.status === 'active' || pkg.status === 'waiting');
     const completedPackages = myPackages.filter(pkg => pkg.status === 'completed');
 
     const styles = {
@@ -283,18 +283,20 @@ const ProfilePage = ({
 
             {activeTab === 'packages' ? (
                 <div>
-                    {activePackages.length > 0 && (
+                    {packageTemplates.length > 0 && (
                         <div style={{ marginBottom: 24 }}>
                             <h3 style={{
                                 fontSize: 16,
                                 fontWeight: 600,
                                 color: 'var(--tg-theme-text-color, #ffffff)',
                                 marginBottom: 12
-                            }}>Активные посылки</h3>
+                            }}>Мои посылки</h3>
                             
-                            {activePackages.map(packageData => {
-                                const hasNewResponses = packageData.responses.some(r => r.isNew);
-                                const responsesCount = packageData.responses.length;
+                            {packageTemplates.map(packageData => {
+                                const hasNewResponses = packageData.responses && packageData.responses.some(r => r.isNew);
+                                const responsesCount = packageData.responses ? packageData.responses.length : 0;
+                                const isTemplate = packageData.status === 'template';
+                                
                                 return (
                                     <div 
                                         key={packageData.id} 
@@ -304,6 +306,10 @@ const ProfilePage = ({
                                             ...(hasNewResponses ? {
                                                 border: '0.5px solid rgba(255, 215, 0, 0.6)',
                                                 background: 'rgba(255, 215, 0, 0.05)'
+                                            } : {}),
+                                            ...(isTemplate ? {
+                                                border: '0.5px solid rgba(100, 181, 239, 0.3)',
+                                                background: 'rgba(100, 181, 239, 0.05)'
                                             } : {})
                                         }}
                                         onClick={() => setSelectedPackage(packageData)}
@@ -329,16 +335,26 @@ const ProfilePage = ({
                                                 )}
                                                 <div style={{
                                                     ...styles.status,
-                                                    backgroundColor: packageData.status === 'active' ? '#4BB34B' : '#FFD700',
-                                                    color: packageData.status === 'active' ? 'white' : '#1a1a1a'
+                                                    backgroundColor: isTemplate ? '#64b5ef' : 
+                                                        (packageData.status === 'active' ? '#4BB34B' : '#FFD700'),
+                                                    color: 'white'
                                                 }}>
-                                                    {responsesCount} откликов
+                                                    {isTemplate ? 'Шаблон' : `${responsesCount} откликов`}
                                                 </div>
                                             </div>
                                         </div>
                                         <div style={styles.details}>
                                             📦 {packageData.description} • ₽{packageData.reward}
                                         </div>
+                                        {isTemplate && (
+                                            <div style={{
+                                                fontSize: 12,
+                                                color: 'var(--tg-theme-hint-color, #708499)',
+                                                marginTop: 8
+                                            }}>
+                                                👆 Нажмите чтобы отправить курьерам
+                                            </div>
+                                        )}
                                         {packageData.message && (
                                             <div style={styles.message}>💬 {packageData.message}</div>
                                         )}
