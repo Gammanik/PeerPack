@@ -8,6 +8,8 @@ import SortMenu from './components/SortMenu';
 import CourierModal from './components/CourierModal';
 import RequestForm from './components/RequestForm';
 import AboutPage from './components/AboutPage';
+import ProfilePage from './components/ProfilePage';
+import PackageDetails from './components/PackageDetails';
 
 const SearchCouriers = () => {
     const [from, setFrom] = useState('Москва');
@@ -21,6 +23,46 @@ const SearchCouriers = () => {
     const [searchCollapsed, setSearchCollapsed] = useState(false);
     const [showBackToTop, setShowBackToTop] = useState(false);
     const [showAboutPage, setShowAboutPage] = useState(false);
+    const [showProfilePage, setShowProfilePage] = useState(false);
+    const [selectedPackage, setSelectedPackage] = useState(null);
+    const [userTrips, setUserTrips] = useState([
+        {
+            name: 'Никита',
+            from: 'Москва',
+            to: 'Казань',
+            date: '2025-08-12',
+            time: '14:30 → 16:45',
+            airport: 'Шереметьево → Казань',
+            avatar: 'https://i.pravatar.cc/100?img=50',
+            tripsCount: 1,
+            rating: 5.0,
+            reviewsCount: 0,
+            price: 700,
+            tripComment: 'Лечу к родственникам, могу взять небольшие посылки',
+            pastTrips: [],
+            reviews: [],
+            isUserTrip: true
+        },
+        {
+            name: 'Никита',
+            from: 'Санкт-Петербург',
+            to: 'Екатеринбург',
+            date: '2025-08-20',
+            time: '10:15 → 14:30',
+            airport: 'Пулково → Кольцово',
+            avatar: 'https://i.pravatar.cc/100?img=50',
+            tripsCount: 2,
+            rating: 5.0,
+            reviewsCount: 1,
+            price: 900,
+            tripComment: 'Командировка, есть место для документов и небольших посылок',
+            pastTrips: [],
+            reviews: [
+                { rating: 5, text: 'Отличный курьер! Очень ответственный.', date: '2025-08-13' }
+            ],
+            isUserTrip: true
+        }
+    ]);
     const [animatedStats, setAnimatedStats] = useState({
         trips: 0,
         rating: 0,
@@ -40,6 +82,86 @@ const SearchCouriers = () => {
     const [selectedCourier, setSelectedCourier] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [showRequestForm, setShowRequestForm] = useState(false);
+    const [myPackages, setMyPackages] = useState([
+        {
+            id: 1,
+            from: 'Москва',
+            to: 'Санкт-Петербург',
+            description: 'Документы в папке',
+            message: 'Нужно доставить документы для офиса',
+            reward: 800,
+            status: 'active',
+            createdAt: Date.now() - 172800000,
+            responses: [
+                {
+                    courierId: 'Иван2025-08-11',
+                    courierName: 'Иван',
+                    courierAvatar: 'https://i.pravatar.cc/100?img=12',
+                    courierRating: 4.9,
+                    date: '2025-08-11',
+                    time: '15:00 → 17:30',
+                    airport: 'Шереметьево → Пулково',
+                    price: 800,
+                    status: 'accepted',
+                    comment: 'Принимаю! Доставлю аккуратно, буду на связи.',
+                    timestamp: Date.now() - 86400000,
+                    isNew: false
+                },
+                {
+                    courierId: 'Елена2025-08-11',
+                    courierName: 'Елена',
+                    courierAvatar: 'https://i.pravatar.cc/100?img=44',
+                    courierRating: 4.8,
+                    date: '2025-08-11',
+                    time: '09:30 → 11:45',
+                    airport: 'Внуково → Пулково',
+                    price: 750,
+                    status: 'accepted',
+                    comment: 'Могу взять документы, утренний рейс очень удобный.',
+                    timestamp: Date.now() - 3600000,
+                    isNew: true
+                }
+            ]
+        },
+        {
+            id: 2,
+            from: 'Москва',
+            to: 'Санкт-Петербург',
+            description: 'Небольшая коробка с подарком',
+            message: 'Подарок для мамы, очень важно!',
+            reward: 1200,
+            status: 'waiting',
+            createdAt: Date.now() - 43200000,
+            responses: []
+        },
+        {
+            id: 3,
+            from: 'Москва',
+            to: 'Санкт-Петербург',
+            description: 'Медикаменты',
+            message: 'Срочные лекарства',
+            reward: 600,
+            status: 'completed',
+            createdAt: Date.now() - 259200000,
+            selectedCourier: 'Анастасия',
+            responses: [
+                {
+                    courierId: 'Максим2025-08-16',
+                    courierName: 'Максим',
+                    courierAvatar: 'https://i.pravatar.cc/100?img=68',
+                    courierRating: 4.6,
+                    date: '2025-08-16',
+                    time: '12:00 → 14:30',
+                    airport: 'Домодедово → Пулково',
+                    price: 600,
+                    status: 'declined',
+                    comment: 'Извините, не смогу взять медикаменты - нет специальных условий хранения.',
+                    timestamp: Date.now() - 172800000,
+                    isNew: false
+                }
+            ]
+        }
+    ]);
     const [sentRequests, setSentRequests] = useState([]);
     const [requestForm, setRequestForm] = useState({
         message: '',
@@ -278,9 +400,11 @@ const SearchCouriers = () => {
                 price: Math.floor(Math.random() * 1000) + 500,
                 tripComment: 'Новый курьер на платформе',
                 pastTrips: [],
-                reviews: []
+                reviews: [],
+                isUserTrip: true
             };
             couriers.push(tripToAdd);
+            setUserTrips([...userTrips, tripToAdd]);
             setNewTrip({
                 name: '',
                 from: '',
@@ -300,7 +424,17 @@ const SearchCouriers = () => {
         const interval = setInterval(() => {
             setCurrentTime(new Date());
         }, 60000);
-        return () => clearInterval(interval);
+
+        const handleSwitchToAddTrip = () => {
+            setMode('add');
+        };
+
+        window.addEventListener('switchToAddTrip', handleSwitchToAddTrip);
+        
+        return () => {
+            clearInterval(interval);
+            window.removeEventListener('switchToAddTrip', handleSwitchToAddTrip);
+        };
     }, []);
 
     useEffect(() => {
@@ -400,11 +534,19 @@ const SearchCouriers = () => {
             transition: 'opacity 0.2s ease'
         },
         logoContainer: {
+            position: 'relative',
             display: 'flex',
-            justifyContent: 'center',
+            justifyContent: 'space-between',
             alignItems: 'center',
-            padding: '24px 0 16px',
+            padding: '24px 16px 16px',
             marginBottom: 8
+        },
+        logoSection: {
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            flex: 1,
+            justifyContent: 'center'
         },
         logoButton: {
             display: 'flex',
@@ -457,15 +599,38 @@ const SearchCouriers = () => {
                 </div>
             )}
             
-            {/* Logo */}
-            {!searchCollapsed && !showAboutPage && (
+            {/* Logo and Profile */}
+            {!searchCollapsed && !showAboutPage && !showProfilePage && (
                 <div style={styles.logoContainer}>
+                    <div style={{ width: 32 }}></div>
+                    <div style={styles.logoSection}>
+                        <button 
+                            style={styles.logoButton}
+                            onClick={() => setShowAboutPage(true)}
+                        >
+                            <div style={styles.logoIcon}>📦</div>
+                            <span style={styles.logoText}>PeerPack</span>
+                        </button>
+                    </div>
                     <button 
-                        style={styles.logoButton}
-                        onClick={() => setShowAboutPage(true)}
+                        style={{
+                            background: 'transparent',
+                            border: 'none',
+                            borderRadius: 8,
+                            padding: '6px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            cursor: 'pointer',
+                            fontSize: 18,
+                            transition: 'all 0.2s ease',
+                            color: 'var(--tg-theme-hint-color, #708499)',
+                            width: 32,
+                            height: 32
+                        }}
+                        onClick={() => setShowProfilePage(true)}
                     >
-                        <div style={styles.logoIcon}>📦</div>
-                        <span style={styles.logoText}>PeerPack</span>
+                        👤
                     </button>
                 </div>
             )}
@@ -475,6 +640,25 @@ const SearchCouriers = () => {
                     setShowAboutPage={setShowAboutPage}
                     animatedStats={animatedStats}
                 />
+            ) : showProfilePage ? (
+                selectedPackage ? (
+                    <PackageDetails 
+                        packageData={selectedPackage}
+                        setSelectedPackage={setSelectedPackage}
+                        onSelectCourier={(packageId, courier) => {
+                            console.log('Выбран курьер:', courier.courierName, 'для посылки:', packageId);
+                            setSelectedPackage(null);
+                            setShowProfilePage(false);
+                        }}
+                    />
+                ) : (
+                    <ProfilePage 
+                        setShowProfilePage={setShowProfilePage}
+                        myPackages={myPackages}
+                        userTrips={userTrips}
+                        setSelectedPackage={setSelectedPackage}
+                    />
+                )
             ) : mode === 'search' ? (
                 <>
                     {!searchCollapsed && (
