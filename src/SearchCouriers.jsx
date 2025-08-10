@@ -15,7 +15,7 @@ const SearchCouriers = () => {
     const [results, setResults] = useState([]);
     const [selectedDate, setSelectedDate] = useState('');
     const [showDatePicker, setShowDatePicker] = useState(false);
-    const [sortBy, setSortBy] = useState('time'); // time, price, rating
+    const [sortBy, setSortBy] = useState('time');
     const [showSortMenu, setShowSortMenu] = useState(false);
     const [searchCollapsed, setSearchCollapsed] = useState(false);
     const [showBackToTop, setShowBackToTop] = useState(false);
@@ -26,9 +26,8 @@ const SearchCouriers = () => {
         couriers: 0,
         totalTrips: 0
     });
-    // const [showDatePicker, setShowDatePicker] = useState(false);
     const [currentTime, setCurrentTime] = useState(new Date());
-    const [mode, setMode] = useState('search'); // 'search' or 'add'
+    const [mode, setMode] = useState('search');
     const [newTrip, setNewTrip] = useState({
         name: '',
         from: '',
@@ -49,27 +48,164 @@ const SearchCouriers = () => {
 
     const availableCities = getAvailableCities(couriers);
 
-    // todo: http get: /search?from=Moscow,to=Saint-Petersburg,date-from..,date-to,sorted_by=prise
+    // Search functionality
     const handleSearch = () => {
         const lowerFrom = from.trim().toLowerCase();
         const lowerTo = to.trim().toLowerCase();
-        const filtered = couriers.filter((c) =>
+        let filtered = couriers.filter((c) =>
             c.from.toLowerCase() === lowerFrom &&
-            c.to.toLowerCase() === lowerTo &&
-            (!selectedDate || c.date === selectedDate) // дата — опциональна
+            c.to.toLowerCase() === lowerTo
         );
+
+        if (selectedDate) {
+            filtered = filtered.filter(c => c.date === selectedDate);
+        }
+
         const sorted = sortCouriers(filtered, sortBy);
         setResults(sorted);
-
-        if (window.innerWidth <= 768 && filtered.length > 0) {
-            setTimeout(() => {
-                setSearchCollapsed(true);
-                const resultsSection = document.querySelector('.results-section');
-                if (resultsSection) {
-                    resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
-            }, 100);
+        if (sorted.length > 0) {
+            setSearchCollapsed(true);
         }
+    };
+
+    // Request management
+    const getRequestStatus = (courier) => {
+        const request = sentRequests.find(req => req.courierId === courier.name + courier.date);
+        return request ? request.status : null;
+    };
+
+    const isRequestSent = (courier) => {
+        return sentRequests.some(req => req.courierId === courier.name + courier.date);
+    };
+
+    const handleSendRequest = () => {
+        if (selectedCourier) {
+            const newRequest = {
+                id: Date.now(),
+                courierId: selectedCourier.name + selectedCourier.date,
+                status: 'pending',
+                timestamp: Date.now(),
+                courierName: selectedCourier.name,
+                route: `${selectedCourier.from} → ${selectedCourier.to}`,
+                date: selectedCourier.date,
+                message: requestForm.message,
+                reward: requestForm.reward,
+                packageDescription: requestForm.packageDescription,
+            };
+            setSentRequests([...sentRequests, newRequest]);
+            setRequestForm({ message: '', reward: 5, packageDescription: '' });
+        }
+    };
+
+    const simulateStatusChange = () => {
+        setSentRequests(prev => prev.map(req => {
+            if (req.status === 'pending' && Math.random() > 0.7) {
+                const statuses = ['accepted', 'declined'];
+                const newStatus = statuses[Math.floor(Math.random() * statuses.length)];
+                const comments = {
+                    'accepted': [
+                        'Принимаю вашу заявку! Свяжусь с вами ближе к дате поездки.',
+                        'Отлично! Буду рад помочь с доставкой.',
+                        'Заявка принята. Все детали обсудим позже.'
+                    ],
+                    'declined': [
+                        'К сожалению, у меня не будет места для вашей посылки.',
+                        'Извините, но я не смогу взять вашу посылку в этот раз.',
+                        'Не получится помочь с доставкой, извините.'
+                    ]
+                };
+                return {
+                    ...req,
+                    status: newStatus,
+                    courierComment: comments[newStatus][Math.floor(Math.random() * comments[newStatus].length)]
+                };
+            }
+            return req;
+        }));
+    };
+
+    const getStatusText = (status) => {
+        switch (status) {
+            case 'pending': return 'Ожидание ответа';
+            case 'accepted': return 'Принята';
+            case 'declined': return 'Отказано';
+            default: return '';
+        }
+    };
+
+    const getStatusStyle = (status) => ({
+        padding: '4px 8px',
+        borderRadius: 12,
+        fontSize: 12,
+        fontWeight: 500,
+        backgroundColor: status === 'accepted' ? '#4BB34B' : 
+                        status === 'declined' ? '#FF3333' : 
+                        '#FF8C00',
+        color: 'white'
+    });
+
+    // Utility functions
+    const clearFromCity = () => {
+        setFrom('');
+        setResults([]);
+        setSearchCollapsed(false);
+    };
+    const clearToCity = () => {
+        setTo('');
+        setResults([]);
+        setSearchCollapsed(false);
+    };
+
+    const handleCourierClick = (courier) => {
+        setSelectedCourier(courier);
+        setShowModal(true);
+    };
+
+    const scrollToSearch = () => {
+        setSearchCollapsed(false);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const getTimeUntilDeparture = (date, time) => {
+        const [startTime] = time.split(' → ');
+        const departureDateTime = new Date(`${date}T${startTime}:00`);
+        const now = currentTime;
+        const timeDiff = departureDateTime - now;
+
+        if (timeDiff <= 0) return 'Вылетел';
+
+        const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+
+        if (days > 0) return `${days} дн ${hours} ч`;
+        return `${hours} ч`;
+    };
+
+    const getDatePresets = () => {
+        const today = new Date();
+        const tomorrow = new Date(today);
+        tomorrow.setDate(today.getDate() + 1);
+        const dayAfterTomorrow = new Date(today);
+        dayAfterTomorrow.setDate(today.getDate() + 2);
+        const nextWeek = new Date(today);
+        nextWeek.setDate(today.getDate() + 7);
+
+        return [
+            { label: 'Сегодня', value: today.toISOString().split('T')[0] },
+            { label: 'Завтра', value: tomorrow.toISOString().split('T')[0] },
+            { label: 'Послезавтра', value: dayAfterTomorrow.toISOString().split('T')[0] },
+            { label: 'Через неделю', value: nextWeek.toISOString().split('T')[0] },
+        ];
+    };
+
+    const formatDate = (dateString) => {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        return date.toLocaleDateString('ru-RU', {
+            day: 'numeric',
+            month: 'short',
+            weekday: 'short'
+        });
     };
 
     const handleAddTrip = () => {
@@ -80,6 +216,8 @@ const SearchCouriers = () => {
                 tripsCount: 1,
                 rating: 5.0,
                 reviewsCount: 0,
+                price: Math.floor(Math.random() * 1000) + 500,
+                tripComment: 'Новый курьер на платформе',
                 pastTrips: [],
                 reviews: []
             };
@@ -92,311 +230,186 @@ const SearchCouriers = () => {
                 time: '',
                 airport: ''
             });
-            alert('Поездка успешно добавлена!');
-        } else {
-            alert('Пожалуйста, заполните все поля');
+            setMode('search');
         }
     };
 
-    const handleCourierClick = (courier) => {
-        setSelectedCourier(courier);
-        setShowModal(true);
-    };
-
-    const handleSendRequest = () => {
-        if (requestForm.message && requestForm.packageDescription) {
-            const request = {
-                id: Date.now(),
-                courierId: selectedCourier.name + selectedCourier.date,
-                courierName: selectedCourier.name,
-                route: `${selectedCourier.from} → ${selectedCourier.to}`,
-                date: selectedCourier.date,
-                message: requestForm.message,
-                reward: requestForm.reward,
-                packageDescription: requestForm.packageDescription,
-                status: 'pending', // pending, declined, accepted, delivered
-                courierComment: '', // Комментарий от доставщика
-                createdAt: new Date().toISOString()
-            };
-            setSentRequests(prev => [...prev, request]);
-            setRequestForm({ message: '', reward: 5, packageDescription: '' });
-            setShowRequestForm(false);
-            setShowModal(false);
-            alert('Заявка отправлена курьеру!');
-        } else {
-            alert('Пожалуйста, заполните все поля');
-        }
-    };
-
-    const getRequestStatus = (courier) => {
-        const request = sentRequests.find(req => req.courierId === courier.name + courier.date);
-        return request ? request.status : null;
-    };
-
-    const isRequestSent = (courier) => {
-        return sentRequests.some(req => req.courierId === courier.name + courier.date);
-    };
-
-    // Функция для имитации изменения статуса заявки (в реальном приложении это будет через API)
-    const simulateStatusChange = () => {
-        setSentRequests(prev => prev.map(req => {
-            if (req.status === 'pending' && Math.random() > 0.7) {
-                const statuses = ['accepted', 'declined'];
-                const newStatus = statuses[Math.floor(Math.random() * statuses.length)];
-                const comments = {
-                    'accepted': [
-                        'Отлично! С удовольствием доставлю вашу посылку.',
-                        'Принимаю заявку. Свяжемся перед вылетом.',
-                        'Согласен! Место в багаже есть.',
-                        'Хорошо, буду рад помочь с доставкой.'
-                    ],
-                    'declined': [
-                        'К сожалению, багаж уже забит.',
-                        'Извините, не смогу взять хрупкие вещи.',
-                        'К сожалению, не подходит по размеру.',
-                        'Простите, планы изменились.'
-                    ]
-                };
-                return { 
-                    ...req, 
-                    status: newStatus,
-                    courierComment: comments[newStatus][Math.floor(Math.random() * comments[newStatus].length)]
-                };
-            }
-            if (req.status === 'accepted' && Math.random() > 0.8) {
-                return { 
-                    ...req, 
-                    status: 'delivered',
-                    courierComment: req.courierComment + ' Посылка доставлена успешно!'
-                };
-            }
-            return req;
-        }));
-    };
-
-    // Имитация обновления статусов каждые 10 секунд
+    // Effects
     useEffect(() => {
-        const interval = setInterval(simulateStatusChange, 10000);
+        injectCSS();
+        
+        const interval = setInterval(() => {
+            setCurrentTime(new Date());
+        }, 60000);
         return () => clearInterval(interval);
     }, []);
 
-    // Функции для отображения статусов
-    const getStatusText = (status) => {
-        switch (status) {
-            case 'pending': return 'Ожидание ответа';
-            case 'accepted': return 'Принята';
-            case 'declined': return 'Отказано';
-            case 'delivered': return 'Доставлено';
-            default: return '';
-        }
-    };
-
-    const getStatusStyle = (status) => {
-        const baseStyle = {
-            fontSize: 11,
-            padding: '2px 6px',
-            borderRadius: 4,
-            marginLeft: 8
-        };
-        
-        switch (status) {
-            case 'pending': return { ...baseStyle, color: '#ffa726', backgroundColor: 'rgba(255, 167, 38, 0.1)' };
-            case 'accepted': return { ...baseStyle, color: '#66bb6a', backgroundColor: 'rgba(102, 187, 106, 0.1)' };
-            case 'declined': return { ...baseStyle, color: '#ef5350', backgroundColor: 'rgba(239, 83, 80, 0.1)' };
-            case 'delivered': return { ...baseStyle, color: '#00bfa6', backgroundColor: 'rgba(0, 191, 166, 0.1)' };
-            default: return baseStyle;
-        }
-    };
-
-    // Инициализация CSS и автоматический поиск при загрузке компонента
     useEffect(() => {
-        injectCSS();
-        handleSearch();
+        const timer = setInterval(simulateStatusChange, 10000);
+        return () => clearInterval(timer);
     }, []);
-    
-    // Пересортировка при изменении типа сортировки
+
     useEffect(() => {
-        if (results.length > 0) {
-            const sorted = sortCouriers(results, sortBy);
-            setResults(sorted);
-        }
-    }, [sortBy]);
-    
-    // Закрытие меню сортировки при клике вне его
+        const interval = setInterval(() => {
+            setAnimatedStats(prev => ({
+                trips: Math.min(prev.trips + Math.floor(Math.random() * 50) + 10, 15247),
+                rating: Math.min(prev.rating + 0.01, 4.8),
+                couriers: Math.min(prev.couriers + Math.floor(Math.random() * 5) + 1, 1892),
+                totalTrips: Math.min(prev.totalTrips + Math.floor(Math.random() * 100) + 20, 89453)
+            }));
+        }, 100);
+
+        return () => clearInterval(interval);
+    }, []);
+
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (showSortMenu && !event.target.closest('.compact-sort-section')) {
                 setShowSortMenu(false);
             }
         };
-        
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, [showSortMenu]);
-    
-    // Отслеживание скролла для кнопки "Наверх"
+
     useEffect(() => {
         const handleScroll = () => {
             setShowBackToTop(window.scrollY > 300);
         };
-        
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
-    
-    // Плавный возврат к поиску
-    const scrollToSearch = () => {
-        setSearchCollapsed(false);
-        setShowAboutPage(false);
-        setTimeout(() => {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }, 100);
-    };
-    
-    // Real-time обновление времени
-    useEffect(() => {
-        const timer = setInterval(() => {
-            setCurrentTime(new Date());
-        }, 1000);
-        return () => clearInterval(timer);
-    }, []);
-    
-    // Функция для расчета времени до отправления
-    const getTimeUntilDeparture = (date, time) => {
-        const today = new Date();
-        const departureDate = new Date(date);
-        const [hours, minutes] = time.split(' → ')[0].split(':');
-        departureDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
-        
-        const diffMs = departureDate - currentTime;
-        
-        if (diffMs <= 0) return 'Отправлен';
-        
-        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-        const diffHours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-        
-        if (diffDays > 0) return `через ${diffDays}д ${diffHours}ч`;
-        if (diffHours > 0) return `через ${diffHours}ч ${diffMins}м`;
-        return `через ${diffMins}м`;
-    };
-    
-    // Очистка полей городов
-    const clearFromCity = () => {
-        setFrom('');
-        setResults([]);
-        setSearchCollapsed(false);
-    };
-    
-    const clearToCity = () => {
-        setTo('');
-        setResults([]);
-        setSearchCollapsed(false);
-    };
-    
-    // Анимация счетчиков статистики
-    const animateCounter = (start, end, duration, callback) => {
-        const startTime = Date.now();
-        const timer = setInterval(() => {
-            const elapsed = Date.now() - startTime;
-            const progress = Math.min(elapsed / duration, 1);
-            const current = Math.floor(start + (end - start) * progress);
-            callback(current);
-            if (progress >= 1) clearInterval(timer);
-        }, 16);
-    };
-    
-    // Запуск анимации при открытии страницы About
-    useEffect(() => {
-        if (showAboutPage) {
-            // Обнуляем счетчики
-            setAnimatedStats({ trips: 0, rating: 0, couriers: 0, totalTrips: 0 });
-            
-            // Запускаем анимации с задержкой
-            setTimeout(() => {
-                animateCounter(0, 5200000, 2000, (val) => 
-                    setAnimatedStats(prev => ({ ...prev, trips: val })));
-            }, 300);
-            
-            setTimeout(() => {
-                animateCounter(0, 48, 1500, (val) => 
-                    setAnimatedStats(prev => ({ ...prev, rating: val / 10 })));
-            }, 600);
-            
-            setTimeout(() => {
-                animateCounter(0, 125000, 2500, (val) => 
-                    setAnimatedStats(prev => ({ ...prev, couriers: val })));
-            }, 900);
-            
-            setTimeout(() => {
-                animateCounter(0, 8500000, 2800, (val) => 
-                    setAnimatedStats(prev => ({ ...prev, totalTrips: val })));
-            }, 1200);
+
+    // Telegram-native styles
+    const styles = {
+        page: {
+            minHeight: '100vh',
+            background: 'var(--tg-theme-bg-color, #17212b)',
+            color: 'var(--tg-theme-text-color, #ffffff)',
+            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            transition: 'padding-top 0.3s ease',
+            position: 'relative',
+            padding: '0 16px'
+        },
+        compactHeader: {
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            background: 'var(--tg-theme-secondary-bg-color, #232e3c)',
+            backdropFilter: 'blur(20px)',
+            borderBottom: '0.5px solid var(--tg-theme-hint-color, #708499)',
+            padding: '12px 16px',
+            zIndex: 100,
+            animation: 'slideIn 0.3s ease-out'
+        },
+        compactHeaderContent: {
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            maxWidth: '100%',
+            margin: '0 auto'
+        },
+        compactLogo: {
+            fontSize: 18,
+            fontWeight: 600,
+            color: 'var(--tg-theme-accent-text-color, #64b5ef)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6
+        },
+        routeDisplay: {
+            fontSize: 15,
+            fontWeight: 500,
+            color: 'var(--tg-theme-text-color, #ffffff)',
+            textAlign: 'center',
+            flex: 1,
+            margin: '0 16px'
+        },
+        editSearchButton: {
+            background: 'var(--tg-theme-button-color, #5288c1)',
+            color: 'var(--tg-theme-button-text-color, #ffffff)',
+            border: 'none',
+            borderRadius: 8,
+            padding: '6px 12px',
+            fontSize: 13,
+            fontWeight: 500,
+            cursor: 'pointer',
+            transition: 'opacity 0.2s ease'
+        },
+        logoContainer: {
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            padding: '24px 0 16px',
+            marginBottom: 8
+        },
+        logoButton: {
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            background: 'transparent',
+            border: 'none',
+            cursor: 'pointer',
+            transition: 'opacity 0.2s ease',
+            padding: '8px 16px',
+            borderRadius: 12
+        },
+        logoIcon: {
+            width: 28,
+            height: 28,
+            background: 'linear-gradient(135deg, var(--tg-theme-button-color, #5288c1), var(--tg-theme-accent-text-color, #64b5ef))',
+            borderRadius: 8,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: 16,
+            fontWeight: 600
+        },
+        logoText: {
+            fontSize: 20,
+            fontWeight: 700,
+            color: 'var(--tg-theme-text-color, #ffffff)',
+            letterSpacing: '-0.02em'
         }
-    }, [showAboutPage]);
-
-    // Функции для работы с датами
-    const getDatePresets = () => {
-        const today = new Date();
-        const tomorrow = new Date(today);
-        tomorrow.setDate(today.getDate() + 1);
-        const nextWeek = new Date(today);
-        nextWeek.setDate(today.getDate() + 7);
-        
-        return [
-            { label: 'Сегодня', value: today.toISOString().split('T')[0] },
-            { label: 'Завтра', value: tomorrow.toISOString().split('T')[0] },
-            { label: 'Через неделю', value: nextWeek.toISOString().split('T')[0] },
-            { label: 'Любая дата', value: '' }
-        ];
-    };
-
-    const formatDate = (dateStr) => {
-        if (!dateStr) return 'Любая дата';
-        const date = new Date(dateStr);
-        return date.toLocaleDateString('ru-RU', { 
-            day: 'numeric', 
-            month: 'short',
-            weekday: 'short'
-        });
     };
 
     return (
-        <div style={{
-            ...styles.page,
-            paddingTop: searchCollapsed ? '80px' : '20px'
-        }}>
-            {/* Мобильная компактная шапка для результатов */}
+        <div style={styles.page}>
+            {/* Compact header for results */}
             {searchCollapsed && (
                 <div style={styles.compactHeader}>
                     <div style={styles.compactHeaderContent}>
-                        <div style={styles.compactLogo}>⚡</div>
+                        <div style={styles.compactLogo}>
+                            <div style={{...styles.logoIcon, width: 20, height: 20, fontSize: 12}}>📦</div>
+                            PeerPack
+                        </div>
                         <div style={styles.routeDisplay}>{from} → {to}</div>
                         <button 
-                            className="edit-search-button"
                             style={styles.editSearchButton}
                             onClick={scrollToSearch}
                         >
-                            изменить
+                            Изменить
                         </button>
                     </div>
                 </div>
             )}
             
-            {/* Компактный логотип в поиске */}
+            {/* Logo */}
             {!searchCollapsed && !showAboutPage && (
-                <div style={styles.compactLogoSection}>
+                <div style={styles.logoContainer}>
                     <button 
-                        style={styles.compactLogoButton}
+                        style={styles.logoButton}
                         onClick={() => setShowAboutPage(true)}
-                        className="compact-logo-btn"
                     >
-                        <span style={styles.compactLogoIcon}>⚡</span>
-                        <span style={styles.compactBrandText}>PeerPack</span>
+                        <div style={styles.logoIcon}>📦</div>
+                        <span style={styles.logoText}>PeerPack</span>
                     </button>
                 </div>
             )}
-            
 
             {showAboutPage ? (
                 <AboutPage 
@@ -406,1653 +419,238 @@ const SearchCouriers = () => {
             ) : mode === 'search' ? (
                 <>
                     {!searchCollapsed && (
-                        <div className="search-container" style={styles.searchContainer}>
-                        <label style={styles.label}>Откуда отправить</label>
-                        <div style={styles.inputWithClear}>
-                            <input
-                                className="search-input"
-                                list="available-cities"
-                                value={from}
-                                onChange={(e) => setFrom(e.target.value)}
-                                placeholder="Например, Москва"
-                                style={styles.inputWithButton}
-                            />
-                            {from && (
-                                <button 
-                                    style={styles.clearButton}
-                                    onClick={clearFromCity}
-                                    className="clear-button"
-                                >
-                                    ×
-                                </button>
-                            )}
-                        </div>
-                        <label style={styles.label}>Куда доставить</label>
-                        <div style={styles.inputWithClear}>
-                            <input
-                                className="search-input"
-                                list="available-cities"
-                                value={to}
-                                onChange={(e) => setTo(e.target.value)}
-                                placeholder="Например, Сочи"
-                                style={styles.inputWithButton}
-                            />
-                            {to && (
-                                <button 
-                                    style={styles.clearButton}
-                                    onClick={clearToCity}
-                                    className="clear-button"
-                                >
-                                    ×
-                                </button>
-                            )}
-                        </div>
-                        <datalist id="available-cities">
-                            {availableCities.map(city => (
-                                <option key={city} value={city} />
-                            ))}
-                        </datalist>
-
-                            <div style={{
-                                marginTop: 16,
-                                display: 'flex',
-                                flexDirection: 'column',
-                                gap: 10
-                            }}>
-                                <div style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: 8,
-                                }}>
-                                    <button
-                                        onClick={() => setShowDatePicker(!showDatePicker)}
-                                        aria-expanded={showDatePicker}
-                                        aria-controls="date-optional-panel"
-                                        style={{
-                                            display: 'inline-flex',
-                                            alignItems: 'center',
-                                            gap: 8,
-                                            padding: '10px 14px',
-                                            borderRadius: 9999,
-                                            border: '1px solid rgba(0,191,166,0.35)',
-                                            background: 'linear-gradient(180deg, rgba(0,191,166,0.06), rgba(0,191,166,0.03))',
-                                            color: '#0f766e',
-                                            fontWeight: 600,
-                                            cursor: 'pointer',
-                                            transition: 'transform .15s ease, box-shadow .15s ease, background .2s ease',
-                                            boxShadow: showDatePicker ? '0 4px 16px rgba(0,191,166,0.15)' : 'none'
-                                        }}
-                                        className="button-hover"
-                                    >
-      <span style={{
-          width: 24, height: 24, display: 'inline-flex',
-          alignItems: 'center', justifyContent: 'center',
-          background: '#00bfa6', color: 'white', borderRadius: 6,
-          fontSize: 14, boxShadow: '0 2px 8px rgba(0,191,166,0.35)'
-      }}>📅</span>
-                                        <span>Дата</span>
-                                        <span style={{ opacity: 0.6 }}>{showDatePicker ? '▲' : '▼'}</span>
-                                    </button>
-
-                                    {selectedDate && (
-                                        <span style={{
-                                            display: 'inline-flex',
-                                            alignItems: 'center',
-                                            gap: 8,
-                                            padding: '8px 12px',
-                                            borderRadius: 9999,
-                                            background: 'rgba(0,191,166,0.08)',
-                                            border: '1px solid rgba(0,191,166,0.25)',
-                                            color: '#0f766e',
-                                            fontWeight: 500
-                                        }}>
-        {formatDate(selectedDate)}
-                                            <button
-                                                onClick={(e) => { e.stopPropagation(); setSelectedDate(''); }}
-                                                title="Сбросить дату"
-                                                style={{
-                                                    width: 22, height: 22, borderRadius: 11,
-                                                    border: '1px solid rgba(0,0,0,0.1)',
-                                                    background: 'white',
-                                                    color: '#666',
-                                                    cursor: 'pointer',
-                                                    lineHeight: 1
-                                                }}
-                                            >
-          ×
-        </button>
-      </span>
-                                    )}
-                                </div>
-
-                                {showDatePicker && (
-                                    <div
-                                        id="date-optional-panel"
-                                        style={{
-                                            border: '1px solid rgba(0,0,0,0.08)',
-                                            background: 'linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0.95))',
-                                            borderRadius: 14,
-                                            padding: 14,
-                                            boxShadow: '0 8px 28px rgba(0,0,0,0.06)',
-                                            display: 'flex',
-                                            flexDirection: 'column',
-                                            gap: 12
-                                        }}
-                                        className="modal-enter"
-                                    >
-                                        <div style={{ fontSize: 12, color: '#667085' }}>
-                                            Выберите готовый пресет или укажите точную дату
-                                        </div>
-
-                                        <div style={{
-                                            display: 'flex',
-                                            flexWrap: 'wrap',
-                                            gap: 8
-                                        }}>
-                                            {getDatePresets().map((preset, index) => {
-                                                const active = selectedDate === preset.value;
-                                                return (
-                                                    <button
-                                                        key={index}
-                                                        onClick={() => {
-                                                            setSelectedDate(preset.value);
-                                                            if (window.innerWidth <= 768) setShowDatePicker(false);
-                                                        }}
-                                                        style={{
-                                                            padding: '8px 12px',
-                                                            borderRadius: 9999,
-                                                            border: `1px solid ${active ? 'rgba(0,191,166,0.6)' : 'rgba(0,0,0,0.1)'}`,
-                                                            background: active ? 'rgba(0,191,166,0.1)' : 'white',
-                                                            color: active ? '#0f766e' : '#555',
-                                                            cursor: 'pointer',
-                                                            fontWeight: 600
-                                                        }}
-                                                    >
-                                                        {preset.label}
-                                                    </button>
-                                                );
-                                            })}
-                                        </div>
-
-                                        <div style={{
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: 10
-                                        }}>
-                                            <input
-                                                type="date"
-                                                value={selectedDate}
-                                                onChange={(e) => {
-                                                    setSelectedDate(e.target.value);
-                                                    if (window.innerWidth <= 768) setShowDatePicker(false);
-                                                }}
-                                                min={new Date().toISOString().split('T')[0]}
-                                                style={{
-                                                    flex: '0 1 220px',
-                                                    padding: '10px 12px',
-                                                    borderRadius: 10,
-                                                    border: '1px solid rgba(0,0,0,0.12)',
-                                                    outline: 'none',
-                                                    fontSize: 14,
-                                                    color: '#222',
-                                                    boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.04)'
-                                                }}
-                                                className="search-input"
-                                            />
-
-                                            <div style={{ display: 'flex', gap: 8, marginLeft: 'auto' }}>
-                                                <button
-                                                    onClick={() => setSelectedDate('')}
-                                                    style={{
-                                                        padding: '10px 12px',
-                                                        borderRadius: 10,
-                                                        border: '1px dashed rgba(0,0,0,0.2)',
-                                                        background: 'transparent',
-                                                        color: '#666',
-                                                        cursor: 'pointer',
-                                                        fontWeight: 600
-                                                    }}
-                                                >
-                                                    Сбросить
-                                                </button>
-                                                <button
-                                                    onClick={() => setShowDatePicker(false)}
-                                                    style={{
-                                                        padding: '10px 14px',
-                                                        borderRadius: 10,
-                                                        border: 'none',
-                                                        background: '#00bfa6',
-                                                        color: 'white',
-                                                        cursor: 'pointer',
-                                                        fontWeight: 700,
-                                                        boxShadow: '0 6px 18px rgba(0,191,166,0.35)'
-                                                    }}
-                                                    className="button-hover"
-                                                >
-                                                    Готово
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-
-                        
-                        <button 
-                            className="button-hover"
-                            style={styles.searchButton} 
-                            onClick={handleSearch}
-                        >
-                            <span style={styles.searchButtonIcon}>📦</span>
-                            Передать посылку
-                        </button>
-                        </div>
+                        <SearchForm
+                            from={from}
+                            setFrom={(value) => {
+                                setFrom(value);
+                                if (results.length > 0) {
+                                    setResults([]);
+                                    setSearchCollapsed(false);
+                                }
+                            }}
+                            to={to}
+                            setTo={(value) => {
+                                setTo(value);
+                                if (results.length > 0) {
+                                    setResults([]);
+                                    setSearchCollapsed(false);
+                                }
+                            }}
+                            selectedDate={selectedDate}
+                            setSelectedDate={setSelectedDate}
+                            showDatePicker={showDatePicker}
+                            setShowDatePicker={setShowDatePicker}
+                            availableCities={availableCities}
+                            handleSearch={handleSearch}
+                            clearFromCity={clearFromCity}
+                            clearToCity={clearToCity}
+                            getDatePresets={getDatePresets}
+                            formatDate={formatDate}
+                        />
                     )}
 
-                    {/* Минимальная опциональная сортировка */}
-                    {results.length > 1 && (
-                        <div className="compact-sort-section" style={styles.compactSortSection}>
-                            <button 
-                                className="sort-toggle"
-                                style={styles.sortToggle}
-                                onClick={() => setShowSortMenu(!showSortMenu)}
-                            >
-                                сортировка ▼
-                            </button>
-                            {showSortMenu && (
-                                <div style={styles.sortDropdown}>
-                                    <button 
-                                        className="compact-sort-button"
-                                        style={{
-                                            ...styles.compactSortButton,
-                                            ...(sortBy === 'time' ? styles.compactSortButtonActive : {})
-                                        }}
-                                        onClick={() => {
-                                            setSortBy('time');
-                                            const sorted = sortCouriers(results, 'time');
-                                            setResults(sorted);
-                                            setShowSortMenu(false);
-                                        }}
-                                    >
-                                        по времени
-                                    </button>
-                                    <button 
-                                        className="compact-sort-button"
-                                        style={{
-                                            ...styles.compactSortButton,
-                                            ...(sortBy === 'price' ? styles.compactSortButtonActive : {})
-                                        }}
-                                        onClick={() => {
-                                            setSortBy('price');
-                                            const sorted = sortCouriers(results, 'price');
-                                            setResults(sorted);
-                                            setShowSortMenu(false);
-                                        }}
-                                    >
-                                        по цене
-                                    </button>
-                                    <button 
-                                        className="compact-sort-button"
-                                        style={{
-                                            ...styles.compactSortButton,
-                                            ...(sortBy === 'rating' ? styles.compactSortButtonActive : {})
-                                        }}
-                                        onClick={() => {
-                                            setSortBy('rating');
-                                            const sorted = sortCouriers(results, 'rating');
-                                            setResults(sorted);
-                                            setShowSortMenu(false);
-                                        }}
-                                    >
-                                        по рейтингу
-                                    </button>
-                                </div>
-                            )}
-                        </div>
-                    )}
+                    <SortMenu
+                        results={results}
+                        setResults={setResults}
+                        sortBy={sortBy}
+                        setSortBy={setSortBy}
+                        showSortMenu={showSortMenu}
+                        setShowSortMenu={setShowSortMenu}
+                    />
 
-                    <div className="results-section" style={{ width: '100%', maxWidth: 400, marginTop: results.length > 0 ? 15 : 30 }}>
+                    <div style={{ 
+                        width: '100%', 
+                        maxWidth: 480, 
+                        marginTop: results.length > 0 ? (searchCollapsed ? 70 : 15) : 30,
+                        paddingTop: searchCollapsed ? 16 : 0
+                    }}>
                         {results.length === 0 ? (
-                            <p style={{ color: '#aaa' }}>Доставщики не найдены.</p>
-                        ) : results.map((c, index) => (
-                            <div 
-                                key={c.name + c.date} 
-                                className="card-hover"
-                                style={{
-                                    ...styles.newCard, 
-                                    cursor: 'pointer',
-                                    animationDelay: `${index * 0.1}s`
-                                }}
-                                onClick={() => handleCourierClick(c)}
-                            >
-                                <div style={styles.cardHeader}>
-                                    <div style={styles.courierInfo1}>
-                                        <img src={c.avatar} alt={c.name} style={styles.avatar} />
-                                        <div style={styles.courierDetails}>
-                                            <div style={styles.courierName}>{c.name}</div>
-                                            <div style={styles.rating}>
-                                                <span style={styles.stars}>{renderStars(c.rating)}</span>
-                                                <span style={styles.ratingText}>{c.rating}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div style={styles.priceTag}>₽{c.price}</div>
-                                </div>
-                                
-                                <div style={styles.routeSection}>
-                                    <div style={styles.routeInfo}>
-                                        <div style={styles.cities}>{c.from} → {c.to}</div>
-                                        <div style={styles.timeInfo}>
-                                            <span style={styles.timeHighlight}>🕐 {c.time}</span>
-                                        </div>
-                                    </div>
-                                    <div style={styles.countdown}>
-                                        <span style={styles.countdownText}>⏰ {getTimeUntilDeparture(c.date, c.time)}</span>
-                                    </div>
-                                </div>
-                                
-                                <div style={styles.commentSection}>
-                                    <div style={styles.commentIcon}>💬</div>
-                                    <div style={styles.commentText}>{c.tripComment}</div>
-                                </div>
-                                
-                                <div style={styles.cardFooter}>
-                                    <div style={styles.statsInfo}>
-                                        <span style={styles.tripsCount}>{c.tripsCount} поездок</span>
-                                        <span style={styles.reviewsCount}>• {c.reviewsCount} отзывов</span>
-                                    </div>
-                                    {getRequestStatus(c) && (
-                                        <span style={getStatusStyle(getRequestStatus(c))}>
-                                            {getStatusText(getRequestStatus(c))}
-                                        </span>
-                                    )}
-                                </div>
+                            <div style={{ 
+                                textAlign: 'center',
+                                color: 'var(--tg-theme-hint-color, #708499)',
+                                fontSize: 15,
+                                padding: '40px 20px'
+                            }}>
+                                Курьеры не найдены
                             </div>
+                        ) : results.map((courier, index) => (
+                            <CourierCard
+                                key={courier.name + courier.date}
+                                courier={courier}
+                                index={index}
+                                onClick={handleCourierClick}
+                                getRequestStatus={getRequestStatus}
+                                getStatusStyle={getStatusStyle}
+                                getStatusText={getStatusText}
+                                getTimeUntilDeparture={getTimeUntilDeparture}
+                            />
                         ))}
                     </div>
 
-                    <div style={styles.courierLinkContainer}>
+                    <div style={{ 
+                        marginTop: 32, 
+                        marginBottom: 32,
+                        textAlign: 'center' 
+                    }}>
                         <button 
-                            style={styles.courierLink}
+                            style={{
+                                background: 'transparent',
+                                color: 'var(--tg-theme-link-color, #64b5ef)',
+                                border: 'none',
+                                fontSize: 15,
+                                cursor: 'pointer',
+                                textDecoration: 'none',
+                                fontWeight: 500
+                            }}
                             onClick={() => setMode('add')}
                         >
-                            Вы доставщик? Добавить поездку
+                            Вы курьер? Добавить поездку
                         </button>
                     </div>
                 </>
             ) : (
                 <>
-                    <div style={styles.backLink}>
+                    <div style={{ width: '100%', maxWidth: 400, marginBottom: 20, paddingTop: 20 }}>
                         <button 
-                            style={styles.backButton}
+                            style={{
+                                background: 'transparent',
+                                color: 'var(--tg-theme-link-color, #64b5ef)',
+                                border: 'none',
+                                fontSize: 15,
+                                cursor: 'pointer',
+                                fontWeight: 500
+                            }}
                             onClick={() => setMode('search')}
                         >
                             ← Назад к поиску курьеров
                         </button>
                     </div>
                     
-                    <div style={styles.container}>
-                        <h3 style={styles.addTripTitle}>Добавить поездку</h3>
+                    <div style={{
+                        background: 'var(--tg-theme-secondary-bg-color, #232e3c)',
+                        padding: 20,
+                        borderRadius: 12,
+                        maxWidth: 400,
+                        width: '100%',
+                        border: '0.5px solid var(--tg-theme-hint-color, #708499)'
+                    }}>
+                        <h3 style={{
+                            color: 'var(--tg-theme-text-color, #ffffff)',
+                            fontSize: 18,
+                            fontWeight: 600,
+                            margin: '0 0 20px 0',
+                            textAlign: 'center'
+                        }}>Добавить поездку</h3>
                         
-                        <label style={styles.label}>Ваше имя</label>
-                        <input
-                            value={newTrip.name}
-                            onChange={(e) => setNewTrip({...newTrip, name: e.target.value})}
-                            placeholder="Например, Анна"
-                            style={styles.input}
-                        />
+                        {Object.keys(newTrip).map((field) => (
+                            <div key={field} style={{ marginBottom: 16 }}>
+                                <label style={{
+                                    color: 'var(--tg-theme-hint-color, #708499)',
+                                    marginBottom: 6,
+                                    display: 'block',
+                                    fontSize: 14,
+                                    fontWeight: 500
+                                }}>
+                                    {field === 'name' ? 'Ваше имя' :
+                                     field === 'from' ? 'Откуда' :
+                                     field === 'to' ? 'Куда' :
+                                     field === 'date' ? 'Дата' :
+                                     field === 'time' ? 'Время вылета → прилета' :
+                                     'Аэропорты'}
+                                </label>
+                                <input
+                                    type={field === 'date' ? 'date' : 'text'}
+                                    value={newTrip[field]}
+                                    onChange={(e) => setNewTrip({...newTrip, [field]: e.target.value})}
+                                    placeholder={field === 'name' ? 'Например, Анна' :
+                                               field === 'from' ? 'Например, Москва' :
+                                               field === 'to' ? 'Например, Сочи' :
+                                               field === 'time' ? 'Например, 15:00 → 17:30' :
+                                               field === 'airport' ? 'Например, Внуково → Адлер' : ''}
+                                    style={{
+                                        padding: '12px 16px',
+                                        width: '100%',
+                                        background: 'var(--tg-theme-bg-color, #17212b)',
+                                        border: '0.5px solid var(--tg-theme-hint-color, #708499)',
+                                        borderRadius: 8,
+                                        color: 'var(--tg-theme-text-color, #ffffff)',
+                                        fontSize: 16,
+                                        outline: 'none',
+                                        boxSizing: 'border-box'
+                                    }}
+                                />
+                            </div>
+                        ))}
                         
-                        <label style={styles.label}>Откуда</label>
-                        <div style={styles.inputWithClear}>
-                            <input
-                                list="all-cities"
-                                value={newTrip.from}
-                                onChange={(e) => setNewTrip({...newTrip, from: e.target.value})}
-                                placeholder="Например, Москва"
-                                style={newTrip.from ? styles.inputWithButton : styles.input}
-                            />
-                            {newTrip.from && (
-                                <button 
-                                    style={styles.clearButton}
-                                    onClick={() => setNewTrip({...newTrip, from: ''})}
-                                    className="clear-button"
-                                >
-                                    ×
-                                </button>
-                            )}
-                        </div>
-                        
-                        <label style={styles.label}>Куда</label>
-                        <div style={styles.inputWithClear}>
-                            <input
-                                list="all-cities"
-                                value={newTrip.to}
-                                onChange={(e) => setNewTrip({...newTrip, to: e.target.value})}
-                                placeholder="Например, Сочи"
-                                style={newTrip.to ? styles.inputWithButton : styles.input}
-                            />
-                            {newTrip.to && (
-                                <button 
-                                    style={styles.clearButton}
-                                    onClick={() => setNewTrip({...newTrip, to: ''})}
-                                    className="clear-button"
-                                >
-                                    ×
-                                </button>
-                            )}
-                        </div>
-                        
-                        <label style={styles.label}>Дата</label>
-                        <input
-                            type="date"
-                            value={newTrip.date}
-                            onChange={(e) => setNewTrip({...newTrip, date: e.target.value})}
-                            style={styles.input}
-                        />
-                        
-                        <label style={styles.label}>Время вылета → прилета</label>
-                        <input
-                            value={newTrip.time}
-                            onChange={(e) => setNewTrip({...newTrip, time: e.target.value})}
-                            placeholder="Например, 15:00 → 17:30"
-                            style={styles.input}
-                        />
-                        
-                        <label style={styles.label}>Аэропорты</label>
-                        <input
-                            value={newTrip.airport}
-                            onChange={(e) => setNewTrip({...newTrip, airport: e.target.value})}
-                            placeholder="Например, Внуково → Адлер"
-                            style={styles.input}
-                        />
-                        
-                        <datalist id="all-cities">
-                            {cities.map(city => (
-                                <option key={city} value={city} />
-                            ))}
-                        </datalist>
-                        
-                        <button style={styles.button} onClick={handleAddTrip}>
+                        <button 
+                            style={{
+                                marginTop: 24,
+                                padding: '12px 16px',
+                                backgroundColor: 'var(--tg-theme-button-color, #5288c1)',
+                                color: 'var(--tg-theme-button-text-color, #ffffff)',
+                                border: 'none',
+                                borderRadius: 8,
+                                width: '100%',
+                                fontWeight: 600,
+                                fontSize: 16,
+                                cursor: 'pointer'
+                            }} 
+                            onClick={handleAddTrip}
+                        >
                             Добавить поездку
                         </button>
                     </div>
                 </>
             )}
 
-            {/* Модальное окно с деталями курьера */}
-            {showModal && selectedCourier && (
-                <div style={styles.modalOverlay} onClick={() => setShowModal(false)}>
-                    <div className="modal-enter" style={styles.modal} onClick={(e) => e.stopPropagation()}>
-                        <div style={styles.modalHeader}>
-                            <h3>{selectedCourier.name}</h3>
-                            <button 
-                                style={styles.closeButton}
-                                onClick={() => setShowModal(false)}
-                            >
-                                ✕
-                            </button>
-                        </div>
-                        
-                        <div style={styles.modalContent}>
-                            <div style={styles.courierInfo}>
-                                <img src={selectedCourier.avatar} alt={selectedCourier.name} style={styles.modalAvatar} />
-                                <div>
-                                    <div style={styles.rating}>
-                                        <span style={styles.stars}>{renderStars(selectedCourier.rating)}</span>
-                                        <span style={styles.ratingText}>{selectedCourier.rating} ({selectedCourier.reviewsCount} отзывов)</span>
-                                    </div>
-                                    <p style={styles.trips}>{selectedCourier.tripsCount} успешных поездок</p>
-                                </div>
-                            </div>
+            <CourierModal
+                selectedCourier={selectedCourier}
+                showModal={showModal}
+                setShowModal={setShowModal}
+                getRequestStatus={getRequestStatus}
+                getStatusStyle={getStatusStyle}
+                getStatusText={getStatusText}
+                sentRequests={sentRequests}
+                isRequestSent={isRequestSent}
+                setShowRequestForm={setShowRequestForm}
+            />
 
-                            <div style={styles.tripInfo}>
-                                <h4>Предстоящая поездка</h4>
-                                <p><strong>{selectedCourier.from} → {selectedCourier.to}</strong></p>
-                                <p>{selectedCourier.date}, {selectedCourier.time}</p>
-                                <p>Аэропорт: {selectedCourier.airport}</p>
-                            </div>
+            <RequestForm
+                selectedCourier={selectedCourier}
+                showRequestForm={showRequestForm}
+                setShowRequestForm={setShowRequestForm}
+                requestForm={requestForm}
+                setRequestForm={setRequestForm}
+                handleSendRequest={handleSendRequest}
+            />
 
-                            <div style={styles.pastTripsSection}>
-                                <h4>Последние поездки</h4>
-                                {selectedCourier.pastTrips.map((trip, index) => (
-                                    <div key={index} style={styles.pastTrip}>
-                                        <span>{trip.from} → {trip.to}</span>
-                                        <span style={styles.tripDate}>{trip.date}</span>
-                                        <span style={styles.tripStatus}>✓</span>
-                                    </div>
-                                ))}
-                            </div>
-
-                            <div style={styles.reviewsSection}>
-                                <h4>Отзывы</h4>
-                                {selectedCourier.reviews.map((review, index) => (
-                                    <div key={index} style={styles.review}>
-                                        <div style={styles.reviewHeader}>
-                                            <span style={styles.stars}>{renderStars(review.rating)}</span>
-                                            <span style={styles.reviewDate}>{review.date}</span>
-                                        </div>
-                                        <p style={styles.reviewText}>{review.text}</p>
-                                    </div>
-                                ))}
-                            </div>
-
-                            {/* Показать статус и комментарий заявки, если есть */}
-                            {getRequestStatus(selectedCourier) && (
-                                <div style={styles.requestStatusSection}>
-                                    <h4>Статус вашей заявки</h4>
-                                    <div style={{
-                                        ...styles.requestStatus,
-                                        ...getStatusStyle(getRequestStatus(selectedCourier))
-                                    }}>
-                                        {getStatusText(getRequestStatus(selectedCourier))}
-                                    </div>
-                                    {sentRequests.find(req => req.courierId === selectedCourier.name + selectedCourier.date)?.courierComment && (
-                                        <div style={styles.courierCommentBox}>
-                                            <strong>Комментарий от {selectedCourier.name}:</strong>
-                                            <p style={styles.courierComment}>
-                                                {sentRequests.find(req => req.courierId === selectedCourier.name + selectedCourier.date)?.courierComment}
-                                            </p>
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-
-                            {!isRequestSent(selectedCourier) && (
-                                <button 
-                                    className="button-hover"
-                                    style={styles.requestButton}
-                                    onClick={() => setShowRequestForm(true)}
-                                >
-                                    Отправить заявку на доставку
-                                </button>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Модальное окно с формой заявки */}
-            {showRequestForm && selectedCourier && (
-                <div style={styles.modalOverlay} onClick={() => setShowRequestForm(false)}>
-                    <div className="modal-enter" style={styles.modal} onClick={(e) => e.stopPropagation()}>
-                        <div style={styles.modalHeader}>
-                            <h3>Заявка на доставку</h3>
-                            <button 
-                                style={styles.closeButton}
-                                onClick={() => setShowRequestForm(false)}
-                            >
-                                ✕
-                            </button>
-                        </div>
-                        
-                        <div style={styles.modalContent}>
-                            <p><strong>Курьер:</strong> {selectedCourier.name}</p>
-                            <p><strong>Маршрут:</strong> {selectedCourier.from} → {selectedCourier.to}</p>
-                            <p><strong>Дата:</strong> {selectedCourier.date}</p>
-                            
-                            <div style={styles.formGroup}>
-                                <label style={styles.label}>Описание посылки</label>
-                                <textarea
-                                    value={requestForm.packageDescription}
-                                    onChange={(e) => setRequestForm({...requestForm, packageDescription: e.target.value})}
-                                    placeholder="Опишите что нужно доставить (размер, вес, хрупкость)"
-                                    style={styles.textarea}
-                                />
-                            </div>
-
-                            <div style={styles.formGroup}>
-                                <label style={styles.label}>Сообщение курьеру</label>
-                                <textarea
-                                    value={requestForm.message}
-                                    onChange={(e) => setRequestForm({...requestForm, message: e.target.value})}
-                                    placeholder="Дополнительная информация, особые пожелания"
-                                    style={styles.textarea}
-                                />
-                            </div>
-
-                            <div style={styles.formGroup}>
-                                <label style={styles.label}>Вознаграждение (в звездах)</label>
-                                <div style={styles.rewardSelector}>
-                                    {[1,2,3,4,5,6,7,8,9,10].map(num => (
-                                        <button
-                                            key={num}
-                                            style={{
-                                                ...styles.rewardButton,
-                                                ...(requestForm.reward === num ? styles.rewardButtonActive : {})
-                                            }}
-                                            onClick={() => setRequestForm({...requestForm, reward: num})}
-                                        >
-                                            {num}★
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-
-                            <div style={styles.modalButtons}>
-                                <button 
-                                    style={styles.cancelButton}
-                                    onClick={() => setShowRequestForm(false)}
-                                >
-                                    Отмена
-                                </button>
-                                <button 
-                                    className="button-hover"
-                                    style={styles.sendButton}
-                                    onClick={handleSendRequest}
-                                >
-                                    Отправить заявку
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
-            
-            {/* Кнопка наверх */}
             {showBackToTop && (
-                <button 
-                    style={styles.backToTopButton}
-                    onClick={scrollToSearch}
-                    className="back-to-top"
+                <button
+                    style={{
+                        position: 'fixed',
+                        bottom: 20,
+                        right: 20,
+                        background: 'var(--tg-theme-button-color, #5288c1)',
+                        color: 'var(--tg-theme-button-text-color, #ffffff)',
+                        border: 'none',
+                        borderRadius: '50%',
+                        width: 44,
+                        height: 44,
+                        fontSize: 18,
+                        cursor: 'pointer',
+                        boxShadow: '0 4px 16px rgba(0,0,0,0.15)',
+                        zIndex: 1000,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                    }}
+                    onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
                 >
-                    <span style={styles.backToTopIcon}>↑</span>
-                    <span style={styles.backToTopText}>поиск</span>
+                    ↑
                 </button>
             )}
         </div>
     );
-};
-
-const styles = {
-    page: {
-        background: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0f0f0f 100%)',
-        color: '#fff',
-        minHeight: '100vh',
-        padding: '20px 15px',
-        paddingTop: '20px',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        fontFamily: 'system-ui, -apple-system, sans-serif',
-        position: 'relative',
-        overflow: 'hidden'
-    },
-    modeToggle: {
-        display: 'flex',
-        gap: 10,
-        marginBottom: 20,
-        background: '#2b2b2b',
-        padding: 4,
-        borderRadius: 12,
-        border: '1px solid #3a3a3a'
-    },
-    toggleButton: {
-        padding: '8px 16px',
-        background: 'transparent',
-        color: '#aaa',
-        border: 'none',
-        borderRadius: 8,
-        cursor: 'pointer',
-        fontSize: 14,
-        transition: 'all 0.2s'
-    },
-    activeToggle: {
-        background: '#00bfa6',
-        color: 'black',
-        fontWeight: 'bold'
-    },
-    // Основная шапка с фирменным стилем
-    header: {
-        width: '100%',
-        maxWidth: 500,
-        marginBottom: 30,
-        background: 'linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 50%, #0a0a0a 100%)',
-        borderRadius: 24,
-        padding: 30,
-        border: '2px solid rgba(255,215,0,0.2)',
-        boxShadow: '0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05)',
-        position: 'relative',
-        overflow: 'hidden'
-    },
-    headerContent: {
-        position: 'relative',
-        zIndex: 2
-    },
-    brandSection: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: 16,
-        marginBottom: 24
-    },
-    mainLogo: {
-        fontSize: 40,
-        filter: 'drop-shadow(0 0 15px rgba(255,215,0,0.8))',
-        animation: 'logoGlow 3s ease-in-out infinite alternate'
-    },
-    brandInfo: {
-        flex: 1
-    },
-    brandTitle: {
-        fontSize: 28,
-        fontWeight: 800,
-        margin: 0,
-        marginBottom: 6,
-        background: 'linear-gradient(135deg, #FFD700, #00bfa6, #FFD700)',
-        WebkitBackgroundClip: 'text',
-        WebkitTextFillColor: 'transparent',
-        backgroundClip: 'text',
-        backgroundSize: '200% 100%',
-        animation: 'shimmerText 3s ease-in-out infinite'
-    },
-    brandTagline: {
-        fontSize: 13,
-        color: '#aaa',
-        margin: 0,
-        lineHeight: 1.4,
-        fontWeight: 500
-    },
-    trustIndicators: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        gap: 8
-    },
-    trustBadge: {
-        background: 'rgba(0,191,166,0.1)',
-        border: '1px solid rgba(0,191,166,0.3)',
-        borderRadius: 12,
-        padding: '8px 12px',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: 4,
-        flex: 1,
-        minWidth: 0
-    },
-    trustIcon: {
-        fontSize: 16
-    },
-    trustText: {
-        fontSize: 10,
-        color: '#00bfa6',
-        fontWeight: 600,
-        textAlign: 'center',
-        lineHeight: 1.2
-    },
-    searchButton: {
-        marginTop: 20,
-        padding: '14px 20px',
-        background: 'linear-gradient(135deg, #00bfa6, #00d4aa)',
-        color: 'black',
-        border: 'none',
-        borderRadius: 14,
-        width: '100%',
-        fontWeight: 700,
-        fontSize: 16,
-        cursor: 'pointer',
-        transition: 'all 0.3s ease',
-        transform: 'scale(1)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 8,
-        boxShadow: '0 6px 20px rgba(0,191,166,0.3)'
-    },
-    searchButtonIcon: {
-        fontSize: 18
-    },
-    searchContainer: {
-        background: 'linear-gradient(135deg, #2b2b2b 0%, #2a2a2a 100%)',
-        padding: 24,
-        borderRadius: 20,
-        maxWidth: 420,
-        width: '100%',
-        boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
-        border: '1px solid #3a3a3a',
-        position: 'relative',
-        overflow: 'hidden'
-    },
-    courierLinkContainer: {
-        marginTop: 40,
-        textAlign: 'center'
-    },
-    courierLink: {
-        background: 'transparent',
-        color: '#00bfa6',
-        border: 'none',
-        fontSize: 14,
-        cursor: 'pointer',
-        textDecoration: 'underline'
-    },
-    backLink: {
-        width: '100%',
-        maxWidth: 400,
-        marginBottom: 20
-    },
-    backButton: {
-        background: 'transparent',
-        color: '#aaa',
-        border: 'none',
-        fontSize: 14,
-        cursor: 'pointer'
-    },
-    addTripTitle: {
-        color: 'white',
-        fontSize: 20,
-        fontWeight: 'bold',
-        margin: '0 0 20px 0',
-        textAlign: 'center'
-    },
-    container: {
-        background: '#2b2b2b',
-        padding: 20,
-        borderRadius: 16,
-        maxWidth: 400,
-        width: '100%',
-        boxShadow: '0 0 15px rgba(0,0,0,0.3)'
-    },
-    label: {
-        color: '#aaa',
-        marginTop: 15,
-        marginBottom: 5,
-        display: 'block',
-        fontSize: 14
-    },
-    input: {
-        padding: 14,
-        width: '100%',
-        background: '#1c1c1c',
-        border: '1px solid #3a3a3a',
-        borderRadius: 12,
-        color: 'white',
-        fontSize: 15,
-        transition: 'all 0.3s ease',
-        outline: 'none',
-        boxSizing: 'border-box'
-    },
-    inputWithClear: {
-        position: 'relative',
-        width: '100%',
-        marginBottom: 0
-    },
-    inputWithButton: {
-        padding: '14px 50px 14px 14px',
-        width: '100%',
-        background: '#1c1c1c',
-        border: '1px solid #3a3a3a',
-        borderRadius: 12,
-        color: 'white',
-        fontSize: 15,
-        transition: 'all 0.3s ease',
-        outline: 'none',
-        boxSizing: 'border-box'
-    },
-    clearButton: {
-        position: 'absolute',
-        right: 12,
-        top: '50%',
-        transform: 'translateY(-50%)',
-        background: 'rgba(255,255,255,0.1)',
-        color: '#aaa',
-        border: 'none',
-        borderRadius: '50%',
-        width: 24,
-        height: 24,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        cursor: 'pointer',
-        fontSize: 14,
-        fontWeight: 'bold',
-        transition: 'all 0.2s ease',
-        zIndex: 2
-    },
-    button: {
-        marginTop: 20,
-        padding: 12,
-        backgroundColor: '#00bfa6',
-        color: 'black',
-        border: 'none',
-        borderRadius: 10,
-        width: '100%',
-        fontWeight: 'bold',
-        fontSize: 16,
-        cursor: 'pointer',
-        transition: 'all 0.3s ease',
-        transform: 'scale(1)'
-    },
-    card: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: 15,
-        background: '#2b2b2b',
-        padding: 12,
-        borderRadius: 14,
-        border: '1px solid #3a3a3a',
-        marginBottom: 15,
-        boxShadow: '0 0 10px rgba(0,0,0,0.2)',
-        transition: 'all 0.3s ease',
-        transform: 'scale(1)',
-        opacity: 1,
-        animation: 'slideIn 0.5s ease-out'
-    },
-    avatar: {
-        width: 48,
-        height: 48,
-        borderRadius: '50%',
-        objectFit: 'cover'
-    },
-    cardContent: {
-        flex: 1
-    },
-    cardRoute: {
-        marginTop: 8,
-        fontSize: 14
-    },
-    courierHeader: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 6
-    },
-    courierStats: {
-        fontSize: 12,
-        color: '#aaa'
-    },
-    trips: {
-        fontSize: 12,
-        color: '#00bfa6'
-    },
-    rating: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: 8,
-        marginBottom: 6
-    },
-    stars: {
-        color: '#ffd700',
-        fontSize: 16
-    },
-    ratingText: {
-        fontSize: 12,
-        color: '#aaa'
-    },
-    requestSent: {
-        fontSize: 11,
-        color: '#00bfa6',
-        backgroundColor: 'rgba(0, 191, 166, 0.1)',
-        padding: '2px 6px',
-        borderRadius: 4,
-        marginLeft: 8
-    },
-    modalOverlay: {
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: 'rgba(0,0,0,0.7)',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        zIndex: 1000
-    },
-    modal: {
-        backgroundColor: '#2b2b2b',
-        borderRadius: 16,
-        padding: 0,
-        maxWidth: 500,
-        width: '90%',
-        maxHeight: '80vh',
-        overflow: 'hidden',
-        boxShadow: '0 10px 30px rgba(0,0,0,0.5)'
-    },
-    modalHeader: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: '20px 20px 10px',
-        borderBottom: '1px solid #3a3a3a'
-    },
-    closeButton: {
-        background: 'transparent',
-        border: 'none',
-        color: '#aaa',
-        fontSize: 20,
-        cursor: 'pointer'
-    },
-    modalContent: {
-        padding: 20,
-        maxHeight: 'calc(80vh - 70px)',
-        overflowY: 'auto'
-    },
-    courierInfo1: {
-        display: 'flex',
-        gap: 15,
-        marginBottom: 20,
-        alignItems: 'center'
-    },
-    modalAvatar: {
-        width: 60,
-        height: 60,
-        borderRadius: '50%',
-        objectFit: 'cover'
-    },
-    tripInfo: {
-        marginBottom: 20,
-        padding: 15,
-        backgroundColor: '#1c1c1c',
-        borderRadius: 8
-    },
-    pastTripsSection: {
-        marginBottom: 20
-    },
-    pastTrip: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: '8px 0',
-        borderBottom: '1px solid #3a3a3a'
-    },
-    tripDate: {
-        fontSize: 12,
-        color: '#aaa'
-    },
-    tripStatus: {
-        color: '#00bfa6',
-        fontSize: 14
-    },
-    reviewsSection: {
-        marginBottom: 20
-    },
-    review: {
-        padding: '10px 0',
-        borderBottom: '1px solid #3a3a3a'
-    },
-    reviewHeader: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 5
-    },
-    reviewDate: {
-        fontSize: 11,
-        color: '#aaa'
-    },
-    reviewText: {
-        fontSize: 14,
-        color: '#ddd',
-        margin: 0
-    },
-    requestButton: {
-        width: '100%',
-        padding: 12,
-        backgroundColor: '#00bfa6',
-        color: 'black',
-        border: 'none',
-        borderRadius: 10,
-        fontWeight: 'bold',
-        fontSize: 16,
-        cursor: 'pointer'
-    },
-    formGroup: {
-        marginBottom: 15
-    },
-    textarea: {
-        width: '100%',
-        padding: 10,
-        background: '#1c1c1c',
-        border: '1px solid #3a3a3a',
-        borderRadius: 8,
-        color: 'white',
-        fontSize: 14,
-        minHeight: 80,
-        resize: 'vertical'
-    },
-    rewardSelector: {
-        display: 'flex',
-        gap: 8,
-        flexWrap: 'wrap'
-    },
-    rewardButton: {
-        padding: '8px 12px',
-        background: '#1c1c1c',
-        color: '#aaa',
-        border: '1px solid #3a3a3a',
-        borderRadius: 6,
-        cursor: 'pointer',
-        fontSize: 14
-    },
-    rewardButtonActive: {
-        background: '#00bfa6',
-        color: 'black',
-        border: '1px solid #00bfa6'
-    },
-    modalButtons: {
-        display: 'flex',
-        gap: 10,
-        marginTop: 20
-    },
-    cancelButton: {
-        flex: 1,
-        padding: 12,
-        background: 'transparent',
-        color: '#aaa',
-        border: '1px solid #3a3a3a',
-        borderRadius: 10,
-        cursor: 'pointer'
-    },
-    sendButton: {
-        flex: 1,
-        padding: 12,
-        backgroundColor: '#00bfa6',
-        color: 'black',
-        border: 'none',
-        borderRadius: 10,
-        fontWeight: 'bold',
-        cursor: 'pointer'
-    },
-    // Стили для пикера дат
-    datePickerContainer: {
-        position: 'relative',
-        marginBottom: 15
-    },
-    dateButton: {
-        width: '100%',
-        padding: 12,
-        background: '#1c1c1c',
-        color: 'white',
-        border: '1px solid #3a3a3a',
-        borderRadius: 8,
-        cursor: 'pointer',
-        fontSize: 15,
-        textAlign: 'left',
-        transition: 'all 0.2s ease'
-    },
-    dateDropdown: {
-        position: 'absolute',
-        top: '100%',
-        left: 0,
-        right: 0,
-        background: '#2b2b2b',
-        border: '1px solid #3a3a3a',
-        borderRadius: 8,
-        padding: 15,
-        zIndex: 100,
-        boxShadow: '0 10px 25px rgba(0,0,0,0.3)',
-        animation: 'slideIn 0.2s ease-out'
-    },
-    datePresets: {
-        display: 'grid',
-        gridTemplateColumns: '1fr 1fr',
-        gap: 8,
-        marginBottom: 15
-    },
-    datePreset: {
-        padding: '8px 12px',
-        background: '#1c1c1c',
-        color: '#aaa',
-        border: '1px solid #3a3a3a',
-        borderRadius: 6,
-        cursor: 'pointer',
-        fontSize: 14,
-        transition: 'all 0.2s ease'
-    },
-    datePresetActive: {
-        background: '#00bfa6',
-        color: 'black',
-        border: '1px solid #00bfa6'
-    },
-    dateSeparator: {
-        textAlign: 'center',
-        color: '#aaa',
-        fontSize: 12,
-        marginBottom: 10,
-        padding: '5px 0',
-        borderTop: '1px solid #3a3a3a'
-    },
-    dateInput: {
-        width: '100%',
-        padding: 10,
-        background: '#1c1c1c',
-        border: '1px solid #3a3a3a',
-        borderRadius: 6,
-        color: 'white',
-        fontSize: 14
-    },
-    // Стили для комментариев от курьеров
-    requestStatusSection: {
-        marginTop: 20,
-        padding: 15,
-        background: '#1c1c1c',
-        borderRadius: 8,
-        border: '1px solid #3a3a3a'
-    },
-    requestStatus: {
-        display: 'inline-block',
-        padding: '6px 12px',
-        borderRadius: 6,
-        fontSize: 14,
-        fontWeight: 'bold',
-        marginBottom: 10
-    },
-    courierCommentBox: {
-        marginTop: 15,
-        padding: 12,
-        background: '#2b2b2b',
-        borderRadius: 8,
-        border: '1px solid #3a3a3a'
-    },
-    courierComment: {
-        margin: '8px 0 0 0',
-        color: '#ddd',
-        fontSize: 14,
-        lineHeight: 1.4,
-        fontStyle: 'italic'
-    },
-    // Минимальная опциональная сортировка
-    compactSortSection: {
-        width: '100%',
-        maxWidth: 400,
-        marginTop: 10,
-        marginBottom: 15,
-        display: 'flex',
-        justifyContent: 'flex-end',
-        position: 'relative'
-    },
-    sortToggle: {
-        background: 'transparent',
-        border: 'none',
-        color: '#777',
-        fontSize: 13,
-        cursor: 'pointer',
-        padding: '4px 8px',
-        borderRadius: 4,
-        transition: 'color 0.2s ease'
-    },
-    sortDropdown: {
-        position: 'absolute',
-        top: '100%',
-        right: 0,
-        background: '#2b2b2b',
-        border: '1px solid #3a3a3a',
-        borderRadius: 8,
-        padding: 6,
-        marginTop: 4,
-        boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-        zIndex: 10,
-        minWidth: 120
-    },
-    compactSortButton: {
-        width: '100%',
-        background: 'transparent',
-        border: 'none',
-        color: '#aaa',
-        fontSize: 13,
-        cursor: 'pointer',
-        padding: '6px 10px',
-        borderRadius: 4,
-        textAlign: 'left',
-        transition: 'all 0.2s ease'
-    },
-    compactSortButtonActive: {
-        color: '#00bfa6',
-        background: 'rgba(0,191,166,0.1)'
-    },
-    // Новые стили для карточек курьеров
-    newCard: {
-        background: 'linear-gradient(135deg, #2b2b2b 0%, #2a2a2a 100%)',
-        border: '1px solid #3a3a3a',
-        borderRadius: 16,
-        padding: 0,
-        marginBottom: 16,
-        boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
-        transition: 'all 0.3s ease',
-        transform: 'scale(1)',
-        opacity: 1,
-        animation: 'slideIn 0.5s ease-out',
-        overflow: 'hidden'
-    },
-    cardHeader: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: '16px 20px 12px',
-        borderBottom: '1px solid rgba(58, 58, 58, 0.5)'
-    },
-    courierInfo: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: 12
-    },
-    courierDetails: {
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 4
-    },
-    courierName: {
-        fontSize: 16,
-        fontWeight: 600,
-        color: 'white'
-    },
-    priceTag: {
-        background: '#00bfa6',
-        color: 'black',
-        padding: '6px 12px',
-        borderRadius: 20,
-        fontSize: 14,
-        fontWeight: 700
-    },
-    routeSection: {
-        padding: '12px 20px 8px'
-    },
-    routeInfo: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center'
-    },
-    cities: {
-        fontSize: 16,
-        fontWeight: 600,
-        color: 'white'
-    },
-    timeInfo: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: 6
-    },
-    timeHighlight: {
-        background: 'rgba(0, 191, 166, 0.1)',
-        color: '#00bfa6',
-        padding: '4px 8px',
-        borderRadius: 6,
-        fontSize: 12,
-        fontWeight: 600,
-        border: '1px solid rgba(0, 191, 166, 0.3)'
-    },
-    commentSection: {
-        display: 'flex',
-        alignItems: 'flex-start',
-        gap: 10,
-        padding: '8px 20px 12px',
-        background: 'rgba(28, 28, 28, 0.5)'
-    },
-    commentIcon: {
-        fontSize: 14,
-        marginTop: 2
-    },
-    commentText: {
-        flex: 1,
-        fontSize: 13,
-        color: '#ddd',
-        lineHeight: 1.4,
-        fontStyle: 'italic'
-    },
-    cardFooter: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: '12px 20px 16px'
-    },
-    statsInfo: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: 8,
-        fontSize: 12,
-        color: '#aaa'
-    },
-    tripsCount: {
-        color: '#00bfa6',
-        fontWeight: 500
-    },
-    reviewsCount: {
-        color: '#aaa'
-    },
-    
-    // Компактная мобильная шапка
-    compactHeader: {
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        background: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%)',
-        backdropFilter: 'blur(20px)',
-        border: 'none',
-        borderBottom: '1px solid rgba(255,255,255,0.1)',
-        padding: '12px 20px',
-        zIndex: 100,
-        boxShadow: '0 4px 20px rgba(0,0,0,0.4)'
-    },
-    compactHeaderContent: {
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        maxWidth: 400,
-        margin: '0 auto'
-    },
-    compactLogo: {
-        fontSize: 20,
-        filter: 'drop-shadow(0 0 10px rgba(255,215,0,0.6))',
-        animation: 'pulse 2s infinite'
-    },
-    routeDisplay: {
-        fontSize: 16,
-        fontWeight: 600,
-        color: '#00bfa6'
-    },
-    editSearchButton: {
-        background: 'rgba(0,191,166,0.2)',
-        color: '#00bfa6',
-        border: '1px solid rgba(0,191,166,0.3)',
-        padding: '6px 12px',
-        borderRadius: 20,
-        fontSize: 12,
-        cursor: 'pointer',
-        transition: 'all 0.2s ease'
-    },
-    
-    // Кнопка наверх
-    backToTopButton: {
-        position: 'fixed',
-        bottom: 30,
-        right: 20,
-        background: 'linear-gradient(135deg, #00bfa6, #00d4aa)',
-        color: 'black',
-        border: 'none',
-        borderRadius: 25,
-        padding: '12px 16px',
-        cursor: 'pointer',
-        boxShadow: '0 8px 25px rgba(0,191,166,0.4)',
-        display: 'flex',
-        alignItems: 'center',
-        gap: 6,
-        fontSize: 12,
-        fontWeight: 700,
-        transition: 'all 0.3s ease',
-        zIndex: 50,
-        animation: 'slideUp 0.3s ease-out'
-    },
-    backToTopIcon: {
-        fontSize: 16,
-        fontWeight: 'bold'
-    },
-    backToTopText: {
-        fontSize: 12,
-        fontWeight: 700
-    },
-    
-    // Компактный логотип в поиске
-    compactLogoSection: {
-        width: '100%',
-        display: 'flex',
-        justifyContent: 'center',
-        marginBottom: 20
-    },
-    compactLogoButton: {
-        background: 'transparent',
-        border: 'none',
-        display: 'flex',
-        alignItems: 'center',
-        gap: 8,
-        padding: '8px 12px',
-        borderRadius: 20,
-        cursor: 'pointer',
-        transition: 'all 0.3s ease'
-    },
-    compactLogoIcon: {
-        fontSize: 18,
-        filter: 'drop-shadow(0 0 8px rgba(255,215,0,0.6))'
-    },
-    compactBrandText: {
-        fontSize: 16,
-        fontWeight: 700,
-        color: '#FFD700',
-        textShadow: '0 0 10px rgba(255,215,0,0.3)'
-    },
-    
-    // Страница About
-    aboutPage: {
-        width: '100%',
-        maxWidth: 500,
-        minHeight: 'calc(100vh - 40px)',
-        background: 'linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 50%, #0a0a0a 100%)',
-        borderRadius: 24,
-        padding: 30,
-        border: '2px solid rgba(255,215,0,0.2)',
-        boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
-        position: 'relative',
-        overflow: 'hidden',
-        animation: 'slideIn 0.5s ease-out'
-    },
-    aboutHeader: {
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        marginBottom: 30,
-        paddingBottom: 20,
-        borderBottom: '1px solid rgba(255,255,255,0.1)'
-    },
-    backFromAboutButton: {
-        background: 'rgba(255,255,255,0.1)',
-        color: '#aaa',
-        border: '1px solid rgba(255,255,255,0.2)',
-        padding: '8px 12px',
-        borderRadius: 20,
-        fontSize: 14,
-        cursor: 'pointer',
-        transition: 'all 0.2s ease'
-    },
-    aboutTitle: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: 12
-    },
-    aboutLogo: {
-        fontSize: 28,
-        filter: 'drop-shadow(0 0 15px rgba(255,215,0,0.8))',
-        animation: 'logoGlow 3s ease-in-out infinite alternate'
-    },
-    aboutBrandTitle: {
-        fontSize: 24,
-        fontWeight: 800,
-        margin: 0,
-        background: 'linear-gradient(135deg, #FFD700, #00bfa6, #FFD700)',
-        WebkitBackgroundClip: 'text',
-        WebkitTextFillColor: 'transparent',
-        backgroundClip: 'text',
-        backgroundSize: '200% 100%',
-        animation: 'shimmerText 3s ease-in-out infinite'
-    },
-    aboutContent: {
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 30
-    },
-    
-    // Секция миссии
-    missionSection: {
-        textAlign: 'center'
-    },
-    sectionTitle: {
-        fontSize: 20,
-        fontWeight: 700,
-        color: '#FFD700',
-        marginBottom: 16,
-        textShadow: '0 0 10px rgba(255,215,0,0.3)'
-    },
-    missionText: {
-        fontSize: 14,
-        lineHeight: 1.6,
-        color: '#ddd',
-        margin: 0
-    },
-    
-    // Секция статистики
-    statsSection: {
-        textAlign: 'center'
-    },
-    statsGrid: {
-        display: 'grid',
-        gridTemplateColumns: '1fr 1fr',
-        gap: 16
-    },
-    statCard: {
-        background: 'rgba(0,191,166,0.1)',
-        border: '1px solid rgba(0,191,166,0.3)',
-        borderRadius: 16,
-        padding: 20,
-        textAlign: 'center',
-        transition: 'all 0.3s ease',
-        animation: 'slideIn 0.6s ease-out'
-    },
-    statIcon: {
-        fontSize: 24,
-        marginBottom: 8
-    },
-    statNumber: {
-        fontSize: 20,
-        fontWeight: 800,
-        color: '#00bfa6',
-        marginBottom: 4,
-        textShadow: '0 0 10px rgba(0,191,166,0.3)'
-    },
-    statLabel: {
-        fontSize: 11,
-        color: '#aaa',
-        lineHeight: 1.2
-    },
-    
-    // Секция видения
-    visionSection: {
-        textAlign: 'center'
-    },
-    visionGrid: {
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 16
-    },
-    visionCard: {
-        background: 'rgba(255,215,0,0.05)',
-        border: '1px solid rgba(255,215,0,0.2)',
-        borderRadius: 16,
-        padding: 20,
-        textAlign: 'center',
-        animation: 'slideIn 0.8s ease-out'
-    },
-    visionIcon: {
-        fontSize: 20,
-        marginBottom: 8
-    },
-    visionTitle: {
-        fontSize: 14,
-        fontWeight: 700,
-        color: '#FFD700',
-        marginBottom: 6
-    },
-    visionText: {
-        fontSize: 12,
-        color: '#ccc',
-        lineHeight: 1.4
-    }
 };
 
 export default SearchCouriers;

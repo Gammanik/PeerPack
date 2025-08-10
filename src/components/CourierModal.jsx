@@ -19,40 +19,47 @@ const CourierModal = ({
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundColor: 'rgba(0,0,0,0.7)',
+            backgroundColor: 'rgba(0,0,0,0.6)',
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
-            zIndex: 1000
+            zIndex: 1000,
+            padding: '16px'
         },
         modal: {
-            backgroundColor: '#2b2b2b',
-            borderRadius: 16,
+            backgroundColor: 'var(--tg-theme-secondary-bg-color, #232e3c)',
+            borderRadius: 12,
             padding: 0,
-            maxWidth: 500,
-            width: '90%',
-            maxHeight: '80vh',
+            maxWidth: 480,
+            width: '100%',
+            maxHeight: '85vh',
             overflow: 'hidden',
-            boxShadow: '0 10px 30px rgba(0,0,0,0.5)'
+            border: '0.5px solid var(--tg-theme-hint-color, #708499)'
         },
         modalHeader: {
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            padding: '20px 20px 10px',
-            borderBottom: '1px solid #3a3a3a',
-            color: 'white'
+            padding: '16px 16px 12px',
+            borderBottom: '0.5px solid var(--tg-theme-hint-color, #708499)',
+            color: 'var(--tg-theme-text-color, #ffffff)'
         },
         closeButton: {
             background: 'transparent',
             border: 'none',
-            color: '#aaa',
-            fontSize: 20,
-            cursor: 'pointer'
+            color: 'var(--tg-theme-hint-color, #708499)',
+            fontSize: 18,
+            cursor: 'pointer',
+            width: 32,
+            height: 32,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: 16
         },
         modalContent: {
-            padding: 20,
-            maxHeight: 'calc(80vh - 70px)',
+            padding: 16,
+            maxHeight: 'calc(85vh - 60px)',
             overflowY: 'auto'
         },
         courierInfo: {
@@ -79,19 +86,19 @@ const CourierModal = ({
         },
         ratingText: {
             fontSize: 12,
-            color: '#aaa'
+            color: 'var(--tg-theme-hint-color, #708499)'
         },
         trips: {
-            color: '#aaa',
+            color: 'var(--tg-theme-hint-color, #708499)',
             fontSize: 14,
             margin: 0
         },
         tripInfo: {
-            marginBottom: 20,
-            padding: 15,
-            backgroundColor: '#1c1c1c',
+            marginBottom: 16,
+            padding: 12,
+            backgroundColor: 'var(--tg-theme-bg-color, #17212b)',
             borderRadius: 8,
-            color: 'white'
+            color: 'var(--tg-theme-text-color, #ffffff)'
         },
         pastTripsSection: {
             marginBottom: 20
@@ -101,15 +108,15 @@ const CourierModal = ({
             justifyContent: 'space-between',
             alignItems: 'center',
             padding: '8px 0',
-            borderBottom: '1px solid #3a3a3a',
-            color: 'white'
+            borderBottom: '0.5px solid var(--tg-theme-hint-color, #708499)',
+            color: 'var(--tg-theme-text-color, #ffffff)'
         },
         tripDate: {
             fontSize: 12,
-            color: '#aaa'
+            color: 'var(--tg-theme-hint-color, #708499)'
         },
         tripStatus: {
-            color: '#00bfa6',
+            color: 'var(--tg-theme-accent-text-color, #64b5ef)',
             fontSize: 14
         },
         reviewsSection: {
@@ -117,7 +124,7 @@ const CourierModal = ({
         },
         review: {
             padding: '10px 0',
-            borderBottom: '1px solid #3a3a3a'
+            borderBottom: '0.5px solid var(--tg-theme-hint-color, #708499)'
         },
         reviewHeader: {
             display: 'flex',
@@ -127,11 +134,11 @@ const CourierModal = ({
         },
         reviewDate: {
             fontSize: 11,
-            color: '#aaa'
+            color: 'var(--tg-theme-hint-color, #708499)'
         },
         reviewText: {
             fontSize: 14,
-            color: '#ddd',
+            color: 'var(--tg-theme-text-color, #ffffff)',
             margin: 0
         },
         requestStatusSection: {
@@ -157,16 +164,16 @@ const CourierModal = ({
         requestButton: {
             width: '100%',
             padding: 12,
-            backgroundColor: '#00bfa6',
-            color: 'black',
+            backgroundColor: 'var(--tg-theme-button-color, #5288c1)',
+            color: 'var(--tg-theme-button-text-color, #ffffff)',
             border: 'none',
-            borderRadius: 10,
-            fontWeight: 'bold',
+            borderRadius: 8,
+            fontWeight: 600,
             fontSize: 16,
             cursor: 'pointer'
         },
         sectionTitle: {
-            color: 'white',
+            color: 'var(--tg-theme-text-color, #ffffff)',
             fontSize: 16,
             fontWeight: 600,
             marginBottom: 10

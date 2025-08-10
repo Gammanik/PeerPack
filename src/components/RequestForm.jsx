@@ -22,53 +22,59 @@ const RequestForm = ({
             zIndex: 1000
         },
         modal: {
-            backgroundColor: '#2b2b2b',
-            borderRadius: 16,
+            backgroundColor: 'var(--tg-theme-secondary-bg-color, #232e3c)',
+            borderRadius: 12,
             padding: 0,
-            maxWidth: 500,
-            width: '90%',
-            maxHeight: '80vh',
+            maxWidth: 480,
+            width: '100%',
+            maxHeight: '85vh',
             overflow: 'hidden',
-            boxShadow: '0 10px 30px rgba(0,0,0,0.5)'
+            border: '0.5px solid var(--tg-theme-hint-color, #708499)'
         },
         modalHeader: {
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            padding: '20px 20px 10px',
-            borderBottom: '1px solid #3a3a3a',
-            color: 'white'
+            padding: '16px 16px 12px',
+            borderBottom: '0.5px solid var(--tg-theme-hint-color, #708499)',
+            color: 'var(--tg-theme-text-color, #ffffff)'
         },
         closeButton: {
             background: 'transparent',
             border: 'none',
-            color: '#aaa',
-            fontSize: 20,
-            cursor: 'pointer'
+            color: 'var(--tg-theme-hint-color, #708499)',
+            fontSize: 18,
+            cursor: 'pointer',
+            width: 32,
+            height: 32,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: 16
         },
         modalContent: {
-            padding: 20,
-            maxHeight: 'calc(80vh - 70px)',
+            padding: 16,
+            maxHeight: 'calc(85vh - 60px)',
             overflowY: 'auto',
-            color: 'white'
+            color: 'var(--tg-theme-text-color, #ffffff)'
         },
         formGroup: {
             marginBottom: 15
         },
         label: {
-            color: '#aaa',
-            marginBottom: 5,
+            color: 'var(--tg-theme-hint-color, #708499)',
+            marginBottom: 6,
             display: 'block',
             fontSize: 14,
-            fontWeight: 600
+            fontWeight: 500
         },
         textarea: {
             width: '100%',
-            padding: 10,
-            background: '#1c1c1c',
-            border: '1px solid #3a3a3a',
+            padding: 12,
+            background: 'var(--tg-theme-bg-color, #17212b)',
+            border: '0.5px solid var(--tg-theme-hint-color, #708499)',
             borderRadius: 8,
-            color: 'white',
+            color: 'var(--tg-theme-text-color, #ffffff)',
             fontSize: 14,
             minHeight: 80,
             resize: 'vertical',
@@ -81,19 +87,19 @@ const RequestForm = ({
             flexWrap: 'wrap'
         },
         rewardButton: {
-            padding: '8px 12px',
-            background: '#1c1c1c',
-            color: '#aaa',
-            border: '1px solid #3a3a3a',
-            borderRadius: 6,
+            padding: '6px 10px',
+            background: 'var(--tg-theme-bg-color, #17212b)',
+            color: 'var(--tg-theme-hint-color, #708499)',
+            border: '0.5px solid var(--tg-theme-hint-color, #708499)',
+            borderRadius: 8,
             cursor: 'pointer',
             fontSize: 14,
             transition: 'all 0.2s ease'
         },
         rewardButtonActive: {
-            background: '#00bfa6',
-            color: 'black',
-            border: '1px solid #00bfa6'
+            background: 'var(--tg-theme-button-color, #5288c1)',
+            color: 'var(--tg-theme-button-text-color, #ffffff)',
+            border: '0.5px solid var(--tg-theme-button-color, #5288c1)'
         },
         modalButtons: {
             display: 'flex',
@@ -104,25 +110,25 @@ const RequestForm = ({
             flex: 1,
             padding: 12,
             background: 'transparent',
-            color: '#aaa',
-            border: '1px solid #3a3a3a',
-            borderRadius: 10,
+            color: 'var(--tg-theme-hint-color, #708499)',
+            border: '0.5px solid var(--tg-theme-hint-color, #708499)',
+            borderRadius: 8,
             cursor: 'pointer',
             fontSize: 14
         },
         sendButton: {
             flex: 1,
             padding: 12,
-            backgroundColor: '#00bfa6',
-            color: 'black',
+            backgroundColor: 'var(--tg-theme-button-color, #5288c1)',
+            color: 'var(--tg-theme-button-text-color, #ffffff)',
             border: 'none',
-            borderRadius: 10,
-            fontWeight: 'bold',
+            borderRadius: 8,
+            fontWeight: 600,
             cursor: 'pointer',
             fontSize: 14
         },
         tripInfo: {
-            marginBottom: 20,
+            marginBottom: 16,
             fontSize: 14
         }
     };

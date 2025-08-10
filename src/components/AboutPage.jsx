@@ -3,8 +3,8 @@ import React from 'react';
 const AboutPage = ({ setShowAboutPage, animatedStats }) => {
     const styles = {
         aboutPage: {
-            padding: 20,
-            maxWidth: 800,
+            padding: 16,
+            maxWidth: 480,
             margin: '0 auto',
             animation: 'slideIn 0.6s ease-out'
         },
@@ -17,12 +17,12 @@ const AboutPage = ({ setShowAboutPage, animatedStats }) => {
         backFromAboutButton: {
             alignSelf: 'flex-start',
             background: 'transparent',
-            color: '#aaa',
-            border: '1px solid rgba(255,255,255,0.1)',
+            color: 'var(--tg-theme-link-color, #64b5ef)',
+            border: 'none',
             borderRadius: 8,
             padding: '8px 16px',
             cursor: 'pointer',
-            fontSize: 14,
+            fontSize: 15,
             marginBottom: 20,
             transition: 'all 0.2s ease'
         },
@@ -33,20 +33,22 @@ const AboutPage = ({ setShowAboutPage, animatedStats }) => {
             gap: 10
         },
         aboutLogo: {
-            fontSize: 48,
-            filter: 'drop-shadow(0 0 15px rgba(255,215,0,0.8))',
-            animation: 'logoGlow 3s ease-in-out infinite alternate'
+            width: 64,
+            height: 64,
+            background: 'linear-gradient(135deg, var(--tg-theme-button-color, #5288c1), var(--tg-theme-accent-text-color, #64b5ef))',
+            borderRadius: 16,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: 32,
+            marginBottom: 12
         },
         aboutBrandTitle: {
-            fontSize: 32,
-            fontWeight: 800,
+            fontSize: 28,
+            fontWeight: 700,
             margin: 0,
-            background: 'linear-gradient(135deg, #FFD700, #00bfa6, #FFD700)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text',
-            backgroundSize: '200% 100%',
-            animation: 'shimmerText 3s ease-in-out infinite'
+            color: 'var(--tg-theme-text-color, #ffffff)',
+            letterSpacing: '-0.02em'
         },
         aboutContent: {
             display: 'flex',
@@ -57,17 +59,17 @@ const AboutPage = ({ setShowAboutPage, animatedStats }) => {
             textAlign: 'center'
         },
         sectionTitle: {
-            fontSize: 24,
-            fontWeight: 700,
-            color: 'white',
-            marginBottom: 20,
+            fontSize: 20,
+            fontWeight: 600,
+            color: 'var(--tg-theme-text-color, #ffffff)',
+            marginBottom: 16,
             textAlign: 'center'
         },
         missionText: {
-            fontSize: 18,
-            color: '#ddd',
-            lineHeight: 1.6,
-            maxWidth: 600,
+            fontSize: 16,
+            color: 'var(--tg-theme-hint-color, #708499)',
+            lineHeight: 1.5,
+            maxWidth: 400,
             margin: '0 auto'
         },
         statsSection: {
@@ -80,26 +82,26 @@ const AboutPage = ({ setShowAboutPage, animatedStats }) => {
             marginTop: 20
         },
         statCard: {
-            background: 'linear-gradient(135deg, #2b2b2b, #1a1a1a)',
-            border: '1px solid #3a3a3a',
-            borderRadius: 16,
-            padding: 24,
+            background: 'var(--tg-theme-secondary-bg-color, #232e3c)',
+            border: '0.5px solid var(--tg-theme-hint-color, #708499)',
+            borderRadius: 12,
+            padding: 16,
             textAlign: 'center',
-            transition: 'all 0.3s ease'
+            transition: 'all 0.2s ease'
         },
         statIcon: {
             fontSize: 32,
             marginBottom: 12
         },
         statNumber: {
-            fontSize: 28,
+            fontSize: 24,
             fontWeight: 700,
-            color: '#00bfa6',
-            marginBottom: 8
+            color: 'var(--tg-theme-accent-text-color, #64b5ef)',
+            marginBottom: 6
         },
         statLabel: {
-            fontSize: 14,
-            color: '#aaa',
+            fontSize: 13,
+            color: 'var(--tg-theme-hint-color, #708499)',
             fontWeight: 500
         },
         visionSection: {
@@ -112,27 +114,27 @@ const AboutPage = ({ setShowAboutPage, animatedStats }) => {
             marginTop: 20
         },
         visionCard: {
-            background: 'linear-gradient(135deg, rgba(255,215,0,0.05), rgba(0,191,166,0.05))',
-            border: '1px solid rgba(255,215,0,0.2)',
-            borderRadius: 16,
-            padding: 24,
+            background: 'rgba(100, 181, 239, 0.1)',
+            border: '0.5px solid rgba(100, 181, 239, 0.3)',
+            borderRadius: 12,
+            padding: 16,
             textAlign: 'center',
-            transition: 'all 0.3s ease'
+            transition: 'all 0.2s ease'
         },
         visionIcon: {
             fontSize: 32,
             marginBottom: 16
         },
         visionTitle: {
-            fontSize: 18,
+            fontSize: 16,
             fontWeight: 600,
-            color: '#FFD700',
-            marginBottom: 12
+            color: 'var(--tg-theme-accent-text-color, #64b5ef)',
+            marginBottom: 8
         },
         visionText: {
-            fontSize: 14,
-            color: '#ccc',
-            lineHeight: 1.5
+            fontSize: 13,
+            color: 'var(--tg-theme-hint-color, #708499)',
+            lineHeight: 1.4
         }
     };
 

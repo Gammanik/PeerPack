@@ -12,13 +12,13 @@ const CourierCard = ({
 }) => {
     const styles = {
         newCard: {
-            background: 'linear-gradient(135deg, #2b2b2b 0%, #2a2a2a 100%)',
-            border: '1px solid #3a3a3a',
-            borderRadius: 16,
+            background: 'var(--tg-theme-secondary-bg-color, #232e3c)',
+            border: '0.5px solid var(--tg-theme-hint-color, #708499)',
+            borderRadius: 12,
             padding: 0,
-            marginBottom: 16,
+            marginBottom: 8,
             overflow: 'hidden',
-            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            transition: 'all 0.2s ease',
             cursor: 'pointer',
             opacity: 1,
             animation: 'slideIn 0.5s ease-out'
@@ -27,8 +27,8 @@ const CourierCard = ({
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            padding: '16px 20px 12px',
-            borderBottom: '1px solid rgba(58, 58, 58, 0.5)'
+            padding: '12px 16px 10px',
+            borderBottom: '0.5px solid var(--tg-theme-hint-color, #708499)'
         },
         courierInfo1: {
             display: 'flex',
@@ -48,7 +48,7 @@ const CourierCard = ({
         courierName: {
             fontSize: 16,
             fontWeight: 600,
-            color: 'white'
+            color: 'var(--tg-theme-text-color, #ffffff)'
         },
         rating: {
             display: 'flex',
@@ -62,18 +62,18 @@ const CourierCard = ({
         },
         ratingText: {
             fontSize: 13,
-            color: '#ddd'
+            color: 'var(--tg-theme-hint-color, #708499)'
         },
         priceTag: {
-            background: '#00bfa6',
-            color: 'black',
-            padding: '6px 12px',
-            borderRadius: 20,
-            fontSize: 14,
+            background: 'var(--tg-theme-button-color, #5288c1)',
+            color: 'var(--tg-theme-button-text-color, #ffffff)',
+            padding: '4px 8px',
+            borderRadius: 12,
+            fontSize: 13,
             fontWeight: 600
         },
         routeSection: {
-            padding: '12px 20px 8px'
+            padding: '10px 16px 8px'
         },
         routeInfo: {
             display: 'flex',
@@ -82,21 +82,21 @@ const CourierCard = ({
             marginBottom: 8
         },
         cities: {
-            fontSize: 16,
+            fontSize: 15,
             fontWeight: 600,
-            color: 'white'
+            color: 'var(--tg-theme-text-color, #ffffff)'
         },
         timeInfo: {
             display: 'flex',
             alignItems: 'center'
         },
         timeHighlight: {
-            background: 'rgba(0, 191, 166, 0.1)',
-            color: '#00bfa6',
-            padding: '4px 8px',
+            background: 'rgba(100, 181, 239, 0.15)',
+            color: 'var(--tg-theme-accent-text-color, #64b5ef)',
+            padding: '3px 6px',
             borderRadius: 6,
             fontSize: 12,
-            fontWeight: 600
+            fontWeight: 500
         },
         countdown: {
             display: 'flex',
@@ -105,16 +105,16 @@ const CourierCard = ({
         },
         countdownText: {
             fontSize: 12,
-            color: '#aaa',
+            color: 'var(--tg-theme-hint-color, #708499)',
             fontWeight: 500
         },
         commentSection: {
             display: 'flex',
             alignItems: 'flex-start',
-            gap: 10,
-            padding: '8px 20px 12px',
-            background: 'rgba(255, 255, 255, 0.02)',
-            borderTop: '1px solid rgba(58, 58, 58, 0.3)'
+            gap: 8,
+            padding: '8px 16px 10px',
+            background: 'rgba(100, 181, 239, 0.05)',
+            borderTop: '0.5px solid var(--tg-theme-hint-color, #708499)'
         },
         commentIcon: {
             fontSize: 16,
@@ -122,7 +122,7 @@ const CourierCard = ({
         },
         commentText: {
             fontSize: 13,
-            color: '#bbb',
+            color: 'var(--tg-theme-hint-color, #708499)',
             lineHeight: 1.4,
             flex: 1
         },
@@ -130,7 +130,7 @@ const CourierCard = ({
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            padding: '12px 20px 16px'
+            padding: '10px 16px 12px'
         },
         statsInfo: {
             display: 'flex',
@@ -139,12 +139,12 @@ const CourierCard = ({
         },
         tripsCount: {
             fontSize: 12,
-            color: '#999',
+            color: 'var(--tg-theme-hint-color, #708499)',
             fontWeight: 500
         },
         reviewsCount: {
             fontSize: 12,
-            color: '#999',
+            color: 'var(--tg-theme-hint-color, #708499)',
             fontWeight: 500
         }
     };

@@ -19,7 +19,7 @@ const SortMenu = ({
         sortToggle: {
             background: 'none',
             border: 'none',
-            color: '#888',
+            color: 'var(--tg-theme-hint-color, #708499)',
             fontSize: 13,
             cursor: 'pointer',
             padding: '8px 12px',
@@ -31,31 +31,31 @@ const SortMenu = ({
             top: '100%',
             left: '50%',
             transform: 'translateX(-50%)',
-            background: 'rgba(42, 42, 42, 0.98)',
-            border: '1px solid #444',
-            borderRadius: 12,
-            padding: 8,
+            background: 'var(--tg-theme-secondary-bg-color, #232e3c)',
+            border: '0.5px solid var(--tg-theme-hint-color, #708499)',
+            borderRadius: 8,
+            padding: 6,
             zIndex: 1000,
             display: 'flex',
             gap: 4,
-            boxShadow: '0 8px 25px rgba(0,0,0,0.3)',
-            backdropFilter: 'blur(10px)',
+            boxShadow: '0 4px 16px rgba(0,0,0,0.2)',
+            backdropFilter: 'blur(20px)',
             marginTop: 4
         },
         compactSortButton: {
             background: 'none',
             border: 'none',
-            color: '#aaa',
+            color: 'var(--tg-theme-hint-color, #708499)',
             fontSize: 12,
-            padding: '8px 12px',
-            borderRadius: 8,
+            padding: '6px 10px',
+            borderRadius: 6,
             cursor: 'pointer',
             transition: 'all 0.2s ease',
             whiteSpace: 'nowrap'
         },
         compactSortButtonActive: {
-            background: 'rgba(0,191,166,0.15)',
-            color: '#00bfa6'
+            background: 'rgba(100, 181, 239, 0.15)',
+            color: 'var(--tg-theme-accent-text-color, #64b5ef)'
         }
     };
 
