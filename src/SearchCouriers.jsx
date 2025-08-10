@@ -13,7 +13,10 @@ const couriers = [
         date: '2025-07-15',
         time: '12:00 → 14:00',
         airport: 'Шереметьево → Пулково',
-        avatar: 'https://i.pravatar.cc/100?img=12'
+        avatar: 'https://i.pravatar.cc/100?img=12',
+        tripsCount: 47,
+        rating: 4.9,
+        reviewsCount: 32
     },
     {
         name: 'Анна',
@@ -22,7 +25,10 @@ const couriers = [
         date: '2025-07-18',
         time: '09:30 → 12:10',
         airport: 'Казань → Кольцово',
-        avatar: 'https://i.pravatar.cc/100?img=25'
+        avatar: 'https://i.pravatar.cc/100?img=25',
+        tripsCount: 23,
+        rating: 4.7,
+        reviewsCount: 18
     },
     {
         name: 'Олег',
@@ -31,7 +37,10 @@ const couriers = [
         date: '2025-07-20',
         time: '15:00 → 17:30',
         airport: 'Внуково → Адлер',
-        avatar: 'https://i.pravatar.cc/100?img=33'
+        avatar: 'https://i.pravatar.cc/100?img=33',
+        tripsCount: 89,
+        rating: 5.0,
+        reviewsCount: 67
     }
 ];
 
@@ -61,6 +70,25 @@ const SearchCouriers = () => {
 
     const availableCities = getAvailableCities();
 
+    // Функция для отображения рейтинга звездочками
+    const renderStars = (rating) => {
+        const stars = [];
+        const fullStars = Math.floor(rating);
+        const hasHalfStar = rating % 1 !== 0;
+        
+        for (let i = 0; i < fullStars; i++) {
+            stars.push('★');
+        }
+        if (hasHalfStar) {
+            stars.push('☆');
+        }
+        while (stars.length < 5) {
+            stars.push('☆');
+        }
+        
+        return stars.join('');
+    };
+
     // todo: http get: /search?from=Moscow,to=Saint-Petersburg,date-from..,date-to,sorted_by=prise
     const handleSearch = () => {
         const lowerFrom = from.trim().toLowerCase();
@@ -76,7 +104,10 @@ const SearchCouriers = () => {
         if (newTrip.name && newTrip.from && newTrip.to && newTrip.date && newTrip.time && newTrip.airport) {
             const tripToAdd = {
                 ...newTrip,
-                avatar: `https://i.pravatar.cc/100?img=${Math.floor(Math.random() * 70) + 1}`
+                avatar: `https://i.pravatar.cc/100?img=${Math.floor(Math.random() * 70) + 1}`,
+                tripsCount: 1,
+                rating: 5.0,
+                reviewsCount: 0
             };
             couriers.push(tripToAdd);
             setNewTrip({
@@ -134,7 +165,16 @@ const SearchCouriers = () => {
                             <div key={c.name + c.date} style={styles.card}>
                                 <img src={c.avatar} alt={c.name} style={styles.avatar} />
                                 <div style={styles.cardContent}>
-                                    <strong>{c.name}</strong><br />
+                                    <div style={styles.courierHeader}>
+                                        <strong>{c.name}</strong>
+                                        <div style={styles.courierStats}>
+                                            <span style={styles.trips}>{c.tripsCount} поездок</span>
+                                        </div>
+                                    </div>
+                                    <div style={styles.rating}>
+                                        <span style={styles.stars}>{renderStars(c.rating)}</span>
+                                        <span style={styles.ratingText}>{c.rating} ({c.reviewsCount} отзывов)</span>
+                                    </div>
                                     <div style={styles.cardRoute}>{c.from} → {c.to}</div>
                                     <small>{c.date}, {c.time}</small><br />
                                     <small>Аэропорт: {c.airport}</small>
@@ -370,8 +410,36 @@ const styles = {
         flex: 1
     },
     cardRoute: {
-        marginTop: 4,
+        marginTop: 8,
         fontSize: 14
+    },
+    courierHeader: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 6
+    },
+    courierStats: {
+        fontSize: 12,
+        color: '#aaa'
+    },
+    trips: {
+        fontSize: 12,
+        color: '#00bfa6'
+    },
+    rating: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: 8,
+        marginBottom: 6
+    },
+    stars: {
+        color: '#ffd700',
+        fontSize: 16
+    },
+    ratingText: {
+        fontSize: 12,
+        color: '#aaa'
     }
 };
 
