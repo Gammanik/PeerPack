@@ -74,8 +74,12 @@ const SearchCouriers = () => {
             filtered = filtered.filter(c => c.date <= dateTo);
         }
 
-        // Сортировка по времени
-        const sorted = filtered.sort((a, b) => {
+        // Разделяем курьеров со статусом pending и остальных
+        const pendingRequests = filtered.filter(c => getRequestStatus(c) === 'pending');
+        const otherCouriers = filtered.filter(c => getRequestStatus(c) !== 'pending');
+
+        // Сортируем каждую группу
+        const sortGroup = (couriers) => couriers.sort((a, b) => {
             const getDateTime = (courier) => {
                 const [time] = courier.time.split(' → ');
                 return new Date(`${courier.date}T${time}:00`);
@@ -90,6 +94,9 @@ const SearchCouriers = () => {
                 return sortCouriers([a, b], sortBy)[0] === a ? -1 : 1;
             }
         });
+
+        // Объединяем: сначала обычные курьеры, потом с pending статусом
+        const sorted = [...sortGroup(otherCouriers), ...sortGroup(pendingRequests)];
 
         setResults(sorted);
         if (sorted.length > 0) {
@@ -169,8 +176,8 @@ const SearchCouriers = () => {
         fontWeight: 500,
         backgroundColor: status === 'accepted' ? '#4BB34B' : 
                         status === 'declined' ? '#FF3333' : 
-                        '#FF8C00',
-        color: 'white'
+                        '#FFD700',
+        color: status === 'pending' ? '#1a1a1a' : 'white'
     });
 
     // Utility functions
@@ -515,8 +522,8 @@ const SearchCouriers = () => {
                     <div style={{ 
                         width: '100%', 
                         maxWidth: 480, 
-                        marginTop: results.length > 0 ? (searchCollapsed ? 70 : 15) : 30,
-                        paddingTop: searchCollapsed ? 16 : 0
+                        marginTop: results.length > 0 ? (searchCollapsed ? 8 : 0) : 30,
+                        paddingTop: 0
                     }}>
                         {results.length === 0 ? (
                             <div style={{ 

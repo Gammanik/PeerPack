@@ -10,17 +10,23 @@ const CourierCard = ({
     getStatusText,
     getTimeUntilDeparture 
 }) => {
+    const requestStatus = getRequestStatus(courier);
+    const isPending = requestStatus === 'pending';
     const styles = {
         newCard: {
-            background: 'var(--tg-theme-secondary-bg-color, #232e3c)',
-            border: '0.5px solid var(--tg-theme-hint-color, #708499)',
+            background: isPending 
+                ? 'rgba(255, 215, 0, 0.1)' 
+                : 'var(--tg-theme-secondary-bg-color, #232e3c)',
+            border: isPending 
+                ? '0.5px solid rgba(255, 215, 0, 0.4)' 
+                : '0.5px solid var(--tg-theme-hint-color, #708499)',
             borderRadius: 12,
             padding: 0,
             marginBottom: 8,
             overflow: 'hidden',
             transition: 'all 0.2s ease',
             cursor: 'pointer',
-            opacity: 1,
+            opacity: isPending ? 0.85 : 1,
             animation: 'slideIn 0.5s ease-out'
         },
         cardHeader: {
@@ -194,9 +200,9 @@ const CourierCard = ({
                     <span style={styles.tripsCount}>{courier.tripsCount} поездок</span>
                     <span style={styles.reviewsCount}>• {courier.reviewsCount} отзывов</span>
                 </div>
-                {getRequestStatus(courier) && (
-                    <span style={getStatusStyle(getRequestStatus(courier))}>
-                        {getStatusText(getRequestStatus(courier))}
+                {requestStatus && (
+                    <span style={getStatusStyle(requestStatus)}>
+                        {getStatusText(requestStatus)}
                     </span>
                 )}
             </div>
