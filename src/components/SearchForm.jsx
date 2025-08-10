@@ -117,7 +117,35 @@ const SearchForm = ({
                 )}
             </div>
             
-            <label style={styles.label}>Куда доставить</label>
+            <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginBottom: 6
+            }}>
+                <label style={styles.label}>Куда доставить</label>
+                <button
+                    style={{
+                        background: 'transparent',
+                        border: 'none',
+                        color: 'var(--tg-theme-hint-color, #708499)',
+                        fontSize: 16,
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease',
+                        opacity: 0.6,
+                        padding: 4,
+                        borderRadius: 4
+                    }}
+                    onClick={() => {
+                        const tempFrom = from;
+                        setFrom(to);
+                        setTo(tempFrom);
+                    }}
+                    title="Поменять города местами"
+                >
+                    ⇅
+                </button>
+            </div>
             <div style={styles.inputWithClear}>
                 <input
                     className="search-input"

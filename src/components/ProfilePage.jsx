@@ -345,7 +345,39 @@ const ProfilePage = ({
                                         </div>
                                         <div style={styles.details}>
                                             📦 {packageData.description} • ₽{packageData.reward}
+                                            {packageData.size && packageData.weight && (
+                                                <span style={{ marginLeft: 8, opacity: 0.7 }}>
+                                                    • {packageData.size.toUpperCase()} • {packageData.weight}
+                                                </span>
+                                            )}
                                         </div>
+                                        {packageData.tags && packageData.tags.length > 0 && (
+                                            <div style={{
+                                                display: 'flex',
+                                                gap: 4,
+                                                marginTop: 8,
+                                                flexWrap: 'wrap'
+                                            }}>
+                                                {packageData.tags.map(tag => (
+                                                    <span
+                                                        key={tag}
+                                                        style={{
+                                                            background: 'rgba(100, 181, 239, 0.2)',
+                                                            color: 'var(--tg-theme-accent-text-color, #64b5ef)',
+                                                            padding: '2px 6px',
+                                                            borderRadius: 4,
+                                                            fontSize: 10,
+                                                            fontWeight: 500
+                                                        }}
+                                                    >
+                                                        {tag === 'fragile' ? '🔸 Хрупкое' :
+                                                         tag === 'urgent' ? '⚡ Срочно' :
+                                                         tag === 'valuable' ? '💎 Ценное' :
+                                                         tag === 'documents' ? '📄 Документы' : tag}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        )}
                                         {isTemplate && (
                                             <div style={{
                                                 fontSize: 12,

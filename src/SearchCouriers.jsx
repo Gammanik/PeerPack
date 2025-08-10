@@ -203,6 +203,11 @@ const SearchCouriers = () => {
             to: 'Казань',
             description: 'Медикаменты',
             reward: 1000,
+            size: 's',
+            weight: 'light',
+            tags: ['urgent', 'fragile'],
+            pickupAddress: 'Аптека на Тверской, 15',
+            deliveryAddress: 'Больница им. Боткина, касса',
             status: 'template',
             createdAt: Date.now() - 259200000,
             responses: []
@@ -213,6 +218,11 @@ const SearchCouriers = () => {
             to: 'Москва',
             description: 'Сувениры из поездки',
             reward: 600,
+            size: 'm',
+            weight: 'medium',
+            tags: ['valuable'],
+            pickupAddress: 'Невский проспект, 28',
+            deliveryAddress: 'Красная площадь, 1',
             status: 'template',
             createdAt: Date.now() - 86400000,
             responses: []
@@ -233,7 +243,12 @@ const SearchCouriers = () => {
     const [requestForm, setRequestForm] = useState({
         message: '',
         reward: 800,
-        packageDescription: ''
+        packageDescription: '',
+        size: '',
+        weight: '',
+        tags: [],
+        pickupAddress: '',
+        deliveryAddress: ''
     });
     const [useExistingPackage, setUseExistingPackage] = useState(false);
 
@@ -321,6 +336,11 @@ const SearchCouriers = () => {
                         to: selectedCourier.to,
                         description: requestForm.packageDescription,
                         reward: requestForm.reward,
+                        size: requestForm.size,
+                        weight: requestForm.weight,
+                        tags: requestForm.tags || [],
+                        pickupAddress: requestForm.pickupAddress,
+                        deliveryAddress: requestForm.deliveryAddress,
                         status: 'template',
                         createdAt: Date.now(),
                         responses: []
@@ -342,7 +362,16 @@ const SearchCouriers = () => {
                 packageDescription: requestForm.packageDescription,
             };
             setSentRequests([...sentRequests, newRequest]);
-            setRequestForm({ message: '', reward: 800, packageDescription: '' });
+            setRequestForm({ 
+                message: '', 
+                reward: 800, 
+                packageDescription: '',
+                size: '',
+                weight: '',
+                tags: [],
+                pickupAddress: '',
+                deliveryAddress: ''
+            });
         }
     };
 

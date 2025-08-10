@@ -404,7 +404,12 @@
         "from": "Москва",
         "to": "Санкт-Петербург",
         "description": "Документы в папке",
-        "reward": 800
+        "reward": 800,
+        "size": "s",
+        "weight": "light", 
+        "tags": ["documents", "urgent"],
+        "pickup_address": "Красная площадь, 1",
+        "delivery_address": "Невский проспект, 28"
       },
       "response": {
         "success": true,

@@ -240,12 +240,113 @@ const RequestForm = ({
                     ) : (
                         <>
                             <div style={styles.formGroup}>
-                                <label style={styles.label}>Описание посылки</label>
+                                <label style={styles.label}>Что нужно доставить</label>
                                 <textarea
                                     value={requestForm.packageDescription}
                                     onChange={(e) => setRequestForm({...requestForm, packageDescription: e.target.value})}
-                                    placeholder="Опишите что нужно доставить (размер, вес, хрупкость)"
-                                    style={styles.textarea}
+                                    placeholder="Документы, подарок, лекарства, электроника..."
+                                    style={{...styles.textarea, minHeight: 60}}
+                                />
+                            </div>
+
+                            <div style={{
+                                display: 'flex',
+                                gap: 12,
+                                marginBottom: 15
+                            }}>
+                                <div style={{flex: 1}}>
+                                    <label style={styles.label}>Размер</label>
+                                    <select
+                                        value={requestForm.size || ''}
+                                        onChange={(e) => setRequestForm({...requestForm, size: e.target.value})}
+                                        style={{
+                                            ...styles.textarea,
+                                            minHeight: 'auto',
+                                            height: 40,
+                                            padding: '8px 12px'
+                                        }}
+                                    >
+                                        <option value="">Выберите</option>
+                                        <option value="xs">XS (конверт)</option>
+                                        <option value="s">S (книга)</option>
+                                        <option value="m">M (коробка обуви)</option>
+                                        <option value="l">L (чемодан)</option>
+                                    </select>
+                                </div>
+                                <div style={{flex: 1}}>
+                                    <label style={styles.label}>Вес</label>
+                                    <select
+                                        value={requestForm.weight || ''}
+                                        onChange={(e) => setRequestForm({...requestForm, weight: e.target.value})}
+                                        style={{
+                                            ...styles.textarea,
+                                            minHeight: 'auto',
+                                            height: 40,
+                                            padding: '8px 12px'
+                                        }}
+                                    >
+                                        <option value="">Выберите</option>
+                                        <option value="light">До 0.5кг</option>
+                                        <option value="medium">0.5-2кг</option>
+                                        <option value="heavy">2-5кг</option>
+                                        <option value="very_heavy">5-10кг</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div style={styles.formGroup}>
+                                <label style={styles.label}>Особенности</label>
+                                <div style={{
+                                    display: 'flex',
+                                    flexWrap: 'wrap',
+                                    gap: 8,
+                                    marginBottom: 8
+                                }}>
+                                    {[
+                                        {key: 'fragile', label: '🔸 Хрупкое'}, 
+                                        {key: 'urgent', label: '⚡ Срочно'},
+                                        {key: 'valuable', label: '💎 Ценное'},
+                                        {key: 'documents', label: '📄 Документы'}
+                                    ].map(tag => (
+                                        <button
+                                            key={tag.key}
+                                            style={{
+                                                ...styles.rewardButton,
+                                                fontSize: 12,
+                                                padding: '4px 8px',
+                                                ...((requestForm.tags || []).includes(tag.key) ? styles.rewardButtonActive : {})
+                                            }}
+                                            onClick={() => {
+                                                const currentTags = requestForm.tags || [];
+                                                const newTags = currentTags.includes(tag.key) 
+                                                    ? currentTags.filter(t => t !== tag.key)
+                                                    : [...currentTags, tag.key];
+                                                setRequestForm({...requestForm, tags: newTags});
+                                            }}
+                                        >
+                                            {tag.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div style={styles.formGroup}>
+                                <label style={styles.label}>Адрес получения</label>
+                                <textarea
+                                    value={requestForm.pickupAddress || ''}
+                                    onChange={(e) => setRequestForm({...requestForm, pickupAddress: e.target.value})}
+                                    placeholder="Точный адрес где забрать посылку"
+                                    style={{...styles.textarea, minHeight: 50}}
+                                />
+                            </div>
+
+                            <div style={styles.formGroup}>
+                                <label style={styles.label}>Адрес доставки</label>
+                                <textarea
+                                    value={requestForm.deliveryAddress || ''}
+                                    onChange={(e) => setRequestForm({...requestForm, deliveryAddress: e.target.value})}
+                                    placeholder="Точный адрес куда доставить"
+                                    style={{...styles.textarea, minHeight: 50}}
                                 />
                             </div>
 
