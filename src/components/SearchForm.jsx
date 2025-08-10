@@ -5,8 +5,10 @@ const SearchForm = ({
     setFrom,
     to,
     setTo,
-    selectedDate,
-    setSelectedDate,
+    dateFrom,
+    setDateFrom,
+    dateTo,
+    setDateTo,
     showDatePicker,
     setShowDatePicker,
     availableCities,
@@ -14,7 +16,7 @@ const SearchForm = ({
     clearFromCity,
     clearToCity,
     getDatePresets,
-    formatDate
+    getDateRangeLabel
 }) => {
     const styles = {
         searchContainer: {
@@ -143,188 +145,145 @@ const SearchForm = ({
             </datalist>
 
             <div style={{
-                marginTop: 16,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 10
+                marginTop: 8,
+                marginBottom: 4
             }}>
-                <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 8,
-                }}>
-                    <button
-                        onClick={() => setShowDatePicker(!showDatePicker)}
-                        aria-expanded={showDatePicker}
-                        aria-controls="date-optional-panel"
-                        style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: 8,
-                            padding: '10px 14px',
-                            borderRadius: 9999,
-                            border: '1px solid rgba(0,191,166,0.35)',
-                            background: 'linear-gradient(180deg, rgba(0,191,166,0.06), rgba(0,191,166,0.03))',
-                            color: '#0f766e',
-                            fontWeight: 600,
-                            cursor: 'pointer',
-                            transition: 'transform .15s ease, box-shadow .15s ease, background .2s ease',
-                            boxShadow: showDatePicker ? '0 4px 16px rgba(0,191,166,0.15)' : 'none'
-                        }}
-                        className="button-hover"
-                    >
-                        <span style={{
-                            width: 24, height: 24, display: 'inline-flex',
-                            alignItems: 'center', justifyContent: 'center',
-                            background: '#00bfa6', color: 'white', borderRadius: 6,
-                            fontSize: 14, boxShadow: '0 2px 8px rgba(0,191,166,0.35)'
-                        }}>📅</span>
-                        <span>Дата</span>
-                        <span style={{ opacity: 0.6 }}>{showDatePicker ? '▲' : '▼'}</span>
-                    </button>
+                <button
+                    onClick={() => setShowDatePicker(!showDatePicker)}
+                    style={{
+                        width: '100%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '10px 12px',
+                        borderRadius: 6,
+                        border: 'none',
+                        background: 'var(--tg-theme-bg-color, #17212b)',
+                        color: 'var(--tg-theme-text-color, #ffffff)',
+                        fontSize: 14,
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease'
+                    }}
+                >
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 8
+                    }}>
+                        <span style={{ fontSize: 16, opacity: 0.7 }}>📅</span>
+                        <span>{getDateRangeLabel()}</span>
+                    </div>
+                    <span style={{ 
+                        fontSize: 10, 
+                        color: 'var(--tg-theme-hint-color, #708499)',
+                        transform: showDatePicker ? 'rotate(180deg)' : 'rotate(0deg)',
+                        transition: 'transform 0.2s ease'
+                    }}>▼</span>
+                </button>
+            </div>
 
-                    {selectedDate && (
-                        <span style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: 8,
-                            padding: '8px 12px',
-                            borderRadius: 9999,
-                            background: 'rgba(0,191,166,0.08)',
-                            border: '1px solid rgba(0,191,166,0.25)',
-                            color: '#0f766e',
-                            fontWeight: 500
-                        }}>
-                            {formatDate(selectedDate)}
+            {showDatePicker && (
+                <div
+                    style={{
+                        marginTop: 4,
+                        marginBottom: 8,
+                        background: 'var(--tg-theme-bg-color, #17212b)',
+                        borderRadius: 8,
+                        padding: '12px 8px',
+                        animation: 'slideIn 0.2s ease-out'
+                    }}
+                >
+                    <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(3, 1fr)',
+                        gap: 6,
+                        marginBottom: 12
+                    }}>
+                        {getDatePresets().map((preset, index) => (
                             <button
-                                onClick={(e) => { e.stopPropagation(); setSelectedDate(''); }}
-                                title="Сбросить дату"
+                                key={index}
+                                onClick={() => {
+                                    preset.action();
+                                    setShowDatePicker(false);
+                                }}
                                 style={{
-                                    width: 22, height: 22, borderRadius: 11,
-                                    border: '1px solid rgba(0,0,0,0.1)',
-                                    background: 'white',
-                                    color: '#666',
+                                    padding: '8px 8px',
+                                    borderRadius: 6,
+                                    border: 'none',
+                                    background: 'var(--tg-theme-secondary-bg-color, #232e3c)',
+                                    color: 'var(--tg-theme-text-color, #ffffff)',
                                     cursor: 'pointer',
-                                    lineHeight: 1
+                                    fontSize: 11,
+                                    fontWeight: 500,
+                                    transition: 'all 0.2s ease',
+                                    opacity: 0.9
                                 }}
                             >
-                                ×
+                                {preset.label}
                             </button>
-                        </span>
-                    )}
-                </div>
+                        ))}
+                    </div>
 
-                {showDatePicker && (
-                    <div
-                        id="date-optional-panel"
-                        style={{
-                            border: '1px solid rgba(0,0,0,0.08)',
-                            background: 'linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0.95))',
-                            borderRadius: 14,
-                            padding: 14,
-                            boxShadow: '0 8px 28px rgba(0,0,0,0.06)',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: 12
-                        }}
-                        className="modal-enter"
-                    >
-                        <div style={{ fontSize: 12, color: '#667085' }}>
-                            Выберите готовый пресет или укажите точную дату
-                        </div>
-
-                        <div style={{
-                            display: 'flex',
-                            flexWrap: 'wrap',
-                            gap: 8
-                        }}>
-                            {getDatePresets().map((preset, index) => {
-                                const active = selectedDate === preset.value;
-                                return (
-                                    <button
-                                        key={index}
-                                        onClick={() => {
-                                            setSelectedDate(preset.value);
-                                            if (window.innerWidth <= 768) setShowDatePicker(false);
-                                        }}
-                                        style={{
-                                            padding: '8px 12px',
-                                            borderRadius: 9999,
-                                            border: `1px solid ${active ? 'rgba(0,191,166,0.6)' : 'rgba(0,0,0,0.1)'}`,
-                                            background: active ? 'rgba(0,191,166,0.1)' : 'white',
-                                            color: active ? '#0f766e' : '#555',
-                                            cursor: 'pointer',
-                                            fontWeight: 600
-                                        }}
-                                    >
-                                        {preset.label}
-                                    </button>
-                                );
-                            })}
-                        </div>
-
-                        <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 10
-                        }}>
+                    <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: '1fr 1fr',
+                        gap: 8,
+                        borderTop: '0.5px solid var(--tg-theme-hint-color, #708499)',
+                        paddingTop: 12
+                    }}>
+                        <div>
+                            <label style={{
+                                fontSize: 11,
+                                color: 'var(--tg-theme-hint-color, #708499)',
+                                marginBottom: 4,
+                                display: 'block'
+                            }}>С</label>
                             <input
                                 type="date"
-                                value={selectedDate}
-                                onChange={(e) => {
-                                    setSelectedDate(e.target.value);
-                                    if (window.innerWidth <= 768) setShowDatePicker(false);
-                                }}
+                                value={dateFrom}
+                                onChange={(e) => setDateFrom(e.target.value)}
                                 min={new Date().toISOString().split('T')[0]}
                                 style={{
-                                    flex: '0 1 220px',
-                                    padding: '10px 12px',
-                                    borderRadius: 10,
-                                    border: '1px solid rgba(0,0,0,0.12)',
+                                    width: '100%',
+                                    padding: '8px 6px',
+                                    borderRadius: 6,
+                                    border: 'none',
                                     outline: 'none',
-                                    fontSize: 14,
-                                    color: '#222',
-                                    boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.04)'
+                                    fontSize: 12,
+                                    background: 'var(--tg-theme-secondary-bg-color, #232e3c)',
+                                    color: 'var(--tg-theme-text-color, #ffffff)',
+                                    boxSizing: 'border-box'
                                 }}
-                                className="search-input"
                             />
-
-                            <div style={{ display: 'flex', gap: 8, marginLeft: 'auto' }}>
-                                <button
-                                    onClick={() => setSelectedDate('')}
-                                    style={{
-                                        padding: '10px 12px',
-                                        borderRadius: 10,
-                                        border: '1px dashed rgba(0,0,0,0.2)',
-                                        background: 'transparent',
-                                        color: '#666',
-                                        cursor: 'pointer',
-                                        fontWeight: 600
-                                    }}
-                                >
-                                    Сбросить
-                                </button>
-                                <button
-                                    onClick={() => setShowDatePicker(false)}
-                                    style={{
-                                        padding: '10px 14px',
-                                        borderRadius: 10,
-                                        border: 'none',
-                                        background: '#00bfa6',
-                                        color: 'white',
-                                        cursor: 'pointer',
-                                        fontWeight: 700,
-                                        boxShadow: '0 6px 18px rgba(0,191,166,0.35)'
-                                    }}
-                                    className="button-hover"
-                                >
-                                    Готово
-                                </button>
-                            </div>
+                        </div>
+                        <div>
+                            <label style={{
+                                fontSize: 11,
+                                color: 'var(--tg-theme-hint-color, #708499)',
+                                marginBottom: 4,
+                                display: 'block'
+                            }}>До</label>
+                            <input
+                                type="date"
+                                value={dateTo}
+                                onChange={(e) => setDateTo(e.target.value)}
+                                min={dateFrom || new Date().toISOString().split('T')[0]}
+                                style={{
+                                    width: '100%',
+                                    padding: '8px 6px',
+                                    borderRadius: 6,
+                                    border: 'none',
+                                    outline: 'none',
+                                    fontSize: 12,
+                                    background: 'var(--tg-theme-secondary-bg-color, #232e3c)',
+                                    color: 'var(--tg-theme-text-color, #ffffff)',
+                                    boxSizing: 'border-box'
+                                }}
+                            />
                         </div>
                     </div>
-                )}
-            </div>
+                </div>
+            )}
 
             <button 
                 className="button-hover"

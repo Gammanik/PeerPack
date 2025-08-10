@@ -3,13 +3,33 @@ export const cities = [
     "Новосибирск", "Сочи", "Самара", "Краснодар"
 ];
 
+// Генерируем данные относительно текущего времени
+const generateRelativeDate = (hoursFromNow) => {
+    const date = new Date();
+    date.setHours(date.getHours() + hoursFromNow);
+    return date.toISOString().split('T')[0];
+};
+
+const generateRelativeTime = (hoursFromNow) => {
+    const startDate = new Date();
+    startDate.setHours(startDate.getHours() + hoursFromNow);
+    const endDate = new Date(startDate);
+    endDate.setHours(endDate.getHours() + 2);
+    
+    const formatTime = (date) => {
+        return date.toTimeString().slice(0, 5);
+    };
+    
+    return `${formatTime(startDate)} → ${formatTime(endDate)}`;
+};
+
 export const couriers = [
     {
         name: 'Иван',
         from: 'Москва',
         to: 'Санкт-Петербург',
-        date: '2025-07-15',
-        time: '12:00 → 14:00',
+        date: generateRelativeDate(1),
+        time: generateRelativeTime(1),
         airport: 'Шереметьево → Пулково',
         avatar: 'https://i.pravatar.cc/100?img=12',
         tripsCount: 47,
@@ -32,8 +52,8 @@ export const couriers = [
         name: 'Елена',
         from: 'Москва',
         to: 'Санкт-Петербург',
-        date: '2025-07-15',
-        time: '08:30 → 10:20',
+        date: generateRelativeDate(3),
+        time: generateRelativeTime(3),
         airport: 'Внуково → Пулково',
         avatar: 'https://i.pravatar.cc/100?img=44',
         tripsCount: 28,
@@ -54,8 +74,8 @@ export const couriers = [
         name: 'Максим',
         from: 'Москва',
         to: 'Санкт-Петербург',
-        date: '2025-07-15',
-        time: '18:45 → 20:30',
+        date: generateRelativeDate(6),
+        time: generateRelativeTime(6),
         airport: 'Домодедово → Пулково',
         avatar: 'https://i.pravatar.cc/100?img=68',
         tripsCount: 15,
@@ -76,8 +96,8 @@ export const couriers = [
         name: 'Анастасия',
         from: 'Москва',
         to: 'Санкт-Петербург',
-        date: '2025-07-16',
-        time: '14:20 → 16:10',
+        date: generateRelativeDate(12),
+        time: generateRelativeTime(12),
         airport: 'Шереметьево → Пулково',
         avatar: 'https://i.pravatar.cc/100?img=31',
         tripsCount: 52,
@@ -98,8 +118,8 @@ export const couriers = [
         name: 'Дмитрий',
         from: 'Москва',
         to: 'Санкт-Петербург',
-        date: '2025-07-16',
-        time: '06:50 → 08:40',
+        date: generateRelativeDate(24),
+        time: generateRelativeTime(24),
         airport: 'Внуково → Пулково',
         avatar: 'https://i.pravatar.cc/100?img=17',
         tripsCount: 34,
@@ -120,8 +140,8 @@ export const couriers = [
         name: 'Анна',
         from: 'Казань',
         to: 'Екатеринбург',
-        date: '2025-07-18',
-        time: '09:30 → 12:10',
+        date: generateRelativeDate(48),
+        time: generateRelativeTime(48),
         airport: 'Казань → Кольцово',
         avatar: 'https://i.pravatar.cc/100?img=25',
         tripsCount: 23,
@@ -142,8 +162,8 @@ export const couriers = [
         name: 'Олег',
         from: 'Москва',
         to: 'Сочи',
-        date: '2025-07-20',
-        time: '15:00 → 17:30',
+        date: generateRelativeDate(72),
+        time: generateRelativeTime(72),
         airport: 'Внуково → Адлер',
         avatar: 'https://i.pravatar.cc/100?img=33',
         tripsCount: 89,

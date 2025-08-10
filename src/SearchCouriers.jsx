@@ -13,7 +13,8 @@ const SearchCouriers = () => {
     const [from, setFrom] = useState('Москва');
     const [to, setTo] = useState('Санкт-Петербург');
     const [results, setResults] = useState([]);
-    const [selectedDate, setSelectedDate] = useState('');
+    const [dateFrom, setDateFrom] = useState('');
+    const [dateTo, setDateTo] = useState('');
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [sortBy, setSortBy] = useState('time');
     const [showSortMenu, setShowSortMenu] = useState(false);
@@ -57,11 +58,39 @@ const SearchCouriers = () => {
             c.to.toLowerCase() === lowerTo
         );
 
-        if (selectedDate) {
-            filtered = filtered.filter(c => c.date === selectedDate);
+        // Скрываем вылетевших курьеров
+        const now = new Date();
+        filtered = filtered.filter(c => {
+            const [time] = c.time.split(' → ');
+            const departureDateTime = new Date(`${c.date}T${time}:00`);
+            return departureDateTime > now;
+        });
+
+        // Фильтрация по диапазону дат
+        if (dateFrom) {
+            filtered = filtered.filter(c => c.date >= dateFrom);
+        }
+        if (dateTo) {
+            filtered = filtered.filter(c => c.date <= dateTo);
         }
 
-        const sorted = sortCouriers(filtered, sortBy);
+        // Сортировка по времени
+        const sorted = filtered.sort((a, b) => {
+            const getDateTime = (courier) => {
+                const [time] = courier.time.split(' → ');
+                return new Date(`${courier.date}T${time}:00`);
+            };
+            
+            const dateTimeA = getDateTime(a);
+            const dateTimeB = getDateTime(b);
+            
+            if (sortBy === 'time') {
+                return dateTimeA - dateTimeB;
+            } else {
+                return sortCouriers([a, b], sortBy)[0] === a ? -1 : 1;
+            }
+        });
+
         setResults(sorted);
         if (sorted.length > 0) {
             setSearchCollapsed(true);
@@ -185,27 +214,50 @@ const SearchCouriers = () => {
         const today = new Date();
         const tomorrow = new Date(today);
         tomorrow.setDate(today.getDate() + 1);
-        const dayAfterTomorrow = new Date(today);
-        dayAfterTomorrow.setDate(today.getDate() + 2);
-        const nextWeek = new Date(today);
-        nextWeek.setDate(today.getDate() + 7);
+        const week = new Date(today);
+        week.setDate(today.getDate() + 7);
 
         return [
-            { label: 'Сегодня', value: today.toISOString().split('T')[0] },
-            { label: 'Завтра', value: tomorrow.toISOString().split('T')[0] },
-            { label: 'Послезавтра', value: dayAfterTomorrow.toISOString().split('T')[0] },
-            { label: 'Через неделю', value: nextWeek.toISOString().split('T')[0] },
+            { 
+                label: 'Сегодня-завтра', 
+                action: () => {
+                    setDateFrom(today.toISOString().split('T')[0]);
+                    setDateTo(tomorrow.toISOString().split('T')[0]);
+                }
+            },
+            { 
+                label: 'Эта неделя', 
+                action: () => {
+                    setDateFrom(today.toISOString().split('T')[0]);
+                    setDateTo(week.toISOString().split('T')[0]);
+                }
+            },
+            { 
+                label: 'Очистить', 
+                action: () => {
+                    setDateFrom('');
+                    setDateTo('');
+                }
+            }
         ];
     };
 
-    const formatDate = (dateString) => {
-        if (!dateString) return '';
-        const date = new Date(dateString);
-        return date.toLocaleDateString('ru-RU', {
-            day: 'numeric',
-            month: 'short',
-            weekday: 'short'
-        });
+    const getDateRangeLabel = () => {
+        if (!dateFrom && !dateTo) return 'Любые даты';
+        if (dateFrom && dateTo) {
+            const fromDate = new Date(dateFrom);
+            const toDate = new Date(dateTo);
+            return `${fromDate.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })} - ${toDate.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })}`;
+        }
+        if (dateFrom) {
+            const fromDate = new Date(dateFrom);
+            return `c ${fromDate.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })}`;
+        }
+        if (dateTo) {
+            const toDate = new Date(dateTo);
+            return `до ${toDate.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })}`;
+        }
+        return 'Любые даты';
     };
 
     const handleAddTrip = () => {
@@ -436,8 +488,10 @@ const SearchCouriers = () => {
                                     setSearchCollapsed(false);
                                 }
                             }}
-                            selectedDate={selectedDate}
-                            setSelectedDate={setSelectedDate}
+                            dateFrom={dateFrom}
+                            setDateFrom={setDateFrom}
+                            dateTo={dateTo}
+                            setDateTo={setDateTo}
                             showDatePicker={showDatePicker}
                             setShowDatePicker={setShowDatePicker}
                             availableCities={availableCities}
@@ -445,7 +499,7 @@ const SearchCouriers = () => {
                             clearFromCity={clearFromCity}
                             clearToCity={clearToCity}
                             getDatePresets={getDatePresets}
-                            formatDate={formatDate}
+                            getDateRangeLabel={getDateRangeLabel}
                         />
                     )}
 
