@@ -51,6 +51,36 @@ const injectCSS = () => {
             50% { transform: scale(1.2); }
             100% { transform: scale(1); }
         }
+        
+        .card-hover:hover {
+            transform: scale(1.02) translateY(-4px) !important;
+            box-shadow: 0 12px 35px rgba(0,191,166,0.2) !important;
+        }
+        
+        .sort-toggle:hover {
+            color: #aaa !important;
+        }
+        
+        .compact-sort-button:hover {
+            background: rgba(0,191,166,0.05) !important;
+            color: #ddd !important;
+        }
+        
+        .search-input:focus {
+            border-color: #00bfa6 !important;
+            box-shadow: 0 0 0 3px rgba(0,191,166,0.1) !important;
+        }
+        
+        .search-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00bfa6, transparent);
+            opacity: 0.6;
+        }
     `;
     document.head.appendChild(style);
 };
@@ -72,6 +102,8 @@ const couriers = [
         tripsCount: 47,
         rating: 4.9,
         reviewsCount: 32,
+        price: 800,
+        tripComment: 'Лечу по работе, могу взять документы или небольшие посылки',
         pastTrips: [
             { from: 'Москва', to: 'Санкт-Петербург', date: '2025-06-15', success: true },
             { from: 'Санкт-Петербург', to: 'Москва', date: '2025-06-10', success: true },
@@ -81,6 +113,94 @@ const couriers = [
             { rating: 5, text: 'Отличный курьер! Быстро и аккуратно доставил документы.', date: '2025-06-16' },
             { rating: 5, text: 'Все супер, рекомендую!', date: '2025-06-11' },
             { rating: 4, text: 'Хорошо, но немного задержался с уведомлением о получении.', date: '2025-05-22' }
+        ]
+    },
+    {
+        name: 'Елена',
+        from: 'Москва',
+        to: 'Санкт-Петербург',
+        date: '2025-07-15',
+        time: '08:30 → 10:20',
+        airport: 'Внуково → Пулково',
+        avatar: 'https://i.pravatar.cc/100?img=44',
+        tripsCount: 28,
+        rating: 4.8,
+        reviewsCount: 21,
+        price: 1200,
+        tripComment: 'Утренний рейс, удобно для срочных доставок. Место только для документов',
+        pastTrips: [
+            { from: 'Москва', to: 'Санкт-Петербург', date: '2025-06-08', success: true },
+            { from: 'Санкт-Петербург', to: 'Москва', date: '2025-05-28', success: true }
+        ],
+        reviews: [
+            { rating: 5, text: 'Очень пунктуальная! Доставила точно в срок.', date: '2025-06-09' },
+            { rating: 5, text: 'Профессиональный подход, рекомендую.', date: '2025-05-29' }
+        ]
+    },
+    {
+        name: 'Максим',
+        from: 'Москва',
+        to: 'Санкт-Петербург',
+        date: '2025-07-15',
+        time: '18:45 → 20:30',
+        airport: 'Домодедово → Пулково',
+        avatar: 'https://i.pravatar.cc/100?img=68',
+        tripsCount: 15,
+        rating: 4.6,
+        reviewsCount: 12,
+        price: 600,
+        tripComment: 'Студент, летаю часто к родителям. Недорого, но надежно!',
+        pastTrips: [
+            { from: 'Москва', to: 'Санкт-Петербург', date: '2025-06-01', success: true },
+            { from: 'Санкт-Петербург', to: 'Москва', date: '2025-05-15', success: true }
+        ],
+        reviews: [
+            { rating: 5, text: 'Отличный парень! Доставил быстро и недорого.', date: '2025-06-02' },
+            { rating: 4, text: 'Все хорошо, молодец!', date: '2025-05-16' }
+        ]
+    },
+    {
+        name: 'Анастасия',
+        from: 'Москва',
+        to: 'Санкт-Петербург',
+        date: '2025-07-16',
+        time: '14:20 → 16:10',
+        airport: 'Шереметьево → Пулково',
+        avatar: 'https://i.pravatar.cc/100?img=31',
+        tripsCount: 52,
+        rating: 5.0,
+        reviewsCount: 45,
+        price: 1500,
+        tripComment: 'Премиум доставка. Фото отчеты, трекинг, страховка включена',
+        pastTrips: [
+            { from: 'Москва', to: 'Санкт-Петербург', date: '2025-06-12', success: true },
+            { from: 'Санкт-Петербург', to: 'Москва', date: '2025-06-05', success: true }
+        ],
+        reviews: [
+            { rating: 5, text: 'Лучший курьер! Идеальный сервис, всегда на связи.', date: '2025-06-13' },
+            { rating: 5, text: 'Профессионал высшего класса. Стоит своих денег.', date: '2025-06-06' }
+        ]
+    },
+    {
+        name: 'Дмитрий',
+        from: 'Москва',
+        to: 'Санкт-Петербург',
+        date: '2025-07-16',
+        time: '06:50 → 08:40',
+        airport: 'Внуково → Пулково',
+        avatar: 'https://i.pravatar.cc/100?img=17',
+        tripsCount: 34,
+        rating: 4.7,
+        reviewsCount: 28,
+        price: 900,
+        tripComment: 'Самый ранний рейс. Беру только легкие посылки до 2кг',
+        pastTrips: [
+            { from: 'Москва', to: 'Санкт-Петербург', date: '2025-06-03', success: true },
+            { from: 'Санкт-Петербург', to: 'Москва', date: '2025-05-20', success: true }
+        ],
+        reviews: [
+            { rating: 5, text: 'Ранняя доставка - то что нужно! Спасибо!', date: '2025-06-04' },
+            { rating: 4, text: 'Хороший курьер, но строго по весу.', date: '2025-05-21' }
         ]
     },
     {
@@ -94,6 +214,8 @@ const couriers = [
         tripsCount: 23,
         rating: 4.7,
         reviewsCount: 18,
+        price: 700,
+        tripComment: 'Регулярные рейсы, доставляю аккуратно',
         pastTrips: [
             { from: 'Казань', to: 'Екатеринбург', date: '2025-06-20', success: true },
             { from: 'Екатеринбург', to: 'Москва', date: '2025-06-05', success: true }
@@ -114,6 +236,8 @@ const couriers = [
         tripsCount: 89,
         rating: 5.0,
         reviewsCount: 67,
+        price: 1800,
+        tripComment: 'Опытный курьер, беру любые посылки. Гарантия доставки',
         pastTrips: [
             { from: 'Москва', to: 'Сочи', date: '2025-06-25', success: true },
             { from: 'Сочи', to: 'Москва', date: '2025-06-15', success: true },
@@ -133,6 +257,8 @@ const SearchCouriers = () => {
     const [results, setResults] = useState([]);
     const [selectedDate, setSelectedDate] = useState('');
     const [showDatePicker, setShowDatePicker] = useState(false);
+    const [sortBy, setSortBy] = useState('time'); // time, price, rating
+    const [showSortMenu, setShowSortMenu] = useState(false);
     const [mode, setMode] = useState('search'); // 'search' or 'add'
     const [newTrip, setNewTrip] = useState({
         name: '',
@@ -183,6 +309,25 @@ const SearchCouriers = () => {
         return stars.join('');
     };
 
+    // Функция сортировки курьеров
+    const sortCouriers = (couriersList, sortType) => {
+        const sorted = [...couriersList];
+        switch (sortType) {
+            case 'time':
+                return sorted.sort((a, b) => {
+                    const timeA = a.time.split(' → ')[0];
+                    const timeB = b.time.split(' → ')[0];
+                    return timeA.localeCompare(timeB);
+                });
+            case 'price':
+                return sorted.sort((a, b) => a.price - b.price);
+            case 'rating':
+                return sorted.sort((a, b) => b.rating - a.rating);
+            default:
+                return sorted;
+        }
+    };
+
     // todo: http get: /search?from=Moscow,to=Saint-Petersburg,date-from..,date-to,sorted_by=prise
     const handleSearch = () => {
         const lowerFrom = from.trim().toLowerCase();
@@ -191,7 +336,8 @@ const SearchCouriers = () => {
             c.from.toLowerCase() === lowerFrom &&
             c.to.toLowerCase() === lowerTo
         );
-        setResults(filtered);
+        const sorted = sortCouriers(filtered, sortBy);
+        setResults(sorted);
     };
 
     const handleAddTrip = () => {
@@ -335,6 +481,26 @@ const SearchCouriers = () => {
         injectCSS();
         handleSearch();
     }, []);
+    
+    // Пересортировка при изменении типа сортировки
+    useEffect(() => {
+        if (results.length > 0) {
+            const sorted = sortCouriers(results, sortBy);
+            setResults(sorted);
+        }
+    }, [sortBy]);
+    
+    // Закрытие меню сортировки при клике вне его
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (showSortMenu && !event.target.closest('.compact-sort-section')) {
+                setShowSortMenu(false);
+            }
+        };
+        
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [showSortMenu]);
 
     // Функции для работы с датами
     const getDatePresets = () => {
@@ -371,9 +537,10 @@ const SearchCouriers = () => {
 
             {mode === 'search' ? (
                 <>
-                    <div style={styles.container}>
+                    <div className="search-container" style={styles.searchContainer}>
                         <label style={styles.label}>Откуда</label>
                         <input
+                            className="search-input"
                             list="available-cities"
                             value={from}
                             onChange={(e) => setFrom(e.target.value)}
@@ -382,6 +549,7 @@ const SearchCouriers = () => {
                         />
                         <label style={styles.label}>Куда</label>
                         <input
+                            className="search-input"
                             list="available-cities"
                             value={to}
                             onChange={(e) => setTo(e.target.value)}
@@ -439,14 +607,77 @@ const SearchCouriers = () => {
                         
                         <button 
                             className="button-hover"
-                            style={styles.button} 
+                            style={styles.searchButton} 
                             onClick={handleSearch}
                         >
+                            <span style={styles.searchButtonIcon}>🔍</span>
                             Найти курьеров
                         </button>
                     </div>
 
-                    <div style={{ width: '100%', maxWidth: 400, marginTop: 30 }}>
+                    {/* Минимальная опциональная сортировка */}
+                    {results.length > 1 && (
+                        <div className="compact-sort-section" style={styles.compactSortSection}>
+                            <button 
+                                className="sort-toggle"
+                                style={styles.sortToggle}
+                                onClick={() => setShowSortMenu(!showSortMenu)}
+                            >
+                                сортировка ▼
+                            </button>
+                            {showSortMenu && (
+                                <div style={styles.sortDropdown}>
+                                    <button 
+                                        className="compact-sort-button"
+                                        style={{
+                                            ...styles.compactSortButton,
+                                            ...(sortBy === 'time' ? styles.compactSortButtonActive : {})
+                                        }}
+                                        onClick={() => {
+                                            setSortBy('time');
+                                            const sorted = sortCouriers(results, 'time');
+                                            setResults(sorted);
+                                            setShowSortMenu(false);
+                                        }}
+                                    >
+                                        по времени
+                                    </button>
+                                    <button 
+                                        className="compact-sort-button"
+                                        style={{
+                                            ...styles.compactSortButton,
+                                            ...(sortBy === 'price' ? styles.compactSortButtonActive : {})
+                                        }}
+                                        onClick={() => {
+                                            setSortBy('price');
+                                            const sorted = sortCouriers(results, 'price');
+                                            setResults(sorted);
+                                            setShowSortMenu(false);
+                                        }}
+                                    >
+                                        по цене
+                                    </button>
+                                    <button 
+                                        className="compact-sort-button"
+                                        style={{
+                                            ...styles.compactSortButton,
+                                            ...(sortBy === 'rating' ? styles.compactSortButtonActive : {})
+                                        }}
+                                        onClick={() => {
+                                            setSortBy('rating');
+                                            const sorted = sortCouriers(results, 'rating');
+                                            setResults(sorted);
+                                            setShowSortMenu(false);
+                                        }}
+                                    >
+                                        по рейтингу
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    <div style={{ width: '100%', maxWidth: 400, marginTop: results.length > 0 ? 15 : 30 }}>
                         {results.length === 0 ? (
                             <p style={{ color: '#aaa' }}>Курьеры не найдены.</p>
                         ) : results.map((c, index) => (
@@ -454,32 +685,50 @@ const SearchCouriers = () => {
                                 key={c.name + c.date} 
                                 className="card-hover"
                                 style={{
-                                    ...styles.card, 
+                                    ...styles.newCard, 
                                     cursor: 'pointer',
                                     animationDelay: `${index * 0.1}s`
                                 }}
                                 onClick={() => handleCourierClick(c)}
                             >
-                                <img src={c.avatar} alt={c.name} style={styles.avatar} />
-                                <div style={styles.cardContent}>
-                                    <div style={styles.courierHeader}>
-                                        <strong>{c.name}</strong>
-                                        <div style={styles.courierStats}>
-                                            <span style={styles.trips}>{c.tripsCount} поездок</span>
-                                            {getRequestStatus(c) && (
-                                                <span style={getStatusStyle(getRequestStatus(c))}>
-                                                    {getStatusText(getRequestStatus(c))}
-                                                </span>
-                                            )}
+                                <div style={styles.cardHeader}>
+                                    <div style={styles.courierInfo1}>
+                                        <img src={c.avatar} alt={c.name} style={styles.avatar} />
+                                        <div style={styles.courierDetails}>
+                                            <div style={styles.courierName}>{c.name}</div>
+                                            <div style={styles.rating}>
+                                                <span style={styles.stars}>{renderStars(c.rating)}</span>
+                                                <span style={styles.ratingText}>{c.rating}</span>
+                                            </div>
                                         </div>
                                     </div>
-                                    <div style={styles.rating}>
-                                        <span style={styles.stars}>{renderStars(c.rating)}</span>
-                                        <span style={styles.ratingText}>{c.rating} ({c.reviewsCount} отзывов)</span>
+                                    <div style={styles.priceTag}>₽{c.price}</div>
+                                </div>
+                                
+                                <div style={styles.routeSection}>
+                                    <div style={styles.routeInfo}>
+                                        <div style={styles.cities}>{c.from} → {c.to}</div>
+                                        <div style={styles.timeInfo}>
+                                            <span style={styles.timeHighlight}>🕐 {c.time}</span>
+                                        </div>
                                     </div>
-                                    <div style={styles.cardRoute}>{c.from} → {c.to}</div>
-                                    <small>{c.date}, {c.time}</small><br />
-                                    <small>Аэропорт: {c.airport}</small>
+                                </div>
+                                
+                                <div style={styles.commentSection}>
+                                    <div style={styles.commentIcon}>💬</div>
+                                    <div style={styles.commentText}>{c.tripComment}</div>
+                                </div>
+                                
+                                <div style={styles.cardFooter}>
+                                    <div style={styles.statsInfo}>
+                                        <span style={styles.tripsCount}>{c.tripsCount} поездок</span>
+                                        <span style={styles.reviewsCount}>• {c.reviewsCount} отзывов</span>
+                                    </div>
+                                    {getRequestStatus(c) && (
+                                        <span style={getStatusStyle(getRequestStatus(c))}>
+                                            {getStatusText(getRequestStatus(c))}
+                                        </span>
+                                    )}
                                 </div>
                             </div>
                         ))}
@@ -779,19 +1028,99 @@ const styles = {
         fontWeight: 'bold'
     },
     header: {
-        textAlign: 'center',
-        marginBottom: 30
+        width: '100%',
+        maxWidth: 500,
+        marginBottom: 30,
+        background: 'linear-gradient(135deg, #1c1c1c 0%, #2b2b2b 100%)',
+        borderRadius: 20,
+        padding: 24,
+        border: '1px solid #3a3a3a',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.3)'
+    },
+    headerContent: {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 20
+    },
+    logoSection: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: 16
+    },
+    logo: {
+        fontSize: 32,
+        filter: 'drop-shadow(0 0 8px rgba(0,191,166,0.3))'
     },
     title: {
-        fontSize: 28,
-        fontWeight: 'bold',
+        fontSize: 24,
+        fontWeight: 700,
         margin: 0,
-        marginBottom: 8
+        marginBottom: 4,
+        background: 'linear-gradient(135deg, #00bfa6, #00d4aa)',
+        WebkitBackgroundClip: 'text',
+        WebkitTextFillColor: 'transparent',
+        backgroundClip: 'text'
     },
     subtitle: {
-        fontSize: 16,
+        fontSize: 14,
         color: '#aaa',
-        margin: 0
+        margin: 0,
+        lineHeight: 1.4
+    },
+    statsBar: {
+        display: 'flex',
+        justifyContent: 'space-around',
+        paddingTop: 16,
+        borderTop: '1px solid #3a3a3a'
+    },
+    stat: {
+        textAlign: 'center',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 2
+    },
+    statNumber: {
+        fontSize: 20,
+        fontWeight: 700,
+        color: '#00bfa6'
+    },
+    statLabel: {
+        fontSize: 11,
+        color: '#aaa',
+        lineHeight: 1.2
+    },
+    searchButton: {
+        marginTop: 20,
+        padding: '14px 20px',
+        background: 'linear-gradient(135deg, #00bfa6, #00d4aa)',
+        color: 'black',
+        border: 'none',
+        borderRadius: 14,
+        width: '100%',
+        fontWeight: 700,
+        fontSize: 16,
+        cursor: 'pointer',
+        transition: 'all 0.3s ease',
+        transform: 'scale(1)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 8,
+        boxShadow: '0 6px 20px rgba(0,191,166,0.3)'
+    },
+    searchButtonIcon: {
+        fontSize: 18
+    },
+    searchContainer: {
+        background: 'linear-gradient(135deg, #2b2b2b 0%, #2a2a2a 100%)',
+        padding: 24,
+        borderRadius: 20,
+        maxWidth: 420,
+        width: '100%',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+        border: '1px solid #3a3a3a',
+        position: 'relative',
+        overflow: 'hidden'
     },
     courierLinkContainer: {
         marginTop: 40,
@@ -840,13 +1169,15 @@ const styles = {
         fontSize: 14
     },
     input: {
-        padding: 10,
+        padding: 14,
         width: '100%',
         background: '#1c1c1c',
         border: '1px solid #3a3a3a',
-        borderRadius: 8,
+        borderRadius: 12,
         color: 'white',
-        fontSize: 15
+        fontSize: 15,
+        transition: 'all 0.3s ease',
+        outline: 'none'
     },
     button: {
         marginTop: 20,
@@ -967,7 +1298,7 @@ const styles = {
         maxHeight: 'calc(80vh - 70px)',
         overflowY: 'auto'
     },
-    courierInfo: {
+    courierInfo1: {
         display: 'flex',
         gap: 15,
         marginBottom: 20,
@@ -1190,6 +1521,164 @@ const styles = {
         fontSize: 14,
         lineHeight: 1.4,
         fontStyle: 'italic'
+    },
+    // Минимальная опциональная сортировка
+    compactSortSection: {
+        width: '100%',
+        maxWidth: 400,
+        marginTop: 10,
+        marginBottom: 15,
+        display: 'flex',
+        justifyContent: 'flex-end',
+        position: 'relative'
+    },
+    sortToggle: {
+        background: 'transparent',
+        border: 'none',
+        color: '#777',
+        fontSize: 13,
+        cursor: 'pointer',
+        padding: '4px 8px',
+        borderRadius: 4,
+        transition: 'color 0.2s ease'
+    },
+    sortDropdown: {
+        position: 'absolute',
+        top: '100%',
+        right: 0,
+        background: '#2b2b2b',
+        border: '1px solid #3a3a3a',
+        borderRadius: 8,
+        padding: 6,
+        marginTop: 4,
+        boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+        zIndex: 10,
+        minWidth: 120
+    },
+    compactSortButton: {
+        width: '100%',
+        background: 'transparent',
+        border: 'none',
+        color: '#aaa',
+        fontSize: 13,
+        cursor: 'pointer',
+        padding: '6px 10px',
+        borderRadius: 4,
+        textAlign: 'left',
+        transition: 'all 0.2s ease'
+    },
+    compactSortButtonActive: {
+        color: '#00bfa6',
+        background: 'rgba(0,191,166,0.1)'
+    },
+    // Новые стили для карточек курьеров
+    newCard: {
+        background: 'linear-gradient(135deg, #2b2b2b 0%, #2a2a2a 100%)',
+        border: '1px solid #3a3a3a',
+        borderRadius: 16,
+        padding: 0,
+        marginBottom: 16,
+        boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+        transition: 'all 0.3s ease',
+        transform: 'scale(1)',
+        opacity: 1,
+        animation: 'slideIn 0.5s ease-out',
+        overflow: 'hidden'
+    },
+    cardHeader: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: '16px 20px 12px',
+        borderBottom: '1px solid rgba(58, 58, 58, 0.5)'
+    },
+    courierInfo: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: 12
+    },
+    courierDetails: {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 4
+    },
+    courierName: {
+        fontSize: 16,
+        fontWeight: 600,
+        color: 'white'
+    },
+    priceTag: {
+        background: '#00bfa6',
+        color: 'black',
+        padding: '6px 12px',
+        borderRadius: 20,
+        fontSize: 14,
+        fontWeight: 700
+    },
+    routeSection: {
+        padding: '12px 20px 8px'
+    },
+    routeInfo: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center'
+    },
+    cities: {
+        fontSize: 16,
+        fontWeight: 600,
+        color: 'white'
+    },
+    timeInfo: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: 6
+    },
+    timeHighlight: {
+        background: 'rgba(0, 191, 166, 0.1)',
+        color: '#00bfa6',
+        padding: '4px 8px',
+        borderRadius: 6,
+        fontSize: 12,
+        fontWeight: 600,
+        border: '1px solid rgba(0, 191, 166, 0.3)'
+    },
+    commentSection: {
+        display: 'flex',
+        alignItems: 'flex-start',
+        gap: 10,
+        padding: '8px 20px 12px',
+        background: 'rgba(28, 28, 28, 0.5)'
+    },
+    commentIcon: {
+        fontSize: 14,
+        marginTop: 2
+    },
+    commentText: {
+        flex: 1,
+        fontSize: 13,
+        color: '#ddd',
+        lineHeight: 1.4,
+        fontStyle: 'italic'
+    },
+    cardFooter: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: '12px 20px 16px'
+    },
+    statsInfo: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: 8,
+        fontSize: 12,
+        color: '#aaa'
+    },
+    tripsCount: {
+        color: '#00bfa6',
+        fontWeight: 500
+    },
+    reviewsCount: {
+        color: '#aaa'
     }
 };
 
