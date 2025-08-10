@@ -26,6 +26,7 @@ const generateRelativeTime = (hoursFromNow) => {
 export const couriers = [
     {
         name: 'Иван',
+        telegramUsername: 'ivan_courier',
         from: 'Москва',
         to: 'Санкт-Петербург',
         date: generateRelativeDate(1),
@@ -50,6 +51,7 @@ export const couriers = [
     },
     {
         name: 'Елена',
+        telegramUsername: 'elena_express',
         from: 'Москва',
         to: 'Санкт-Петербург',
         date: generateRelativeDate(3),
@@ -72,6 +74,7 @@ export const couriers = [
     },
     {
         name: 'Максим',
+        telegramUsername: 'maxim_student',
         from: 'Москва',
         to: 'Санкт-Петербург',
         date: generateRelativeDate(6),
@@ -94,6 +97,7 @@ export const couriers = [
     },
     {
         name: 'Анастасия',
+        telegramUsername: 'anastasia_premium',
         from: 'Москва',
         to: 'Санкт-Петербург',
         date: generateRelativeDate(12),
@@ -116,6 +120,7 @@ export const couriers = [
     },
     {
         name: 'Дмитрий',
+        telegramUsername: 'dmitry_early',
         from: 'Москва',
         to: 'Санкт-Петербург',
         date: generateRelativeDate(24),
@@ -138,6 +143,7 @@ export const couriers = [
     },
     {
         name: 'Анна',
+        telegramUsername: 'anna_kazan',
         from: 'Казань',
         to: 'Екатеринбург',
         date: generateRelativeDate(48),
@@ -160,6 +166,7 @@ export const couriers = [
     },
     {
         name: 'Олег',
+        telegramUsername: 'oleg_pro',
         from: 'Москва',
         to: 'Сочи',
         date: generateRelativeDate(72),

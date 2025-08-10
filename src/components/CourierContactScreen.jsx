@@ -197,7 +197,8 @@ const CourierContactScreen = ({
                 style={styles.telegramContact}
                 onClick={() => {
                     // В реальном приложении - открытие Telegram
-                    window.open(`https://t.me/${courier.courierName.toLowerCase()}`, '_blank');
+                    const telegramUrl = `https://t.me/${courier.telegramUsername || courier.courierName.toLowerCase()}`;
+                    window.open(telegramUrl, '_blank');
                 }}
             >
                 💬 Написать в Telegram

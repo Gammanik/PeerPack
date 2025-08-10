@@ -240,15 +240,34 @@ const TripPackagesScreen = ({
                                 📍 Доставить: {packageReq.deliveryLocation}
                             </div>
 
-                            <button 
-                                style={{
-                                    ...styles.actionButton,
-                                    ...styles.acceptButton
-                                }}
-                                onClick={() => onAcceptPackage(packageReq.id)}
-                            >
-                                Принять заявку
-                            </button>
+                            <div style={{
+                                display: 'flex',
+                                gap: 8
+                            }}>
+                                <button 
+                                    style={{
+                                        ...styles.actionButton,
+                                        backgroundColor: 'var(--tg-theme-link-color, #64b5ef)',
+                                        flex: 1
+                                    }}
+                                    onClick={() => {
+                                        const telegramUrl = `https://t.me/${packageReq.senderTelegram || packageReq.senderName.toLowerCase().replace(' ', '_')}`;
+                                        window.open(telegramUrl, '_blank');
+                                    }}
+                                >
+                                    💬 Написать
+                                </button>
+                                <button 
+                                    style={{
+                                        ...styles.actionButton,
+                                        ...styles.acceptButton,
+                                        flex: 2
+                                    }}
+                                    onClick={() => onAcceptPackage(packageReq.id)}
+                                >
+                                    Принять заявку
+                                </button>
+                            </div>
                         </div>
                     ))}
                 </div>
@@ -280,15 +299,34 @@ const TripPackagesScreen = ({
                                 📍 Доставить: {packageReq.deliveryLocation}
                             </div>
 
-                            <button 
-                                style={{
-                                    ...styles.actionButton,
-                                    ...styles.deliveredButton
-                                }}
-                                onClick={() => onMarkDelivered(packageReq.id)}
-                            >
-                                ✅ Отметить как доставленную
-                            </button>
+                            <div style={{
+                                display: 'flex',
+                                gap: 8
+                            }}>
+                                <button 
+                                    style={{
+                                        ...styles.actionButton,
+                                        backgroundColor: 'var(--tg-theme-link-color, #64b5ef)',
+                                        flex: 1
+                                    }}
+                                    onClick={() => {
+                                        const telegramUrl = `https://t.me/${packageReq.senderTelegram || packageReq.senderName.toLowerCase().replace(' ', '_')}`;
+                                        window.open(telegramUrl, '_blank');
+                                    }}
+                                >
+                                    💬 Написать
+                                </button>
+                                <button 
+                                    style={{
+                                        ...styles.actionButton,
+                                        ...styles.deliveredButton,
+                                        flex: 2
+                                    }}
+                                    onClick={() => onMarkDelivered(packageReq.id)}
+                                >
+                                    ✅ Доставлено
+                                </button>
+                            </div>
                         </div>
                     ))}
                 </div>
