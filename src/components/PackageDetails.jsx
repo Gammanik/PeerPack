@@ -5,8 +5,10 @@ const PackageDetails = ({
     setSelectedPackage,
     onSelectCourier
 }) => {
-    const newResponses = packageData.responses.filter(r => r.isNew);
-    const oldResponses = packageData.responses.filter(r => !r.isNew);
+    // Защищаемся от undefined responses
+    const responses = packageData?.responses || [];
+    const newResponses = responses.filter(r => r.isNew);
+    const oldResponses = responses.filter(r => !r.isNew);
     const allResponses = [...newResponses, ...oldResponses];
 
     const styles = {
@@ -208,10 +210,10 @@ const PackageDetails = ({
                         >
                             <div style={styles.courierHeader}>
                                 <div style={styles.courierInfo}>
-                                    <img src={response.courierAvatar} alt={response.courierName} style={styles.avatar} />
+                                    <img src={response.courier_avatar || response.courierAvatar} alt={response.courier_name || response.courierName} style={styles.avatar} />
                                     <div>
                                         <div style={styles.courierName}>
-                                            {response.courierName}
+                                            {response.courier_name || response.courierName}
                                             {response.isNew && (
                                                 <span style={{
                                                     ...styles.newBadge,
@@ -222,7 +224,7 @@ const PackageDetails = ({
                                                 </span>
                                             )}
                                         </div>
-                                        <div style={styles.courierRating}>⭐ {response.courierRating}</div>
+                                        <div style={styles.courierRating}>⭐ {response.courier_rating || response.courierRating}</div>
                                     </div>
                                 </div>
                                 <div style={styles.price}>₽{response.price}</div>

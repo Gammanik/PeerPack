@@ -216,26 +216,38 @@ const CourierModal = ({
 
                     <div style={styles.pastTripsSection}>
                         <h4 style={styles.sectionTitle}>Последние поездки</h4>
-                        {selectedCourier.pastTrips.map((trip, index) => (
-                            <div key={index} style={styles.pastTrip}>
-                                <span>{trip.from} → {trip.to}</span>
-                                <span style={styles.tripDate}>{trip.date}</span>
-                                <span style={styles.tripStatus}>✓</span>
+                        {selectedCourier.pastTrips && selectedCourier.pastTrips.length > 0 ? (
+                            selectedCourier.pastTrips.map((trip, index) => (
+                                <div key={index} style={styles.pastTrip}>
+                                    <span>{trip.from} → {trip.to}</span>
+                                    <span style={styles.tripDate}>{trip.date}</span>
+                                    <span style={styles.tripStatus}>✓</span>
+                                </div>
+                            ))
+                        ) : (
+                            <div style={{ color: 'var(--tg-theme-hint-color, #708499)', fontSize: 14 }}>
+                                Нет данных о предыдущих поездках
                             </div>
-                        ))}
+                        )}
                     </div>
 
                     <div style={styles.reviewsSection}>
                         <h4 style={styles.sectionTitle}>Отзывы</h4>
-                        {selectedCourier.reviews.map((review, index) => (
-                            <div key={index} style={styles.review}>
-                                <div style={styles.reviewHeader}>
-                                    <span style={styles.stars}>{renderStars(review.rating)}</span>
-                                    <span style={styles.reviewDate}>{review.date}</span>
+                        {selectedCourier.reviews && selectedCourier.reviews.length > 0 ? (
+                            selectedCourier.reviews.map((review, index) => (
+                                <div key={index} style={styles.review}>
+                                    <div style={styles.reviewHeader}>
+                                        <span style={styles.stars}>{renderStars(review.rating)}</span>
+                                        <span style={styles.reviewDate}>{review.date}</span>
+                                    </div>
+                                    <p style={styles.reviewText}>{review.text}</p>
                                 </div>
-                                <p style={styles.reviewText}>{review.text}</p>
+                            ))
+                        ) : (
+                            <div style={{ color: 'var(--tg-theme-hint-color, #708499)', fontSize: 14 }}>
+                                Пока нет отзывов
                             </div>
-                        ))}
+                        )}
                     </div>
 
                     {/* Показать статус и комментарий заявки, если есть */}

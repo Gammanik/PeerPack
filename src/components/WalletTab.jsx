@@ -1,6 +1,30 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import apiService from '../services/api';
 
 const WalletTab = ({ userBalance }) => {
+    const [transactions, setTransactions] = useState([]);
+    const [transactionsLoading, setTransactionsLoading] = useState(true);
+    
+    // Загружаем историю транзакций (в реальном приложении)
+    useEffect(() => {
+        const loadTransactions = async () => {
+            try {
+                setTransactionsLoading(true);
+                // const response = await apiService.getUserTransactions();
+                // setTransactions(response.transactions || []);
+                
+                // Пока используем мок-данные
+                await new Promise(resolve => setTimeout(resolve, 500));
+                setTransactions(mockTransactions);
+            } catch (error) {
+                console.error('Ошибка загрузки транзакций:', error);
+            } finally {
+                setTransactionsLoading(false);
+            }
+        };
+        
+        loadTransactions();
+    }, []);
     const styles = {
         container: {
             width: '100%'
@@ -210,9 +234,15 @@ const WalletTab = ({ userBalance }) => {
                     opacity: userBalance.available === 0 ? 0.5 : 1
                 }}
                 disabled={userBalance.available === 0}
-                onClick={() => {
+                onClick={async () => {
                     if (userBalance.available > 0) {
-                        alert(`Запрос на вывод ₽${userBalance.available} отправлен`);
+                        try {
+                            await apiService.withdrawBalance(userBalance.available);
+                            alert(`Запрос на вывод ₽${userBalance.available} отправлен`);
+                        } catch (error) {
+                            console.error('Ошибка вывода:', error);
+                            alert('Ошибка вывода средств');
+                        }
                     }
                 }}
             >
@@ -227,7 +257,15 @@ const WalletTab = ({ userBalance }) => {
                     marginBottom: 12
                 }}>История операций</h3>
                 
-                {mockTransactions.map(transaction => (
+                {transactionsLoading ? (
+                    <div style={{
+                        textAlign: 'center',
+                        color: 'var(--tg-theme-hint-color, #708499)',
+                        padding: 20
+                    }}>
+                        Загрузка истории...
+                    </div>
+                ) : transactions.map(transaction => (
                     <div key={transaction.id} style={styles.transactionItem}>
                         <div style={styles.transactionInfo}>
                             <div style={styles.transactionDesc}>{transaction.description}</div>

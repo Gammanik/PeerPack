@@ -68,21 +68,60 @@
             "to": "Санкт-Петербург", 
             "description": "Документы в папке",
             "reward": 800,
-            "status": "template",
+            "status": "active",
             "created_at": "2025-08-08T10:00:00Z",
             "usage_count": 3,
-            "active_requests": [
+            "size": "s",
+            "weight": "light",
+            "tags": ["documents", "urgent"],
+            "responses": [
               {
+                "id": "resp_001",
                 "courier_id": "courier_ivan_001",
                 "courier_name": "Иван",
+                "courier_avatar": "https://i.pravatar.cc/100?img=12",
+                "courier_rating": 4.9,
                 "status": "pending",
-                "message": "Срочно нужно в офис"
+                "price": 800,
+                "comment": "Принимаю! Доставлю аккуратно в срок.",
+                "date": "2025-08-11",
+                "time": "15:00 → 17:30",
+                "airport": "Шереметьево → Пулково",
+                "message": "Срочно нужно в офис",
+                "timestamp": "2025-08-10T14:00:00Z",
+                "isNew": false
               },
               {
+                "id": "resp_002",
                 "courier_id": "courier_elena_002", 
                 "courier_name": "Елена",
+                "courier_avatar": "https://i.pravatar.cc/100?img=44",
+                "courier_rating": 4.8,
                 "status": "accepted",
-                "message": "Утренний рейс предпочтительно"
+                "price": 750,
+                "comment": "Утренний рейс, доставлю быстро и надежно!",
+                "date": "2025-08-13",
+                "time": "09:30 → 11:45", 
+                "airport": "Внуково → Пулково",
+                "message": "Утренний рейс предпочтительно",
+                "timestamp": "2025-08-10T16:30:00Z",
+                "isNew": true
+              },
+              {
+                "id": "resp_003",
+                "courier_id": "courier_dmitry_003", 
+                "courier_name": "Дмитрий",
+                "courier_avatar": "https://i.pravatar.cc/100?img=33",
+                "courier_rating": 4.7,
+                "status": "pending",
+                "price": 700,
+                "comment": "Могу взять документы, лечу по работе",
+                "date": "2025-08-12",
+                "time": "12:15 → 14:30", 
+                "airport": "Домодедово → Пулково",
+                "message": "Бюджетный вариант",
+                "timestamp": "2025-08-11T08:15:00Z",
+                "isNew": true
               }
             ]
           },
@@ -92,10 +131,106 @@
             "to": "Казань",
             "description": "Медикаменты",
             "reward": 1000, 
-            "status": "template",
+            "status": "waiting",
             "created_at": "2025-08-07T15:00:00Z",
             "usage_count": 1,
-            "active_requests": []
+            "size": "m",
+            "weight": "medium",
+            "tags": ["medical", "fragile"],
+            "responses": [
+              {
+                "id": "resp_004",
+                "courier_id": "courier_sergey_004", 
+                "courier_name": "Сергей",
+                "courier_avatar": "https://i.pravatar.cc/100?img=22",
+                "courier_rating": 5.0,
+                "status": "pending",
+                "price": 1000,
+                "comment": "Имею опыт доставки медикаментов, все будет в порядке",
+                "date": "2025-08-12",
+                "time": "16:00 → 18:15", 
+                "airport": "Шереметьево → Казань",
+                "message": "Лекарства для бабушки",
+                "timestamp": "2025-08-11T10:00:00Z",
+                "isNew": true
+              }
+            ]
+          },
+          {
+            "id": "pkg_003",
+            "from": "Санкт-Петербург",
+            "to": "Москва",
+            "description": "Подарок - ювелирные украшения",
+            "reward": 1500, 
+            "status": "active",
+            "created_at": "2025-08-09T12:00:00Z",
+            "usage_count": 2,
+            "size": "s",
+            "weight": "light",
+            "tags": ["valuable", "gift"],
+            "responses": [
+              {
+                "id": "resp_005",
+                "courier_id": "courier_anna_005", 
+                "courier_name": "Анна",
+                "courier_avatar": "https://i.pravatar.cc/100?img=38",
+                "courier_rating": 4.9,
+                "status": "selected",
+                "price": 1500,
+                "comment": "Доставлю ценный груз с особой осторожностью",
+                "date": "2025-08-13",
+                "time": "11:00 → 13:20", 
+                "airport": "Пулково → Шереметьево",
+                "message": "Подарок на юбилей",
+                "timestamp": "2025-08-10T09:30:00Z",
+                "isNew": false
+              },
+              {
+                "id": "resp_006",
+                "courier_id": "courier_mikhail_006", 
+                "courier_name": "Михаил",
+                "courier_avatar": "https://i.pravatar.cc/100?img=45",
+                "courier_rating": 4.6,
+                "status": "declined",
+                "price": 1200,
+                "comment": "Извините, не смогу взять ценные вещи",
+                "date": "2025-08-12",
+                "time": "14:30 → 16:45", 
+                "airport": "Пулково → Внуково",
+                "message": "Дешевле вариант",
+                "timestamp": "2025-08-09T20:15:00Z",
+                "isNew": false
+              }
+            ]
+          },
+          {
+            "id": "pkg_004",
+            "from": "Москва",
+            "to": "Екатеринбург",
+            "description": "Запчасти для компьютера",
+            "reward": 900, 
+            "status": "template",
+            "created_at": "2025-08-06T18:00:00Z",
+            "usage_count": 0,
+            "size": "l",
+            "weight": "heavy",
+            "tags": ["electronics"],
+            "responses": []
+          },
+          {
+            "id": "pkg_005",
+            "from": "Санкт-Петербург",
+            "to": "Казань",
+            "description": "Книги и учебники",
+            "reward": 600, 
+            "status": "completed",
+            "created_at": "2025-08-05T14:00:00Z",
+            "usage_count": 1,
+            "size": "l",
+            "weight": "heavy",
+            "tags": ["books"],
+            "selectedCourier": "Олег",
+            "completedAt": "2025-08-06T16:30:00Z"
           }
         ]
       }
@@ -259,6 +394,52 @@
             "status": "confirmed",
             "timestamp": "2025-08-08T12:00:00Z",
             "is_new": false
+          },
+          {
+            "id": "req_005",
+            "trip_id": "trip_001",
+            "sender_name": "Елена Волкова",
+            "sender_telegram": "elena_volkova",
+            "sender_avatar": "https://i.pravatar.cc/100?img=41", 
+            "package_description": "Подарок - часы Apple Watch",
+            "message": "День рождения у друга, очень важно доставить вовремя!",
+            "reward": 1200,
+            "pickup_location": "Apple Store на Тверской",
+            "delivery_location": "Казанский вокзал, встреча у часов",
+            "status": "pending",
+            "timestamp": "2025-08-11T09:15:00Z",
+            "is_new": true
+          },
+          {
+            "id": "req_006",
+            "trip_id": "trip_001",
+            "sender_name": "Дмитрий Орлов",
+            "sender_telegram": "dmitry_orlov",
+            "sender_avatar": "https://i.pravatar.cc/100?img=52", 
+            "package_description": "Контракты и печать компании",
+            "message": "Срочные документы для подписания сделки",
+            "reward": 1500,
+            "pickup_location": "БЦ Москва-Сити, башня Федерация",
+            "delivery_location": "Аэропорт Казань, зона вылета",
+            "status": "pending",
+            "timestamp": "2025-08-11T11:30:00Z",
+            "is_new": true
+          },
+          {
+            "id": "req_007",
+            "trip_id": "trip_001",
+            "sender_name": "Олеся Кузнецова",
+            "sender_telegram": "olesya_kuznetsova",
+            "sender_avatar": "https://i.pravatar.cc/100?img=29", 
+            "package_description": "Хрупкие сувениры из стекла",
+            "message": "Очень хрупкие стеклянные фигурки, нужна особая осторожность",
+            "reward": 900,
+            "pickup_location": "Сувенирная лавка на Арбате",
+            "delivery_location": "ТЦ Мега Казань",
+            "status": "declined",
+            "timestamp": "2025-08-10T14:20:00Z",
+            "is_new": false,
+            "decline_reason": "Слишком хрупкий груз для авиаперевозки"
           }
         ]
       }

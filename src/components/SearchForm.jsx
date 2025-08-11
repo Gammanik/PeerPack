@@ -129,12 +129,12 @@ const SearchForm = ({
                         background: 'transparent',
                         border: 'none',
                         color: 'var(--tg-theme-hint-color, #708499)',
-                        fontSize: 16,
+                        fontSize: 14,
                         cursor: 'pointer',
-                        transition: 'all 0.2s ease',
-                        opacity: 0.6,
-                        padding: 4,
-                        borderRadius: 4
+                        transition: 'opacity 0.2s ease',
+                        opacity: 0.5,
+                        padding: 2,
+                        lineHeight: 1
                     }}
                     onClick={() => {
                         const tempFrom = from;
@@ -142,6 +142,8 @@ const SearchForm = ({
                         setTo(tempFrom);
                     }}
                     title="Поменять города местами"
+                    onMouseEnter={(e) => e.target.style.opacity = '0.8'}
+                    onMouseLeave={(e) => e.target.style.opacity = '0.5'}
                 >
                     ⇅
                 </button>

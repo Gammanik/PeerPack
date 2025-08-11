@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import apiService from '../services/api';
 import WalletTab from './WalletTab';
 
 const ProfilePage = ({ 
@@ -9,6 +10,39 @@ const ProfilePage = ({
     setSelectedTrip,
     userBalance
 }) => {
+    const [allTripRequests, setAllTripRequests] = useState([]);
+    const [requestsLoading, setRequestsLoading] = useState(true);
+
+    // Загружаем заявки для всех поездок пользователя
+    useEffect(() => {
+        const loadAllRequests = async () => {
+            try {
+                setRequestsLoading(true);
+                const requests = [];
+
+                for (const trip of userTrips) {
+                    try {
+                        const tripRequestsData = await apiService.getTripPackageRequests(trip.id);
+                        requests.push(...(tripRequestsData.requests || []));
+                    } catch (error) {
+                        console.error(`Ошибка загрузки заявок для поездки ${trip.id}:`, error);
+                    }
+                }
+
+                setAllTripRequests(requests);
+            } catch (error) {
+                console.error('Ошибка загрузки заявок:', error);
+            } finally {
+                setRequestsLoading(false);
+            }
+        };
+
+        if (userTrips.length > 0) {
+            loadAllRequests();
+        } else {
+            setRequestsLoading(false);
+        }
+    }, [userTrips]);
     const [activeTab, setActiveTab] = useState('packages');
     const [walletExpanded, setWalletExpanded] = useState(false);
 
@@ -118,26 +152,16 @@ const ProfilePage = ({
             color: 'var(--tg-theme-hint-color, #708499)',
             fontSize: 15,
             padding: '40px 20px'
+        },
+        avatar: {
+            width: 32,
+            height: 32,
+            borderRadius: '50%',
+            objectFit: 'cover',
+            marginRight: 8
         }
     };
 
-    const getStatusColor = (status) => {
-        switch (status) {
-            case 'pending': return { bg: '#FFD700', color: '#1a1a1a' };
-            case 'accepted': return { bg: '#4BB34B', color: 'white' };
-            case 'declined': return { bg: '#FF3333', color: 'white' };
-            default: return { bg: '#708499', color: 'white' };
-        }
-    };
-
-    const getStatusText = (status) => {
-        switch (status) {
-            case 'pending': return 'Ожидание ответа';
-            case 'accepted': return 'Принята';
-            case 'declined': return 'Отказано';
-            default: return '';
-        }
-    };
 
     return (
         <div style={styles.container}>
@@ -248,9 +272,17 @@ const ProfilePage = ({
                                     width: '100%',
                                     marginTop: 12
                                 }}
-                                onClick={(e) => {
+                                onClick={async (e) => {
                                     e.stopPropagation();
-                                    alert(`Запрос на вывод ₽${userBalance.available} отправлен`);
+                                    try {
+                                        await apiService.withdrawBalance(userBalance.available);
+                                        alert(`Запрос на вывод ₽${userBalance.available} отправлен`);
+                                        // Обновляем баланс (в реальном приложении через refreshUserData)
+                                        window.location.reload(); // Временное решение
+                                    } catch (error) {
+                                        console.error('Ошибка вывода средств:', error);
+                                        alert('Ошибка вывода средств');
+                                    }
                                 }}
                             >
                                 💳 Вывести ₽{userBalance.available.toLocaleString()}
@@ -281,6 +313,63 @@ const ProfilePage = ({
                 </button>
             </div>
 
+            {activeTab === 'trips' && (
+                <div style={{
+                    background: 'linear-gradient(135deg, rgba(82, 136, 193, 0.1) 0%, rgba(100, 181, 239, 0.1) 100%)',
+                    border: '1px dashed rgba(82, 136, 193, 0.3)',
+                    borderRadius: 16,
+                    padding: 20,
+                    marginBottom: 20,
+                    textAlign: 'center'
+                }}>
+                    <div style={{
+                        fontSize: 32,
+                        marginBottom: 8
+                    }}>✈️</div>
+                    <div style={{
+                        fontSize: 16,
+                        fontWeight: 600,
+                        color: 'var(--tg-theme-text-color, #ffffff)',
+                        marginBottom: 6
+                    }}>
+                        Планируете поездку?
+                    </div>
+                    <div style={{
+                        fontSize: 13,
+                        color: 'var(--tg-theme-hint-color, #708499)',
+                        marginBottom: 16,
+                        lineHeight: 1.4
+                    }}>
+                        Создайте поездку и получайте заявки на доставку от отправителей
+                    </div>
+                    <button
+                        onClick={() => {
+                            setShowProfilePage(false);
+                            window.dispatchEvent(new CustomEvent('switchToAddTrip'));
+                        }}
+                        style={{
+                            background: 'var(--tg-theme-button-color, #5288c1)',
+                            color: 'var(--tg-theme-button-text-color, #ffffff)',
+                            border: 'none',
+                            borderRadius: 12,
+                            padding: '12px 24px',
+                            fontSize: 15,
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 8,
+                            margin: '0 auto',
+                            boxShadow: '0 2px 8px rgba(82, 136, 193, 0.3)'
+                        }}
+                    >
+                        <span>➕</span>
+                        Добавить поездку
+                    </button>
+                </div>
+            )}
+
             {activeTab === 'packages' ? (
                 <div>
                     {packageTemplates.length > 0 && (
@@ -293,8 +382,9 @@ const ProfilePage = ({
                             }}>Мои посылки</h3>
                             
                             {packageTemplates.map(packageData => {
-                                const hasNewResponses = packageData.responses && packageData.responses.some(r => r.isNew);
-                                const responsesCount = packageData.responses ? packageData.responses.length : 0;
+                                const responses = packageData.responses || [];
+                                const hasNewResponses = responses.length > 0 && responses.some(r => r.isNew);
+                                const responsesCount = responses.length;
                                 const isTemplate = packageData.status === 'template';
                                 
                                 return (
@@ -331,6 +421,46 @@ const ProfilePage = ({
                                                         fontWeight: 600
                                                     }}>
                                                         NEW
+                                                    </div>
+                                                )}
+                                                {responses.length > 0 && !isTemplate && (
+                                                    <div style={{
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        marginRight: 8
+                                                    }}>
+                                                        {responses.slice(0, 3).map((response, index) => (
+                                                            <img 
+                                                                key={response.id}
+                                                                src={response.courier_avatar || response.courierAvatar} 
+                                                                alt={response.courier_name || response.courierName}
+                                                                style={{
+                                                                    ...styles.avatar,
+                                                                    width: 24,
+                                                                    height: 24,
+                                                                    marginRight: index < 2 ? -8 : 4,
+                                                                    border: '1px solid var(--tg-theme-bg-color, #17212b)',
+                                                                    zIndex: 3 - index
+                                                                }}
+                                                            />
+                                                        ))}
+                                                        {responses.length > 3 && (
+                                                            <div style={{
+                                                                width: 24,
+                                                                height: 24,
+                                                                borderRadius: '50%',
+                                                                background: 'var(--tg-theme-hint-color, #708499)',
+                                                                color: 'white',
+                                                                fontSize: 10,
+                                                                fontWeight: 600,
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                justifyContent: 'center',
+                                                                marginLeft: -8
+                                                            }}>
+                                                                +{responses.length - 3}
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 )}
                                                 <div style={{
@@ -436,10 +566,10 @@ const ProfilePage = ({
                 </div>
             ) : (
                 <div>
-                    {userTrips.map((trip, index) => {
-                        // Получаем заявки для этой поездки из props (нужно передать)
-                        const tripRequests = (window.packageRequests || []).filter(req => req.tripId === trip.id);
-                        const newRequests = tripRequests.filter(req => req.isNew && req.status === 'pending');
+                    {userTrips.map((trip) => {
+                        // Получаем заявки для этой поездки  
+                        const tripRequests = allTripRequests.filter(req => req.trip_id === trip.id);
+                        const newRequests = tripRequests.filter(req => req.is_new && req.status === 'pending');
                         const totalRequests = tripRequests.length;
                         
                         return (
@@ -462,6 +592,46 @@ const ProfilePage = ({
                                         alignItems: 'center',
                                         gap: 8
                                     }}>
+                                        {tripRequests.length > 0 && (
+                                            <div style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                marginRight: 8
+                                            }}>
+                                                {tripRequests.slice(0, 3).map((request, index) => (
+                                                    <img 
+                                                        key={request.id}
+                                                        src={request.sender_avatar} 
+                                                        alt={request.sender_name}
+                                                        style={{
+                                                            ...styles.avatar,
+                                                            width: 24,
+                                                            height: 24,
+                                                            marginRight: index < 2 ? -8 : 4,
+                                                            border: '1px solid var(--tg-theme-bg-color, #17212b)',
+                                                            zIndex: 3 - index
+                                                        }}
+                                                    />
+                                                ))}
+                                                {tripRequests.length > 3 && (
+                                                    <div style={{
+                                                        width: 24,
+                                                        height: 24,
+                                                        borderRadius: '50%',
+                                                        background: 'var(--tg-theme-hint-color, #708499)',
+                                                        color: 'white',
+                                                        fontSize: 10,
+                                                        fontWeight: 600,
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                        marginLeft: -8
+                                                    }}>
+                                                        +{tripRequests.length - 3}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
                                         {newRequests.length > 0 && (
                                             <div style={{
                                                 background: '#FFD700',
@@ -508,26 +678,7 @@ const ProfilePage = ({
 
                     {userTrips.length === 0 && (
                         <div style={styles.emptyState}>
-                            <div style={{ marginBottom: 16 }}>У вас пока нет поездок</div>
-                            <button
-                                onClick={() => {
-                                    setShowProfilePage(false);
-                                    window.dispatchEvent(new CustomEvent('switchToAddTrip'));
-                                }}
-                                style={{
-                                    background: 'var(--tg-theme-button-color, #5288c1)',
-                                    color: 'var(--tg-theme-button-text-color, #ffffff)',
-                                    border: 'none',
-                                    borderRadius: 8,
-                                    padding: '12px 24px',
-                                    fontSize: 14,
-                                    fontWeight: 500,
-                                    cursor: 'pointer',
-                                    transition: 'all 0.2s ease'
-                                }}
-                            >
-                                + Добавить поездку
-                            </button>
+                            У вас пока нет поездок
                         </div>
                     )}
                 </div>

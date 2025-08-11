@@ -1,14 +1,18 @@
 import React from 'react';
+import { useTripRequests } from '../hooks/useApi';
 
 const TripPackagesScreen = ({ 
     trip, 
-    packageRequests,
-    onBack,
-    onAcceptPackage,
-    onMarkDelivered,
-    setPackageRequests
+    onBack
 }) => {
-    const tripPackages = packageRequests.filter(pkg => pkg.tripId === trip.id);
+    const { 
+        requests: packageRequests, 
+        loading, 
+        error, 
+        acceptRequest, 
+        markDelivered 
+    } = useTripRequests(trip.id);
+    const tripPackages = packageRequests.filter(pkg => pkg.trip_id === trip.id);
     const pendingPackages = tripPackages.filter(pkg => pkg.status === 'pending');
     const acceptedPackages = tripPackages.filter(pkg => pkg.status === 'accepted');
     const deliveredPackages = tripPackages.filter(pkg => pkg.status === 'delivered');
@@ -171,6 +175,32 @@ const TripPackagesScreen = ({
         }
     };
 
+    if (loading) {
+        return (
+            <div style={styles.container}>
+                <div style={styles.header}>
+                    <button style={styles.backButton} onClick={onBack}>← Назад</button>
+                    <div style={styles.title}>Посылки для поездки</div>
+                    <div style={{ width: 50 }}></div>
+                </div>
+                <div style={styles.emptyState}>Загрузка заявок...</div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div style={styles.container}>
+                <div style={styles.header}>
+                    <button style={styles.backButton} onClick={onBack}>← Назад</button>
+                    <div style={styles.title}>Посылки для поездки</div>
+                    <div style={{ width: 50 }}></div>
+                </div>
+                <div style={styles.emptyState}>Ошибка загрузки: {error}</div>
+            </div>
+        );
+    }
+
     return (
         <div style={styles.container}>
             <div style={styles.header}>
@@ -194,7 +224,7 @@ const TripPackagesScreen = ({
                 <div style={{ marginBottom: 24 }}>
                     <div style={styles.sectionTitle}>
                         📥 Новые запросы ({pendingPackages.length})
-                        {pendingPackages.some(p => p.isNew) && (
+                        {pendingPackages.some(p => p.is_new) && (
                             <span style={styles.newBadge}>NEW</span>
                         )}
                     </div>
@@ -204,16 +234,16 @@ const TripPackagesScreen = ({
                             key={packageReq.id}
                             style={{
                                 ...styles.packageCard,
-                                ...(packageReq.isNew ? styles.newPackageCard : {})
+                                ...(packageReq.is_new ? styles.newPackageCard : {})
                             }}
                         >
                             <div style={styles.cardHeader}>
                                 <div style={styles.senderInfo}>
-                                    <img src={packageReq.senderAvatar} alt={packageReq.senderName} style={styles.avatar} />
+                                    <img src={packageReq.sender_avatar} alt={packageReq.sender_name} style={styles.avatar} />
                                     <div>
                                         <div style={styles.senderName}>
-                                            {packageReq.senderName}
-                                            {packageReq.isNew && (
+                                            {packageReq.sender_name}
+                                            {packageReq.is_new && (
                                                 <span style={{
                                                     ...styles.newBadge,
                                                     marginLeft: 8,
@@ -227,7 +257,7 @@ const TripPackagesScreen = ({
                             </div>
 
                             <div style={styles.packageInfo}>
-                                📦 {packageReq.packageDescription}
+                                📦 {packageReq.package_description}
                             </div>
                             
                             <div style={styles.message}>
@@ -235,9 +265,9 @@ const TripPackagesScreen = ({
                             </div>
 
                             <div style={styles.locationInfo}>
-                                📍 Забрать: {packageReq.pickupLocation}
+                                📍 Забрать: {packageReq.pickup_location}
                                 <br />
-                                📍 Доставить: {packageReq.deliveryLocation}
+                                📍 Доставить: {packageReq.delivery_location}
                             </div>
 
                             <div style={{
@@ -251,7 +281,7 @@ const TripPackagesScreen = ({
                                         flex: 1
                                     }}
                                     onClick={() => {
-                                        const telegramUrl = `https://t.me/${packageReq.senderTelegram || packageReq.senderName.toLowerCase().replace(' ', '_')}`;
+                                        const telegramUrl = `https://t.me/${packageReq.sender_telegram || packageReq.sender_name.toLowerCase().replace(' ', '_')}`;
                                         window.open(telegramUrl, '_blank');
                                     }}
                                 >
@@ -263,7 +293,7 @@ const TripPackagesScreen = ({
                                         ...styles.acceptButton,
                                         flex: 2
                                     }}
-                                    onClick={() => onAcceptPackage(packageReq.id)}
+                                    onClick={() => acceptRequest(packageReq.id)}
                                 >
                                     Принять заявку
                                 </button>
@@ -283,20 +313,20 @@ const TripPackagesScreen = ({
                         <div key={packageReq.id} style={styles.packageCard}>
                             <div style={styles.cardHeader}>
                                 <div style={styles.senderInfo}>
-                                    <img src={packageReq.senderAvatar} alt={packageReq.senderName} style={styles.avatar} />
-                                    <div style={styles.senderName}>{packageReq.senderName}</div>
+                                    <img src={packageReq.sender_avatar} alt={packageReq.sender_name} style={styles.avatar} />
+                                    <div style={styles.senderName}>{packageReq.sender_name}</div>
                                 </div>
                                 <div style={styles.reward}>₽{packageReq.reward}</div>
                             </div>
 
                             <div style={styles.packageInfo}>
-                                📦 {packageReq.packageDescription}
+                                📦 {packageReq.package_description}
                             </div>
 
                             <div style={styles.locationInfo}>
-                                📍 Забрать: {packageReq.pickupLocation}
+                                📍 Забрать: {packageReq.pickup_location}
                                 <br />
-                                📍 Доставить: {packageReq.deliveryLocation}
+                                📍 Доставить: {packageReq.delivery_location}
                             </div>
 
                             <div style={{
@@ -310,7 +340,7 @@ const TripPackagesScreen = ({
                                         flex: 1
                                     }}
                                     onClick={() => {
-                                        const telegramUrl = `https://t.me/${packageReq.senderTelegram || packageReq.senderName.toLowerCase().replace(' ', '_')}`;
+                                        const telegramUrl = `https://t.me/${packageReq.sender_telegram || packageReq.sender_name.toLowerCase().replace(' ', '_')}`;
                                         window.open(telegramUrl, '_blank');
                                     }}
                                 >
@@ -322,7 +352,7 @@ const TripPackagesScreen = ({
                                         ...styles.deliveredButton,
                                         flex: 2
                                     }}
-                                    onClick={() => onMarkDelivered(packageReq.id)}
+                                    onClick={() => markDelivered(packageReq.id)}
                                 >
                                     ✅ Доставлено
                                 </button>
@@ -345,8 +375,8 @@ const TripPackagesScreen = ({
                         }}>
                             <div style={styles.cardHeader}>
                                 <div style={styles.senderInfo}>
-                                    <img src={packageReq.senderAvatar} alt={packageReq.senderName} style={styles.avatar} />
-                                    <div style={styles.senderName}>{packageReq.senderName}</div>
+                                    <img src={packageReq.sender_avatar} alt={packageReq.sender_name} style={styles.avatar} />
+                                    <div style={styles.senderName}>{packageReq.sender_name}</div>
                                 </div>
                                 <div style={{
                                     fontSize: 12,
@@ -361,7 +391,7 @@ const TripPackagesScreen = ({
                             </div>
 
                             <div style={styles.packageInfo}>
-                                📦 {packageReq.packageDescription}
+                                📦 {packageReq.package_description}
                             </div>
 
                             <div style={{
@@ -390,8 +420,8 @@ const TripPackagesScreen = ({
                         }}>
                             <div style={styles.cardHeader}>
                                 <div style={styles.senderInfo}>
-                                    <img src={packageReq.senderAvatar} alt={packageReq.senderName} style={styles.avatar} />
-                                    <div style={styles.senderName}>{packageReq.senderName}</div>
+                                    <img src={packageReq.sender_avatar} alt={packageReq.sender_name} style={styles.avatar} />
+                                    <div style={styles.senderName}>{packageReq.sender_name}</div>
                                 </div>
                                 <div style={{
                                     fontSize: 12,
@@ -406,7 +436,7 @@ const TripPackagesScreen = ({
                             </div>
 
                             <div style={styles.packageInfo}>
-                                📦 {packageReq.packageDescription}
+                                📦 {packageReq.package_description}
                             </div>
 
                             <div style={{

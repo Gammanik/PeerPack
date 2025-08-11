@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { injectCSS } from './styles/CourierAnimations';
 import { couriers } from './data/mockData';
 import { sortCouriers, getAvailableCities, renderStars } from './utils/courierUtils';
+import { useUserData, usePackageActions, useTripRequests, useCourierSearch } from './hooks/useApi';
 import SearchForm from './components/SearchForm';
 import CourierCard from './components/CourierCard';
 import SortMenu from './components/SortMenu';
@@ -12,8 +13,25 @@ import ProfilePage from './components/ProfilePage';
 import PackageDetails from './components/PackageDetails';
 import TripPackagesScreen from './components/TripPackagesScreen';
 import CourierContactScreen from './components/CourierContactScreen';
+import AddTripForm from './components/AddTripForm';
 
 const SearchCouriers = () => {
+    // API хуки
+    const { 
+        packages: myPackages, 
+        setPackages: setMyPackages,
+        trips: userTrips, 
+        setTrips: setUserTrips,
+        balance: userBalance, 
+        setBalance: setUserBalance,
+        loading: userDataLoading,
+        refreshUserData 
+    } = useUserData();
+    
+    const { createPackage, createTrip, sendPackageToCourier } = usePackageActions();
+    const { couriers, searchCouriers, loading: couriersLoading } = useCourierSearch();
+
+    // UI состояния
     const [from, setFrom] = useState('Москва');
     const [to, setTo] = useState('Санкт-Петербург');
     const [results, setResults] = useState([]);
@@ -29,115 +47,9 @@ const SearchCouriers = () => {
     const [selectedPackage, setSelectedPackage] = useState(null);
     const [selectedTrip, setSelectedTrip] = useState(null);
     const [selectedCourierForContact, setSelectedCourierForContact] = useState(null);
-    const [packageRequests, setPackageRequests] = useState([
-        {
-            id: 1,
-            tripId: 1,
-            senderName: 'Анна Петрова',
-            senderTelegram: 'anna_petrova',
-            senderAvatar: 'https://i.pravatar.cc/100?img=25',
-            packageDescription: 'Документы для банка',
-            message: 'Срочно нужно передать документы в офис',
-            reward: 800,
-            pickupLocation: 'Шереметьево, терминал D',
-            deliveryLocation: 'Пулково, зал прилета',
-            status: 'pending',
-            timestamp: Date.now() - 3600000,
-            isNew: true
-        },
-        {
-            id: 2,
-            tripId: 1,
-            senderName: 'Игорь Смирнов',
-            senderTelegram: 'igor_smirnov',
-            senderAvatar: 'https://i.pravatar.cc/100?img=32',
-            packageDescription: 'Небольшой подарок',
-            message: 'Подарок жене на день рождения',
-            reward: 600,
-            pickupLocation: 'Шереметьево, терминал C',
-            deliveryLocation: 'Пулково, зал прилета',
-            status: 'accepted',
-            timestamp: Date.now() - 7200000,
-            isNew: false
-        },
-        {
-            id: 3,
-            tripId: 2,
-            senderName: 'Мария Козлова',
-            senderTelegram: 'maria_kozlova',
-            senderAvatar: 'https://i.pravatar.cc/100?img=41',
-            packageDescription: 'Лекарства',
-            message: 'Важные медикаменты для мамы',
-            reward: 1000,
-            pickupLocation: 'Пулково, зал отправления',
-            deliveryLocation: 'Кольцово, зал прилета',
-            status: 'confirmed',
-            timestamp: Date.now() - 86400000,
-            deliveredAt: Date.now() - 3600000,
-            confirmedAt: Date.now() - 1800000,
-            isNew: false
-        },
-        {
-            id: 4,
-            tripId: 1,
-            senderName: 'Олег Васильев',
-            senderAvatar: 'https://i.pravatar.cc/100?img=55',
-            packageDescription: 'Контракты',
-            message: 'Важные документы для сделки',
-            reward: 1200,
-            pickupLocation: 'Шереметьево, терминал B',
-            deliveryLocation: 'Казань, зал прилета',
-            status: 'delivered',
-            timestamp: Date.now() - 14400000,
-            deliveredAt: Date.now() - 1800000,
-            isNew: false
-        }
-    ]);
-    const [userBalance, setUserBalance] = useState({
-        available: 2600,
-        frozen: 1800,
-        pending: 1200
-    });
-    const [userTrips, setUserTrips] = useState([
-        {
-            id: 1,
-            name: 'Никита',
-            from: 'Москва',
-            to: 'Казань',
-            date: '2025-08-12',
-            time: '14:30 → 16:45',
-            airport: 'Шереметьево → Казань',
-            avatar: 'https://i.pravatar.cc/100?img=50',
-            tripsCount: 1,
-            rating: 5.0,
-            reviewsCount: 0,
-            price: 700,
-            tripComment: 'Лечу к родственникам, могу взять небольшие посылки',
-            pastTrips: [],
-            reviews: [],
-            isUserTrip: true
-        },
-        {
-            id: 2,
-            name: 'Никита',
-            from: 'Санкт-Петербург',
-            to: 'Екатеринбург',
-            date: '2025-08-20',
-            time: '10:15 → 14:30',
-            airport: 'Пулково → Кольцово',
-            avatar: 'https://i.pravatar.cc/100?img=50',
-            tripsCount: 2,
-            rating: 5.0,
-            reviewsCount: 1,
-            price: 900,
-            tripComment: 'Командировка, есть место для документов и небольших посылок',
-            pastTrips: [],
-            reviews: [
-                { rating: 5, text: 'Отличный курьер! Очень ответственный.', date: '2025-08-13' }
-            ],
-            isUserTrip: true
-        }
-    ]);
+    // packageRequests загружаются через useTripRequests hook для конкретных поездок
+    // userBalance загружается через useUserData hook
+    // userTrips загружаются через useUserData hook
     const [animatedStats, setAnimatedStats] = useState({
         trips: 0,
         rating: 0,
@@ -157,88 +69,7 @@ const SearchCouriers = () => {
     const [selectedCourier, setSelectedCourier] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [showRequestForm, setShowRequestForm] = useState(false);
-    const [myPackages, setMyPackages] = useState([
-        {
-            id: 1,
-            from: 'Москва',
-            to: 'Санкт-Петербург',
-            description: 'Документы в папке',
-            reward: 800,
-            status: 'active',
-            createdAt: Date.now() - 172800000,
-            responses: [
-                {
-                    courierId: 'Иван2025-08-11',
-                    courierName: 'Иван',
-                    courierAvatar: 'https://i.pravatar.cc/100?img=12',
-                    courierRating: 4.9,
-                    date: '2025-08-11',
-                    time: '15:00 → 17:30',
-                    airport: 'Шереметьево → Пулково',
-                    price: 800,
-                    status: 'accepted',
-                    comment: 'Принимаю! Доставлю аккуратно, буду на связи.',
-                    timestamp: Date.now() - 86400000,
-                    isNew: false
-                },
-                {
-                    courierId: 'Елена2025-08-11',
-                    courierName: 'Елена',
-                    courierAvatar: 'https://i.pravatar.cc/100?img=44',
-                    courierRating: 4.8,
-                    date: '2025-08-11',
-                    time: '09:30 → 11:45',
-                    airport: 'Внуково → Пулково',
-                    price: 750,
-                    status: 'accepted',
-                    comment: 'Могу взять документы, утренний рейс очень удобный.',
-                    timestamp: Date.now() - 3600000,
-                    isNew: true
-                }
-            ]
-        },
-        {
-            id: 2,
-            from: 'Москва',
-            to: 'Казань',
-            description: 'Медикаменты',
-            reward: 1000,
-            size: 's',
-            weight: 'light',
-            tags: ['urgent', 'fragile'],
-            pickupAddress: 'Аптека на Тверской, 15',
-            deliveryAddress: 'Больница им. Боткина, касса',
-            status: 'template',
-            createdAt: Date.now() - 259200000,
-            responses: []
-        },
-        {
-            id: 3,
-            from: 'Санкт-Петербург',
-            to: 'Москва',
-            description: 'Сувениры из поездки',
-            reward: 600,
-            size: 'm',
-            weight: 'medium',
-            tags: ['valuable'],
-            pickupAddress: 'Невский проспект, 28',
-            deliveryAddress: 'Красная площадь, 1',
-            status: 'template',
-            createdAt: Date.now() - 86400000,
-            responses: []
-        },
-        {
-            id: 4,
-            from: 'Москва',
-            to: 'Санкт-Петербург',
-            description: 'Документы (завершено)',
-            reward: 800,
-            status: 'completed',
-            createdAt: Date.now() - 432000000,
-            selectedCourier: 'Анастасия',
-            responses: []
-        }
-    ]);
+    // myPackages загружаются через useUserData hook
     const [sentRequests, setSentRequests] = useState([]);
     const [requestForm, setRequestForm] = useState({
         message: '',
@@ -251,17 +82,22 @@ const SearchCouriers = () => {
         deliveryAddress: ''
     });
     const [useExistingPackage, setUseExistingPackage] = useState(false);
+    const [showAddTripForm, setShowAddTripForm] = useState(false);
 
     const availableCities = getAvailableCities(couriers);
 
     // Search functionality
-    const handleSearch = () => {
-        const lowerFrom = from.trim().toLowerCase();
-        const lowerTo = to.trim().toLowerCase();
-        let filtered = couriers.filter((c) =>
-            c.from.toLowerCase() === lowerFrom &&
-            c.to.toLowerCase() === lowerTo
-        );
+    const handleSearch = async () => {
+        try {
+            const searchParams = {
+                from: from.trim(),
+                to: to.trim(),
+                date_from: dateFrom,
+                date_to: dateTo
+            };
+            
+            const searchResults = await searchCouriers(searchParams);
+            let filtered = searchResults;
 
         // Скрываем вылетевших курьеров
         const now = new Date();
@@ -303,9 +139,13 @@ const SearchCouriers = () => {
         // Объединяем: сначала обычные курьеры, потом с pending статусом
         const sorted = [...sortGroup(otherCouriers), ...sortGroup(pendingRequests)];
 
-        setResults(sorted);
-        if (sorted.length > 0) {
-            setSearchCollapsed(true);
+            setResults(sorted);
+            if (sorted.length > 0) {
+                setSearchCollapsed(true);
+            }
+        } catch (error) {
+            console.error('Ошибка поиска:', error);
+            setResults([]);
         }
     };
 
@@ -319,19 +159,12 @@ const SearchCouriers = () => {
         return sentRequests.some(req => req.courierId === courier.name + courier.date);
     };
 
-    const handleSendRequest = () => {
+    const handleSendRequest = async () => {
         if (selectedCourier) {
-            // Создаем или обновляем шаблон посылки если это новая посылка
-            if (!useExistingPackage && requestForm.packageDescription) {
-                const packageExists = myPackages.find(pkg => 
-                    pkg.description === requestForm.packageDescription && 
-                    pkg.from === selectedCourier.from && 
-                    pkg.to === selectedCourier.to
-                );
-                
-                if (!packageExists) {
-                    const newPackageTemplate = {
-                        id: Date.now(),
+            try {
+                // Создаем посылку через API если это новая посылка
+                if (!useExistingPackage && requestForm.packageDescription) {
+                    const packageData = {
                         from: selectedCourier.from,
                         to: selectedCourier.to,
                         description: requestForm.packageDescription,
@@ -340,38 +173,41 @@ const SearchCouriers = () => {
                         weight: requestForm.weight,
                         tags: requestForm.tags || [],
                         pickupAddress: requestForm.pickupAddress,
-                        deliveryAddress: requestForm.deliveryAddress,
-                        status: 'template',
-                        createdAt: Date.now(),
-                        responses: []
+                        deliveryAddress: requestForm.deliveryAddress
                     };
-                    setMyPackages([...myPackages, newPackageTemplate]);
+                    await createPackage(packageData);
                 }
+                
+                // Отправляем посылку курьеру
+                const courierRequestData = {
+                    message: requestForm.message,
+                    reward: requestForm.reward,
+                    packageDescription: requestForm.packageDescription
+                };
+                
+                await sendPackageToCourier(selectedCourier.id, courierRequestData);
+                
+                // Обновляем данные
+                refreshUserData();
+                
+                // Очищаем форму
+                setRequestForm({ 
+                    message: '', 
+                    reward: 800, 
+                    packageDescription: '',
+                    size: '',
+                    weight: '',
+                    tags: [],
+                    pickupAddress: '',
+                    deliveryAddress: ''
+                });
+                
+                setShowRequestForm(false);
+                setShowModal(false);
+            } catch (error) {
+                console.error('Ошибка отправки заявки:', error);
+                alert('Ошибка отправки заявки. Попробуйте ещё раз.');
             }
-            
-            const newRequest = {
-                id: Date.now(),
-                courierId: selectedCourier.name + selectedCourier.date,
-                status: 'pending',
-                timestamp: Date.now(),
-                courierName: selectedCourier.name,
-                route: `${selectedCourier.from} → ${selectedCourier.to}`,
-                date: selectedCourier.date,
-                message: requestForm.message,
-                reward: requestForm.reward,
-                packageDescription: requestForm.packageDescription,
-            };
-            setSentRequests([...sentRequests, newRequest]);
-            setRequestForm({ 
-                message: '', 
-                reward: 800, 
-                packageDescription: '',
-                size: '',
-                weight: '',
-                tags: [],
-                pickupAddress: '',
-                deliveryAddress: ''
-            });
         }
     };
 
@@ -509,31 +345,28 @@ const SearchCouriers = () => {
         return 'Любые даты';
     };
 
-    const handleAddTrip = () => {
-        if (newTrip.name && newTrip.from && newTrip.to && newTrip.date && newTrip.time && newTrip.airport) {
-            const tripToAdd = {
-                ...newTrip,
-                avatar: `https://i.pravatar.cc/100?img=${Math.floor(Math.random() * 70) + 1}`,
-                tripsCount: 1,
-                rating: 5.0,
-                reviewsCount: 0,
-                price: Math.floor(Math.random() * 1000) + 500,
-                tripComment: 'Новый курьер на платформе',
-                pastTrips: [],
-                reviews: [],
-                isUserTrip: true
+    // Удалено: старая реализация handleAddTrip
+
+    const handleAddTrip = async (tripData) => {
+        try {
+            const newTripData = {
+                name: 'Никита',
+                from: tripData.from,
+                to: tripData.to,
+                date: tripData.date,
+                time: tripData.time,
+                airport: tripData.transportDetails,
+                price: tripData.price,
+                comment: tripData.comment,
+                transportType: tripData.transportType,
+                capacity: tripData.capacity
             };
-            couriers.push(tripToAdd);
-            setUserTrips([...userTrips, tripToAdd]);
-            setNewTrip({
-                name: '',
-                from: '',
-                to: '',
-                date: '',
-                time: '',
-                airport: ''
-            });
-            setMode('search');
+            
+            await createTrip(newTripData);
+            refreshUserData(); // Обновляем данные пользователя
+            setShowAddTripForm(false);
+        } catch (error) {
+            console.error('Ошибка создания поездки:', error);
         }
     };
 
@@ -541,24 +374,21 @@ const SearchCouriers = () => {
     useEffect(() => {
         injectCSS();
         
-        // Делаем packageRequests доступными глобально для ProfilePage
-        window.packageRequests = packageRequests;
+        // packageRequests теперь загружаются через API hooks
+        
+        // Обработчик события добавления поездки
+        const handleSwitchToAddTrip = () => setShowAddTripForm(true);
+        window.addEventListener('switchToAddTrip', handleSwitchToAddTrip);
         
         const interval = setInterval(() => {
             setCurrentTime(new Date());
         }, 60000);
-
-        const handleSwitchToAddTrip = () => {
-            setMode('add');
-        };
-
-        window.addEventListener('switchToAddTrip', handleSwitchToAddTrip);
         
         return () => {
-            clearInterval(interval);
             window.removeEventListener('switchToAddTrip', handleSwitchToAddTrip);
+            clearInterval(interval);
         };
-    }, [packageRequests]);
+    }, []);
 
     useEffect(() => {
         const timer = setInterval(simulateStatusChange, 10000);
@@ -701,6 +531,27 @@ const SearchCouriers = () => {
         }
     };
 
+    // Показываем loading пока загружаются данные пользователя
+    if (userDataLoading) {
+        return (
+            <div style={{
+                ...styles.page,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                minHeight: '100vh'
+            }}>
+                <div style={{
+                    textAlign: 'center',
+                    color: 'var(--tg-theme-hint-color, #708499)',
+                    fontSize: 16
+                }}>
+                    Загрузка...
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div style={styles.page}>
             {/* Compact header for results */}
@@ -778,23 +629,7 @@ const SearchCouriers = () => {
                 ) : selectedTrip ? (
                     <TripPackagesScreen 
                         trip={selectedTrip}
-                        packageRequests={packageRequests}
                         onBack={() => setSelectedTrip(null)}
-                        onAcceptPackage={(packageId) => {
-                            setPackageRequests(prev => prev.map(pkg => 
-                                pkg.id === packageId 
-                                    ? { ...pkg, status: 'accepted', isNew: false }
-                                    : pkg
-                            ));
-                        }}
-                        onMarkDelivered={(packageId) => {
-                            setPackageRequests(prev => prev.map(pkg => 
-                                pkg.id === packageId 
-                                    ? { ...pkg, status: 'delivered', deliveredAt: Date.now() }
-                                    : pkg
-                            ));
-                        }}
-                        setPackageRequests={setPackageRequests}
                     />
                 ) : selectedPackage ? (
                     <PackageDetails 
@@ -864,8 +699,8 @@ const SearchCouriers = () => {
                     <div style={{ 
                         width: '100%', 
                         maxWidth: 480, 
-                        marginTop: results.length > 0 ? (searchCollapsed ? 8 : 0) : 30,
-                        paddingTop: 0
+                        marginTop: results.length > 0 ? (searchCollapsed ? 0 : 24) : 30,
+                        paddingTop: searchCollapsed ? 60 : 0
                     }}>
                         {results.length === 0 ? (
                             <div style={{ 
@@ -1028,6 +863,13 @@ const SearchCouriers = () => {
                 myPackages={myPackages}
                 useExistingPackage={useExistingPackage}
                 setUseExistingPackage={setUseExistingPackage}
+            />
+
+            <AddTripForm
+                showAddTripForm={showAddTripForm}
+                setShowAddTripForm={setShowAddTripForm}
+                onAddTrip={handleAddTrip}
+                availableCities={availableCities}
             />
 
             {showBackToTop && (

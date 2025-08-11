@@ -1,4 +1,5 @@
 import React from 'react';
+import apiService from '../services/api';
 
 const CourierContactScreen = ({ 
     courier, 
@@ -179,10 +180,10 @@ const CourierContactScreen = ({
 
             <div style={styles.courierCard}>
                 <div style={styles.courierHeader}>
-                    <img src={courier.courierAvatar} alt={courier.courierName} style={styles.avatar} />
+                    <img src={courier.courier_avatar || courier.courierAvatar} alt={courier.courier_name || courier.courierName} style={styles.avatar} />
                     <div>
-                        <div style={styles.courierName}>{courier.courierName}</div>
-                        <div style={styles.courierRating}>⭐ {courier.courierRating} • ₽{courier.price}</div>
+                        <div style={styles.courierName}>{courier.courier_name || courier.courierName}</div>
+                        <div style={styles.courierRating}>⭐ {courier.courier_rating || courier.courierRating} • ₽{courier.price}</div>
                     </div>
                 </div>
                 <div style={styles.flightInfo}>
@@ -197,7 +198,7 @@ const CourierContactScreen = ({
                 style={styles.telegramContact}
                 onClick={() => {
                     // В реальном приложении - открытие Telegram
-                    const telegramUrl = `https://t.me/${courier.telegramUsername || courier.courierName.toLowerCase()}`;
+                    const telegramUrl = `https://t.me/${courier.telegramUsername || (courier.courier_name || courier.courierName).toLowerCase()}`;
                     window.open(telegramUrl, '_blank');
                 }}
             >
@@ -224,9 +225,25 @@ const CourierContactScreen = ({
 
             <button 
                 style={styles.confirmButton}
-                onClick={() => {
-                    onPaymentConfirm();
-                    alert('Платеж заблокирован! Свяжитесь с курьером для передачи посылки.');
+                onClick={async () => {
+                    try {
+                        // В реальном приложении - создание эскроу-платежа
+                        // await apiService.createEscrowPayment(packageData.id, courier.courierId);
+                        
+                        // Обновляем статус посылки
+                        // await apiService.updatePackageStatus(packageData.id, 'payment_confirmed');
+                        
+                        console.log('API Call: POST /api/packages/' + packageData.id + '/confirm-payment', {
+                            courierId: courier.courierId || courier.courier_id || courier.courier_name || courier.courierName,
+                            amount: packageData.reward
+                        });
+                        
+                        onPaymentConfirm();
+                        alert('Платеж заблокирован! Свяжитесь с курьером для передачи посылки.');
+                    } catch (error) {
+                        console.error('Ошибка подтверждения платежа:', error);
+                        alert('Ошибка подтверждения платежа');
+                    }
                 }}
             >
                 Подтвердить и заблокировать ₽{packageData.reward}

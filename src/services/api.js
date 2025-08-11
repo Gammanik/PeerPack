@@ -1,0 +1,175 @@
+import mockApiData from '../data/api-mock-data.json';
+
+// Симуляция HTTP задержки
+const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+// Симуляция успешного ответа
+const mockResponse = (data, status = 200) => ({
+    status,
+    data,
+    ok: status >= 200 && status < 300
+});
+
+// Симуляция ошибки
+const mockError = (message, status = 400) => {
+    throw new Error(`HTTP ${status}: ${message}`);
+};
+
+class ApiService {
+    constructor() {
+        this.baseUrl = 'https://api.peerpack.com/v1';
+        this.token = 'mock_jwt_token_123';
+    }
+
+    // Общий метод для HTTP запросов
+    async request(endpoint, options = {}) {
+        await delay(300 + Math.random() * 700); // Имитация сетевой задержки
+        
+        console.log(`API Call: ${options.method || 'GET'} ${endpoint}`, options.body || '');
+        
+        // В реальном приложении здесь был бы fetch
+        // return fetch(`${this.baseUrl}${endpoint}`, {
+        //     headers: {
+        //         'Authorization': `Bearer ${this.token}`,
+        //         'Content-Type': 'application/json',
+        //         ...options.headers
+        //     },
+        //     ...options
+        // });
+
+        // Симуляция ответов на основе эндпоинтов
+        return this.getMockResponse(endpoint, options);
+    }
+
+    getMockResponse(endpoint, options) {
+        const method = options.method || 'GET';
+        
+        // GET /api/couriers
+        if (endpoint.includes('/couriers') && method === 'GET') {
+            return mockResponse(mockApiData.endpoints['GET /api/couriers'].response);
+        }
+        
+        // GET /api/user/packages
+        if (endpoint === '/user/packages' && method === 'GET') {
+            return mockResponse(mockApiData.endpoints['GET /api/user/packages'].response);
+        }
+        
+        // GET /api/user/trips
+        if (endpoint === '/user/trips' && method === 'GET') {
+            return mockResponse(mockApiData.endpoints['GET /api/user/trips'].response);
+        }
+        
+        // GET /api/user/balance
+        if (endpoint === '/user/balance' && method === 'GET') {
+            return mockResponse(mockApiData.endpoints['GET /api/user/balance'].response);
+        }
+        
+        // GET /api/trips/{id}/package-requests
+        if (endpoint.includes('/trips/') && endpoint.includes('/package-requests') && method === 'GET') {
+            return mockResponse(mockApiData.endpoints['GET /api/trips/{trip_id}/package-requests'].response);
+        }
+        
+        // POST /api/packages
+        if (endpoint === '/packages' && method === 'POST') {
+            return mockResponse(mockApiData.endpoints['POST /api/packages'].response);
+        }
+        
+        // POST /api/trips
+        if (endpoint === '/trips' && method === 'POST') {
+            return mockResponse(mockApiData.endpoints['POST /api/trips'].response);
+        }
+        
+        // PUT /api/package-requests/{id}/accept
+        if (endpoint.includes('/package-requests/') && endpoint.includes('/accept') && method === 'PUT') {
+            return mockResponse(mockApiData.endpoints['PUT /api/package-requests/{request_id}/accept'].response);
+        }
+        
+        // PUT /api/package-requests/{id}/mark-delivered
+        if (endpoint.includes('/package-requests/') && endpoint.includes('/mark-delivered') && method === 'PUT') {
+            return mockResponse(mockApiData.endpoints['PUT /api/package-requests/{request_id}/mark-delivered'].response);
+        }
+        
+        // POST /api/user/withdraw
+        if (endpoint === '/user/withdraw' && method === 'POST') {
+            return mockResponse(mockApiData.endpoints['POST /api/user/withdraw'].response);
+        }
+        
+        return mockError('Endpoint not found', 404);
+    }
+
+    // API методы
+    async getCouriers(params = {}) {
+        const queryString = new URLSearchParams(params).toString();
+        const response = await this.request(`/couriers?${queryString}`);
+        return response.data;
+    }
+
+    async getUserPackages() {
+        const response = await this.request('/user/packages');
+        return response.data;
+    }
+
+    async getUserTrips() {
+        const response = await this.request('/user/trips');
+        return response.data;
+    }
+
+    async getUserBalance() {
+        const response = await this.request('/user/balance');
+        return response.data;
+    }
+
+    async getTripPackageRequests(tripId) {
+        const response = await this.request(`/trips/${tripId}/package-requests`);
+        return response.data;
+    }
+
+    async createPackage(packageData) {
+        const response = await this.request('/packages', {
+            method: 'POST',
+            body: JSON.stringify(packageData)
+        });
+        return response.data;
+    }
+
+    async createTrip(tripData) {
+        const response = await this.request('/trips', {
+            method: 'POST',
+            body: JSON.stringify(tripData)
+        });
+        return response.data;
+    }
+
+    async acceptPackageRequest(requestId) {
+        const response = await this.request(`/package-requests/${requestId}/accept`, {
+            method: 'PUT'
+        });
+        return response.data;
+    }
+
+    async markPackageDelivered(requestId) {
+        const response = await this.request(`/package-requests/${requestId}/mark-delivered`, {
+            method: 'PUT'
+        });
+        return response.data;
+    }
+
+    async withdrawBalance(amount) {
+        const response = await this.request('/user/withdraw', {
+            method: 'POST',
+            body: JSON.stringify({ amount, method: 'telegram_stars' })
+        });
+        return response.data;
+    }
+
+    async sendPackageToCourier(courierId, packageData) {
+        const response = await this.request(`/couriers/${courierId}/send-package`, {
+            method: 'POST',
+            body: JSON.stringify(packageData)
+        });
+        return response.data;
+    }
+}
+
+export const apiService = new ApiService();
+export default apiService;
