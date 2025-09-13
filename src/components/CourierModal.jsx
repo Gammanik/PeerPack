@@ -201,9 +201,9 @@ const CourierModal = ({
                         <div>
                             <div style={styles.rating}>
                                 <span style={styles.stars}>{renderStars(selectedCourier.rating)}</span>
-                                <span style={styles.ratingText}>{selectedCourier.rating} ({selectedCourier.reviewsCount} отзывов)</span>
+                                <span style={styles.ratingText}>{selectedCourier.rating} ({selectedCourier.reviews_count} отзывов)</span>
                             </div>
-                            <p style={styles.trips}>{selectedCourier.tripsCount} успешных поездок</p>
+                            <p style={styles.trips}>{selectedCourier.trips_count} успешных поездок</p>
                         </div>
                     </div>
 
@@ -216,8 +216,8 @@ const CourierModal = ({
 
                     <div style={styles.pastTripsSection}>
                         <h4 style={styles.sectionTitle}>Последние поездки</h4>
-                        {selectedCourier.pastTrips && selectedCourier.pastTrips.length > 0 ? (
-                            selectedCourier.pastTrips.map((trip, index) => (
+                        {selectedCourier.past_trips && selectedCourier.past_trips.length > 0 ? (
+                            selectedCourier.past_trips.map((trip, index) => (
                                 <div key={index} style={styles.pastTrip}>
                                     <span>{trip.from} → {trip.to}</span>
                                     <span style={styles.tripDate}>{trip.date}</span>
