@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { injectCSS } from './styles/CourierAnimations';
 import { couriers } from './data/mockData';
-import { sortCouriers, getAvailableCities, renderStars } from './utils/courierUtils';
+import { sortCouriers, getAvailableCities } from './utils/courierUtils';
 import { useUserData, usePackageActions, useTripRequests, useCourierSearch } from './hooks/useApi';
 import SearchForm from './components/SearchForm';
 import CourierCard from './components/CourierCard';
