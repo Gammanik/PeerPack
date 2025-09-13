@@ -389,16 +389,10 @@ const AddTripForm = ({
 
                     <div style={styles.modalButtons}>
                         <button 
-                            style={styles.cancelButton}
-                            onClick={() => setShowAddTripForm(false)}
-                        >
-                            Отмена
-                        </button>
-                        <button 
-                            style={styles.addButton}
+                            style={{...styles.addButton, flex: 'none', width: '100%'}}
                             onClick={handleSubmit}
                         >
-                            Добавить поездку
+                            💰 Добавить поездку 💰
                         </button>
                     </div>
                 </div>

@@ -18,7 +18,7 @@
             "telegram_username": "ivan_courier",
             "from": "Москва",
             "to": "Санкт-Петербург",
-            "date": "2025-08-11",
+            "date": "2025-12-11",
             "time": "15:00 → 17:30",
             "airport": "Шереметьево → Пулково",
             "avatar": "https://i.pravatar.cc/100?img=12",
@@ -50,6 +50,54 @@
             "reviews_count": 21,
             "price": 1200,
             "trip_comment": "Утренний рейс, удобно для срочных доставок. Место только для документов"
+          },
+          {
+            "id": "courier_maxim_003",
+            "name": "Максим",
+            "telegram_username": "maxim_student",
+            "from": "Москва",
+            "to": "Санкт-Петербург",
+            "date": "2025-08-16",
+            "time": "18:00 → 20:15",
+            "airport": "Домодедово → Пулково",
+            "avatar": "https://i.pravatar.cc/100?img=68",
+            "trips_count": 15,
+            "rating": 4.6,
+            "reviews_count": 12,
+            "price": 600,
+            "trip_comment": "Студент, летаю часто к родителям. Недорого, но надежно!"
+          },
+          {
+            "id": "courier_anastasia_004",
+            "name": "Анастасия", 
+            "telegram_username": "anastasia_premium",
+            "from": "Москва",
+            "to": "Санкт-Петербург",
+            "date": "2025-08-22",
+            "time": "12:30 → 14:45",
+            "airport": "Шереметьево → Пулково",
+            "avatar": "https://i.pravatar.cc/100?img=31",
+            "trips_count": 52,
+            "rating": 5.0,
+            "reviews_count": 45,
+            "price": 1500,
+            "trip_comment": "Премиум доставка. Фото отчеты, трекинг, страховка включена"
+          },
+          {
+            "id": "courier_dmitry_005",
+            "name": "Дмитрий",
+            "telegram_username": "dmitry_early",
+            "from": "Москва", 
+            "to": "Санкт-Петербург",
+            "date": "2025-08-24",
+            "time": "06:00 → 08:15",
+            "airport": "Внуково → Пулково",
+            "avatar": "https://i.pravatar.cc/100?img=17",
+            "trips_count": 34,
+            "rating": 4.7,
+            "reviews_count": 28,
+            "price": 900,
+            "trip_comment": "Самый ранний рейс. Беру только легкие посылки до 2кг"
           }
         ]
       }

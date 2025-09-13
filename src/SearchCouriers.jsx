@@ -35,6 +35,7 @@ const SearchCouriers = () => {
     const [from, setFrom] = useState('Москва');
     const [to, setTo] = useState('Санкт-Петербург');
     const [results, setResults] = useState([]);
+    const [searchPerformed, setSearchPerformed] = useState(false);
     const [dateFrom, setDateFrom] = useState('');
     const [dateTo, setDateTo] = useState('');
     const [showDatePicker, setShowDatePicker] = useState(false);
@@ -140,6 +141,7 @@ const SearchCouriers = () => {
         const sorted = [...sortGroup(otherCouriers), ...sortGroup(pendingRequests)];
 
             setResults(sorted);
+            setSearchPerformed(true);
             if (sorted.length > 0) {
                 setSearchCollapsed(true);
             }
@@ -262,11 +264,13 @@ const SearchCouriers = () => {
     const clearFromCity = () => {
         setFrom('');
         setResults([]);
+        setSearchPerformed(false);
         setSearchCollapsed(false);
     };
     const clearToCity = () => {
         setTo('');
         setResults([]);
+        setSearchPerformed(false);
         setSearchCollapsed(false);
     };
 
@@ -702,7 +706,7 @@ const SearchCouriers = () => {
                         marginTop: results.length > 0 ? (searchCollapsed ? 0 : 24) : 30,
                         paddingTop: searchCollapsed ? 60 : 0
                     }}>
-                        {results.length === 0 ? (
+                        {results.length === 0 && searchPerformed ? (
                             <div style={{ 
                                 textAlign: 'center',
                                 color: 'var(--tg-theme-hint-color, #708499)',
@@ -740,9 +744,9 @@ const SearchCouriers = () => {
                                 textDecoration: 'none',
                                 fontWeight: 500
                             }}
-                            onClick={() => setMode('add')}
+                            onClick={() => setShowAddTripForm(true)}
                         >
-                            Вы курьер? Добавить поездку
+                            Близится поездка? Заработайте на ней!
                         </button>
                     </div>
                 </>

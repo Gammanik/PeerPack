@@ -41,12 +41,33 @@ class ApiService {
         return this.getMockResponse(endpoint, options);
     }
 
+    // Генерирует относительные даты для курьеров
+    generateDynamicCourierDates(couriers) {
+        const now = new Date();
+        
+        return couriers.map((courier, index) => {
+            // Генерируем разные времена для каждого курьера
+            const hoursFromNow = [1, 3, 5, 8, 12][index] || (index + 1); // 1ч, 3ч, 5ч, 8ч, 12ч
+            const departureTime = new Date(now.getTime() + hoursFromNow * 60 * 60 * 1000);
+            
+            // Форматируем дату в YYYY-MM-DD
+            const formattedDate = departureTime.toISOString().split('T')[0];
+            
+            return {
+                ...courier,
+                date: formattedDate
+            };
+        });
+    }
+
     getMockResponse(endpoint, options) {
         const method = options.method || 'GET';
         
         // GET /api/couriers
         if (endpoint.includes('/couriers') && method === 'GET') {
-            return mockResponse(mockApiData.endpoints['GET /api/couriers'].response);
+            const couriersData = mockApiData.endpoints['GET /api/couriers'].response;
+            const dynamicCouriers = this.generateDynamicCourierDates(couriersData.couriers);
+            return mockResponse({ couriers: dynamicCouriers });
         }
         
         // GET /api/user/packages
