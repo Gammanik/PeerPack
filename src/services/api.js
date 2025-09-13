@@ -53,9 +53,19 @@ class ApiService {
             // Форматируем дату в YYYY-MM-DD
             const formattedDate = departureTime.toISOString().split('T')[0];
             
+            // Генерируем время выезда на основе нового времени
+            const startHour = departureTime.getHours();
+            const startMinute = departureTime.getMinutes();
+            const endTime = new Date(departureTime.getTime() + 2.5 * 60 * 60 * 1000); // +2.5 часа полёта
+            const endHour = endTime.getHours();
+            const endMinute = endTime.getMinutes();
+            
+            const timeString = `${startHour.toString().padStart(2, '0')}:${startMinute.toString().padStart(2, '0')} → ${endHour.toString().padStart(2, '0')}:${endMinute.toString().padStart(2, '0')}`;
+            
             return {
                 ...courier,
-                date: formattedDate
+                date: formattedDate,
+                time: timeString
             };
         });
     }
@@ -80,10 +90,6 @@ class ApiService {
             return mockResponse(mockApiData.endpoints['GET /api/user/trips'].response);
         }
         
-        // GET /api/user/balance
-        if (endpoint === '/user/balance' && method === 'GET') {
-            return mockResponse(mockApiData.endpoints['GET /api/user/balance'].response);
-        }
         
         // GET /api/trips/{id}/package-requests
         if (endpoint.includes('/trips/') && endpoint.includes('/package-requests') && method === 'GET') {
@@ -110,10 +116,6 @@ class ApiService {
             return mockResponse(mockApiData.endpoints['PUT /api/package-requests/{request_id}/mark-delivered'].response);
         }
         
-        // POST /api/user/withdraw
-        if (endpoint === '/user/withdraw' && method === 'POST') {
-            return mockResponse(mockApiData.endpoints['POST /api/user/withdraw'].response);
-        }
         
         return mockError('Endpoint not found', 404);
     }
@@ -135,10 +137,6 @@ class ApiService {
         return response.data;
     }
 
-    async getUserBalance() {
-        const response = await this.request('/user/balance');
-        return response.data;
-    }
 
     async getTripPackageRequests(tripId) {
         const response = await this.request(`/trips/${tripId}/package-requests`);
@@ -175,13 +173,6 @@ class ApiService {
         return response.data;
     }
 
-    async withdrawBalance(amount) {
-        const response = await this.request('/user/withdraw', {
-            method: 'POST',
-            body: JSON.stringify({ amount, method: 'telegram_stars' })
-        });
-        return response.data;
-    }
 
     async sendPackageToCourier(courierId, packageData) {
         const response = await this.request(`/couriers/${courierId}/send-package`, {

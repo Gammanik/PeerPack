@@ -22,8 +22,6 @@ const SearchCouriers = () => {
         setPackages: setMyPackages,
         trips: userTrips, 
         setTrips: setUserTrips,
-        balance: userBalance, 
-        setBalance: setUserBalance,
         loading: userDataLoading,
         refreshUserData 
     } = useUserData();
@@ -49,7 +47,6 @@ const SearchCouriers = () => {
     const [selectedTrip, setSelectedTrip] = useState(null);
     const [selectedCourierForContact, setSelectedCourierForContact] = useState(null);
     // packageRequests загружаются через useTripRequests hook для конкретных поездок
-    // userBalance загружается через useUserData hook
     // userTrips загружаются через useUserData hook
     const [animatedStats, setAnimatedStats] = useState({
         trips: 0,
@@ -653,7 +650,6 @@ const SearchCouriers = () => {
                         userTrips={userTrips}
                         setSelectedPackage={setSelectedPackage}
                         setSelectedTrip={setSelectedTrip}
-                        userBalance={userBalance}
                     />
                 )
             ) : mode === 'search' ? (

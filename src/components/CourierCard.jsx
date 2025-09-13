@@ -192,13 +192,13 @@ const CourierCard = ({
             
             <div style={styles.commentSection}>
                 <div style={styles.commentIcon}>💬</div>
-                <div style={styles.commentText}>{courier.tripComment}</div>
+                <div style={styles.commentText}>{courier.trip_comment}</div>
             </div>
             
             <div style={styles.cardFooter}>
                 <div style={styles.statsInfo}>
-                    <span style={styles.tripsCount}>{courier.tripsCount} поездок</span>
-                    <span style={styles.reviewsCount}>• {courier.reviewsCount} отзывов</span>
+                    <span style={styles.tripsCount}>{courier.trips_count} поездок</span>
+                    <span style={styles.reviewsCount}>• {courier.reviews_count} отзывов</span>
                 </div>
                 {requestStatus && (
                     <span style={getStatusStyle(requestStatus)}>

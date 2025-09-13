@@ -4,7 +4,6 @@ import apiService from '../services/api';
 export const useUserData = () => {
     const [packages, setPackages] = useState([]);
     const [trips, setTrips] = useState([]);
-    const [balance, setBalance] = useState({ available: 0, frozen: 0, pending: 0 });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -13,15 +12,13 @@ export const useUserData = () => {
             setLoading(true);
             setError(null);
             
-            const [packagesResponse, tripsResponse, balanceResponse] = await Promise.all([
+            const [packagesResponse, tripsResponse] = await Promise.all([
                 apiService.getUserPackages(),
-                apiService.getUserTrips(), 
-                apiService.getUserBalance()
+                apiService.getUserTrips()
             ]);
             
             setPackages(packagesResponse.packages || []);
             setTrips(tripsResponse.trips || []);
-            setBalance(balanceResponse.balance || { available: 0, frozen: 0, pending: 0 });
         } catch (err) {
             setError(err.message);
             console.error('Error loading user data:', err);
@@ -41,8 +38,6 @@ export const useUserData = () => {
         setPackages,
         trips,
         setTrips,
-        balance,
-        setBalance,
         loading,
         error,
         refreshUserData
