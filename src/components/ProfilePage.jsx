@@ -8,7 +8,7 @@ const ProfilePage = ({
     userTrips,
     setSelectedPackage,
     setSelectedTrip,
-    userBalance
+    userBalance = { available: 0, frozen: 0, pending: 0 }
 }) => {
     const [allTripRequests, setAllTripRequests] = useState([]);
     const [requestsLoading, setRequestsLoading] = useState(true);

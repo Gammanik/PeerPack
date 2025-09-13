@@ -281,6 +281,52 @@ const SearchCouriers = () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
+    const handleNotifyWhenAvailable = () => {
+        // Создаем салют
+        const createConfetti = () => {
+            const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24', '#f0932b'];
+            const confettiCount = 50;
+            
+            for (let i = 0; i < confettiCount; i++) {
+                const confetti = document.createElement('div');
+                confetti.style.cssText = `
+                    position: fixed;
+                    width: 8px;
+                    height: 8px;
+                    background: ${colors[Math.floor(Math.random() * colors.length)]};
+                    left: ${Math.random() * 100}vw;
+                    top: -10px;
+                    border-radius: 50%;
+                    animation: confetti-fall 3s linear forwards;
+                    z-index: 10000;
+                `;
+                document.body.appendChild(confetti);
+                
+                setTimeout(() => confetti.remove(), 3000);
+            }
+        };
+        
+        // Добавляем CSS анимацию если её нет
+        if (!document.querySelector('#confetti-styles')) {
+            const style = document.createElement('style');
+            style.id = 'confetti-styles';
+            style.textContent = `
+                @keyframes confetti-fall {
+                    0% { transform: translateY(-10px) rotate(0deg); opacity: 1; }
+                    100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        createConfetti();
+        
+        // Показываем алерт
+        setTimeout(() => {
+            alert('🎉 Отлично! Мы уведомим вас, как только кто-то создаст подходящий маршрут в ближайший месяц!');
+        }, 500);
+    };
+
     const getTimeUntilDeparture = (date, time) => {
         const [startTime] = time.split(' → ');
         const departureDateTime = new Date(`${date}T${startTime}:00`);
@@ -734,7 +780,26 @@ const SearchCouriers = () => {
                                 fontSize: 15,
                                 padding: '40px 20px'
                             }}>
-                                Курьеры не найдены
+                                <div style={{ marginBottom: '20px' }}>
+                                    Курьеры не найдены
+                                </div>
+                                <button 
+                                    onClick={handleNotifyWhenAvailable}
+                                    style={{
+                                        backgroundColor: 'var(--tg-theme-button-color, #5288c1)',
+                                        color: 'var(--tg-theme-button-text-color, #ffffff)',
+                                        border: 'none',
+                                        borderRadius: '8px',
+                                        padding: '10px 16px',
+                                        fontSize: '14px',
+                                        cursor: 'pointer',
+                                        transition: 'opacity 0.2s'
+                                    }}
+                                    onMouseEnter={(e) => e.target.style.opacity = '0.8'}
+                                    onMouseLeave={(e) => e.target.style.opacity = '1'}
+                                >
+                                    Уведомить о поездке
+                                </button>
                             </div>
                         ) : results.map((courier, index) => (
                             <CourierCard
