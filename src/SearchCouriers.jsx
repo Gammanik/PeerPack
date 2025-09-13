@@ -702,7 +702,32 @@ const SearchCouriers = () => {
                         marginTop: results.length > 0 ? (searchCollapsed ? 0 : 24) : 30,
                         paddingTop: searchCollapsed ? 60 : 0
                     }}>
-                        {results.length === 0 && searchPerformed ? (
+                        {couriersLoading ? (
+                            <div style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                padding: '60px 20px',
+                                gap: 16
+                            }}>
+                                <div style={{
+                                    width: 40,
+                                    height: 40,
+                                    border: '3px solid var(--tg-theme-hint-color, #708499)',
+                                    borderTop: '3px solid var(--tg-theme-button-color, #5288c1)',
+                                    borderRadius: '50%',
+                                    animation: 'spin 1s linear infinite'
+                                }}></div>
+                                <div style={{
+                                    color: 'var(--tg-theme-hint-color, #708499)',
+                                    fontSize: 15,
+                                    fontWeight: 500
+                                }}>
+                                    Поиск курьеров...
+                                </div>
+                            </div>
+                        ) : results.length === 0 && searchPerformed ? (
                             <div style={{ 
                                 textAlign: 'center',
                                 color: 'var(--tg-theme-hint-color, #708499)',

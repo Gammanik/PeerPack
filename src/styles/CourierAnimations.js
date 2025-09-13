@@ -78,6 +78,11 @@ export const injectCSS = () => {
             to { transform: translateY(0); opacity: 1; }
         }
         
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
         .back-to-top:hover {
             transform: scale(1.1) translateY(-2px) !important;
             box-shadow: 0 12px 30px rgba(0,191,166,0.5) !important;
