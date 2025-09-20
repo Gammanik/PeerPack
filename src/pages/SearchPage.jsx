@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAppContext } from '../shared/context/AppContext.jsx';
+import { useLocale } from '../contexts/LanguageContext.jsx';
 import { theme, layoutStyles } from '../shared/context/DesignSystem';
 import { useSearchState } from '../shared/hooks/useSearchState';
 import { useCourierSearch, usePackageActions } from '../hooks/useApi';
@@ -14,6 +15,7 @@ import RequestForm from '../domains/package/components/RequestForm';
 import AddTripForm from '../domains/user/components/AddTripForm';
 
 const SearchPage = () => {
+  const { t } = useLocale();
   const { 
     searchCollapsed, 
     setSearchCollapsed,
@@ -165,7 +167,7 @@ const SearchPage = () => {
     const now = currentTime;
     const timeDiff = departureDateTime - now;
 
-    if (timeDiff <= 0) return 'Вылетел';
+    if (timeDiff <= 0) return t('departed', 'Вылетел');
 
     const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
     const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
@@ -176,9 +178,9 @@ const SearchPage = () => {
   
   const getStatusText = (status) => {
     switch (status) {
-      case 'pending': return 'Ожидание ответа';
-      case 'accepted': return 'Принята';
-      case 'declined': return 'Отказано';
+      case 'pending': return t('waitingResponse', 'Ожидание ответа');
+      case 'accepted': return t('accepted', 'Принята');
+      case 'declined': return t('declined', 'Отказано');
       default: return '';
     }
   };
@@ -335,7 +337,7 @@ const SearchPage = () => {
               style={styles.editSearchButton}
               onClick={scrollToSearch}
             >
-              Изменить
+{t('change', 'Изменить')}
             </button>
           </div>
         </div>
@@ -411,7 +413,7 @@ const SearchPage = () => {
               fontSize: theme.fontSize.lg,
               fontWeight: theme.fontWeight.medium
             }}>
-              Поиск курьеров...
+{t('searchingCouriers', 'Поиск курьеров...')}
             </div>
           </div>
         ) : results.length === 0 && searchPerformed ? (
@@ -422,7 +424,7 @@ const SearchPage = () => {
             padding: '40px 20px'
           }}>
             <div style={{ marginBottom: '20px' }}>
-              Курьеры не найдены
+{t('couriersNotFound', 'Курьеры не найдены')}
             </div>
             <button 
               onClick={handleNotifyWhenAvailable}
@@ -437,7 +439,7 @@ const SearchPage = () => {
                 transition: theme.transitions.fast
               }}
             >
-              Уведомить о поездке
+{t('notifyAboutTrip', 'Уведомить о поездке')}
             </button>
           </div>
         ) : results.map((courier, index) => (
@@ -471,7 +473,7 @@ const SearchPage = () => {
           }}
           onClick={() => openModal('add-trip')}
         >
-          Близится поездка? Заработайте на ней!
+{t('upcomingTrip', 'Близится поездка? Заработайте на ней!')}
         </button>
       </div>
       

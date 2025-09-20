@@ -1,4 +1,5 @@
 import React from 'react';
+import { useLocale } from '../../../contexts/LanguageContext.jsx';
 
 const SearchForm = ({
     from,
@@ -18,6 +19,7 @@ const SearchForm = ({
     getDatePresets,
     getDateRangeLabel
 }) => {
+    const { t, getCities } = useLocale();
     const styles = {
         searchContainer: {
             position: 'relative',
@@ -118,16 +120,18 @@ const SearchForm = ({
         }
     };
 
+    const cities = getCities();
+
     return (
         <div className="search-container" style={styles.searchContainer}>
-            <label style={styles.label}>Откуда отправить</label>
+            <label style={styles.label}>{t('fromLabel')}</label>
             <div style={styles.inputWithClear}>
                 <input
                     className="search-input"
                     list="available-cities"
                     value={from}
                     onChange={(e) => setFrom(e.target.value)}
-                    placeholder="Например, Москва"
+                    placeholder={t('fromPlaceholder')}
                     style={styles.inputWithButton}
                 />
                 {from && (
@@ -147,7 +151,7 @@ const SearchForm = ({
                 justifyContent: 'space-between',
                 marginBottom: 6
             }}>
-                <label style={styles.label}>Куда доставить</label>
+                <label style={styles.label}>{t('toLabel')}</label>
                 <button
                     style={{
                         background: 'transparent',
@@ -171,7 +175,7 @@ const SearchForm = ({
                         setFrom(to);
                         setTo(tempFrom);
                     }}
-                    title="Поменять города местами"
+                    title={t('swapCities')}
                     onMouseEnter={(e) => e.target.style.opacity = '0.9'}
                     onMouseLeave={(e) => e.target.style.opacity = '0.6'}
                 >
@@ -184,7 +188,7 @@ const SearchForm = ({
                     list="available-cities"
                     value={to}
                     onChange={(e) => setTo(e.target.value)}
-                    placeholder="Например, Сочи"
+                    placeholder={t('toPlaceholder')}
                     style={styles.inputWithButton}
                 />
                 {to && (
@@ -199,8 +203,8 @@ const SearchForm = ({
             </div>
             
             <datalist id="available-cities">
-                {availableCities.map(city => (
-                    <option key={city} value={city} />
+                {cities.map(city => (
+                    <option key={city.english} value={city.local} />
                 ))}
             </datalist>
 
@@ -312,7 +316,7 @@ const SearchForm = ({
                                 color: 'var(--tg-theme-hint-color, #708499)',
                                 marginBottom: 4,
                                 display: 'block'
-                            }}>С</label>
+                            }}>{t('dateFrom')}</label>
                             <input
                                 type="date"
                                 value={dateFrom}
@@ -338,7 +342,7 @@ const SearchForm = ({
                                 color: 'var(--tg-theme-hint-color, #708499)',
                                 marginBottom: 4,
                                 display: 'block'
-                            }}>До</label>
+                            }}>{t('dateTo')}</label>
                             <input
                                 type="date"
                                 value={dateTo}
@@ -368,7 +372,7 @@ const SearchForm = ({
                 onClick={handleSearch}
             >
                 <span style={styles.searchButtonIcon}>📦</span>
-                Передать посылку
+{t('searchButton')}
             </button>
         </div>
     );

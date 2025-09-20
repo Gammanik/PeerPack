@@ -1,9 +1,12 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { getAvailableCities } from '../../utils/courierUtils';
+import { useLocale } from '../../contexts/LanguageContext';
+import { translateCityName } from '../../utils/courierUtils';
 
 export const useSearchState = (couriers) => {
-  const [from, setFrom] = useState('Москва');
-  const [to, setTo] = useState('Санкт-Петербург');
+  const { t, isRussian, language } = useLocale();
+  const [from, setFrom] = useState(isRussian ? 'Москва' : 'Moscow');
+  const [to, setTo] = useState(isRussian ? 'Санкт-Петербург' : 'Saint Petersburg');
   const [results, setResults] = useState([]);
   const [searchPerformed, setSearchPerformed] = useState(false);
   const [dateFrom, setDateFrom] = useState('');
@@ -13,6 +16,22 @@ export const useSearchState = (couriers) => {
   const [showSortMenu, setShowSortMenu] = useState(false);
   
   const availableCities = getAvailableCities(couriers);
+  
+  // Update city names when language changes
+  useEffect(() => {
+    if (from) {
+      const translatedFrom = translateCityName(from, isRussian);
+      if (translatedFrom !== from) {
+        setFrom(translatedFrom);
+      }
+    }
+    if (to) {
+      const translatedTo = translateCityName(to, isRussian);
+      if (translatedTo !== to) {
+        setTo(translatedTo);
+      }
+    }
+  }, [language]); // Only depend on language, not from/to to avoid infinite loops
   
   const clearFromCity = useCallback(() => {
     setFrom('');
@@ -35,46 +54,78 @@ export const useSearchState = (couriers) => {
 
     return [
       { 
-        label: 'Сегодня-завтра', 
+        label: t('today'), 
         action: () => {
           setDateFrom(today.toISOString().split('T')[0]);
+          setDateTo(today.toISOString().split('T')[0]);
+        }
+      },
+      { 
+        label: t('tomorrow'), 
+        action: () => {
+          setDateFrom(tomorrow.toISOString().split('T')[0]);
           setDateTo(tomorrow.toISOString().split('T')[0]);
         }
       },
       { 
-        label: 'Эта неделя', 
+        label: t('thisWeek'), 
         action: () => {
           setDateFrom(today.toISOString().split('T')[0]);
           setDateTo(week.toISOString().split('T')[0]);
         }
       },
       { 
-        label: 'Очистить', 
+        label: t('thisMonth'), 
+        action: () => {
+          const month = new Date(today);
+          month.setMonth(today.getMonth() + 1);
+          setDateFrom(today.toISOString().split('T')[0]);
+          setDateTo(month.toISOString().split('T')[0]);
+        }
+      },
+      { 
+        label: t('nextMonth'), 
+        action: () => {
+          const nextMonth = new Date(today);
+          nextMonth.setMonth(today.getMonth() + 1);
+          const monthAfter = new Date(nextMonth);
+          monthAfter.setMonth(nextMonth.getMonth() + 1);
+          setDateFrom(nextMonth.toISOString().split('T')[0]);
+          setDateTo(monthAfter.toISOString().split('T')[0]);
+        }
+      },
+      { 
+        label: t('flexible'), 
         action: () => {
           setDateFrom('');
           setDateTo('');
         }
       }
     ];
-  }, []);
+  }, [t, language]);
   
   const getDateRangeLabel = useCallback(() => {
-    if (!dateFrom && !dateTo) return 'Любые даты';
+    const locale = isRussian ? 'ru-RU' : 'en-US';
+    const anyDates = isRussian ? 'Любые даты' : 'Any dates';
+    const fromText = isRussian ? 'с' : 'from';
+    const toText = isRussian ? 'до' : 'to';
+    
+    if (!dateFrom && !dateTo) return anyDates;
     if (dateFrom && dateTo) {
       const fromDate = new Date(dateFrom);
       const toDate = new Date(dateTo);
-      return `${fromDate.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })} - ${toDate.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })}`;
+      return `${fromDate.toLocaleDateString(locale, { day: 'numeric', month: 'short' })} - ${toDate.toLocaleDateString(locale, { day: 'numeric', month: 'short' })}`;
     }
     if (dateFrom) {
       const fromDate = new Date(dateFrom);
-      return `c ${fromDate.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })}`;
+      return `${fromText} ${fromDate.toLocaleDateString(locale, { day: 'numeric', month: 'short' })}`;
     }
     if (dateTo) {
       const toDate = new Date(dateTo);
-      return `до ${toDate.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })}`;
+      return `${toText} ${toDate.toLocaleDateString(locale, { day: 'numeric', month: 'short' })}`;
     }
-    return 'Любые даты';
-  }, [dateFrom, dateTo]);
+    return anyDates;
+  }, [dateFrom, dateTo, isRussian, language]);
   
   return {
     // State

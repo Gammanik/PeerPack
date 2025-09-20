@@ -1,5 +1,6 @@
 import React from 'react';
 import { renderStars } from '../../../utils/courierUtils';
+import { useLocale } from '../../../contexts/LanguageContext.jsx';
 
 const CourierCard = ({ 
     courier, 
@@ -10,6 +11,7 @@ const CourierCard = ({
     getStatusText,
     getTimeUntilDeparture 
 }) => {
+    const { t } = useLocale();
     const requestStatus = getRequestStatus(courier);
     const isPending = requestStatus === 'pending';
     const styles = {
@@ -190,7 +192,7 @@ const CourierCard = ({
                         </div>
                     </div>
                 </div>
-                <div style={styles.priceTag}>₽{courier.price}</div>
+                <div style={styles.priceTag}>{courier.price}{t('rub')}</div>
             </div>
             
             <div style={styles.routeSection}>
@@ -211,13 +213,13 @@ const CourierCard = ({
             
             <div style={styles.commentSection}>
                 <div style={styles.commentIcon}>💬</div>
-                <div style={styles.commentText}>{courier.trip_comment || 'Комментарий отсутствует'}</div>
+                <div style={styles.commentText}>{courier.trip_comment || t('noComment', 'Комментарий отсутствует')}</div>
             </div>
             
             <div style={styles.cardFooter}>
                 <div style={styles.statsInfo}>
-                    <span style={styles.tripsCount}>{courier.trips_count || 0} поездок</span>
-                    <span style={styles.reviewsCount}>• {courier.reviews_count || 0} отзывов</span>
+                    <span style={styles.tripsCount}>{courier.trips_count || 0} {t('trips')}</span>
+                    <span style={styles.reviewsCount}>• {courier.reviews_count || 0} {t('reviews')}</span>
                 </div>
                 {requestStatus && (
                     <span style={getStatusStyle(requestStatus)}>

@@ -3,6 +3,7 @@ import Layout from './components/Layout.jsx';
 import SearchScreen from './screens/search/SearchScreen.jsx';
 import ProfileScreen from './screens/profile/ProfileScreen.jsx';
 import AboutPage from './components/AboutPage.jsx';
+import { LanguageProvider } from './contexts/LanguageContext.jsx';
 
 const App = () => {
   const [currentPage, setCurrentPage] = useState('search');
@@ -24,9 +25,11 @@ const App = () => {
   };
 
   return (
-    <Layout currentPage={currentPage} onNavigate={handleNavigate}>
-      {renderCurrentPage()}
-    </Layout>
+    <LanguageProvider>
+      <Layout currentPage={currentPage} onNavigate={handleNavigate}>
+        {renderCurrentPage()}
+      </Layout>
+    </LanguageProvider>
   );
 };
 

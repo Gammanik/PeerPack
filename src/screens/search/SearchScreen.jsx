@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import RequestForm from '../../domains/package/components/RequestForm.jsx';
+import { useLocale } from '../../contexts/LanguageContext.jsx';
 
 const SearchScreen = () => {
+  const { t } = useLocale();
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
   const [results, setResults] = useState([]);
@@ -68,7 +70,7 @@ const SearchScreen = () => {
       requestForm
     });
     // Здесь будет API вызов для отправки заявки
-    alert('Заявка отправлена курьеру!');
+    alert(t('requestSent'));
     // Сбрасываем форму
     setRequestForm({
       packageDescription: '',
@@ -403,7 +405,7 @@ const SearchScreen = () => {
             <input
               style={styles.input}
               type="text"
-              placeholder="Откуда"
+              placeholder={t('fromLabel')}
               value={from}
               onChange={(e) => {
                 setFrom(e.target.value);
@@ -433,7 +435,7 @@ const SearchScreen = () => {
             <input
               style={styles.input}
               type="text"
-              placeholder="Куда"
+              placeholder={t('toLabel')}
               value={to}
               onChange={(e) => {
                 setTo(e.target.value);
@@ -461,14 +463,14 @@ const SearchScreen = () => {
           </div>
         </div>
         <button style={styles.searchButton} onClick={handleSearch}>
-          📦 Передать посылку
+          📦 {t('sendPackage')}
         </button>
       </div>
 
       {results.length === 0 && from && to && (
         <div style={styles.emptyState}>
           <div style={styles.emptyIcon}>📦</div>
-          <div style={styles.emptyText}>Выполните поиск для передачи посылки</div>
+          <div style={styles.emptyText}>{t('performSearch')}</div>
         </div>
       )}
 
@@ -488,11 +490,11 @@ const SearchScreen = () => {
               <div style={styles.courierTextInfo}>
                 <div style={styles.courierName}>{courier.name}</div>
                 <div style={styles.courierStats}>
-                  {renderStars(courier.rating)} {courier.rating} • {courier.trips_count} поездок
+                  {renderStars(courier.rating)} {courier.rating} • {courier.trips_count} {t('trips')}
                 </div>
               </div>
             </div>
-            <div style={styles.price}>{courier.price}₽</div>
+            <div style={styles.price}>{courier.price}{t('rub')}</div>
           </div>
           
           <div style={styles.route}>
@@ -515,7 +517,7 @@ const SearchScreen = () => {
           )}
           
           <div style={styles.clickHint}>
-            📦 Нажмите чтобы отправить посылку
+            📦 {t('clickToSend')}
           </div>
         </div>
       ))}

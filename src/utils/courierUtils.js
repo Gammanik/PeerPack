@@ -34,11 +34,44 @@ export const sortCouriers = (couriersList, sortType) => {
     }
 };
 
+// Mapping between Russian and English city names
+const cityMapping = {
+    'Москва': 'Moscow',
+    'Санкт-Петербург': 'Saint Petersburg',
+    'Сочи': 'Sochi',
+    'Казань': 'Kazan',
+    'Новосибирск': 'Novosibirsk',
+    'Екатеринбург': 'Yekaterinburg',
+    'Нижний Новгород': 'Nizhny Novgorod',
+    'Челябинск': 'Chelyabinsk',
+    'Самара': 'Samara',
+    'Ростов-на-Дону': 'Rostov-on-Don',
+    'Уфа': 'Ufa',
+    'Красноярск': 'Krasnoyarsk',
+    'Пермь': 'Perm',
+    'Воронеж': 'Voronezh',
+    'Волгоград': 'Volgograd'
+};
+
 export const getAvailableCities = (couriers) => {
     const uniqueCities = new Set();
     couriers.forEach(courier => {
-        uniqueCities.add(courier.from);
-        uniqueCities.add(courier.to);
+        // Get English names for backend consistency
+        const fromEn = cityMapping[courier.from] || courier.from;
+        const toEn = cityMapping[courier.to] || courier.to;
+        uniqueCities.add(fromEn);
+        uniqueCities.add(toEn);
     });
     return Array.from(uniqueCities).sort();
+};
+
+export const translateCityName = (cityName, toRussian = true) => {
+    if (toRussian) {
+        // Find Russian name by English name
+        const entry = Object.entries(cityMapping).find(([ru, en]) => en === cityName);
+        return entry ? entry[0] : cityName;
+    } else {
+        // Find English name by Russian name
+        return cityMapping[cityName] || cityName;
+    }
 };

@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
+import LanguageToggle from './LanguageToggle.jsx';
+import { useLocale } from '../contexts/LanguageContext.jsx';
 
 const Layout = ({ children, currentPage, onNavigate }) => {
   const [notificationCount] = useState(6);
+  const { t } = useLocale();
 
   const styles = {
     container: {
@@ -124,6 +127,7 @@ const Layout = ({ children, currentPage, onNavigate }) => {
           <div style={styles.logoIcon}>📦</div>
           <span style={styles.logoText}>PeerPack</span>
         </div>
+        <LanguageToggle />
       </div>
 
       {/* Контент */}
@@ -141,7 +145,7 @@ const Layout = ({ children, currentPage, onNavigate }) => {
           onClick={() => onNavigate('search')}
         >
           <div style={styles.navIcon}>🔍</div>
-          <div>Поиск</div>
+          <div>{t('search')}</div>
         </button>
         <button
           style={{
@@ -152,7 +156,7 @@ const Layout = ({ children, currentPage, onNavigate }) => {
           onClick={() => onNavigate('profile')}
         >
           <div style={styles.navIcon}>👤</div>
-          <div>Профиль</div>
+          <div>{t('profile')}</div>
           {notificationCount > 0 && (
             <div style={{
               position: 'absolute',
