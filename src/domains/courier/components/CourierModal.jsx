@@ -1,5 +1,5 @@
 import React from 'react';
-import { renderStars } from '../utils/courierUtils';
+import { renderStars } from '../../../utils/courierUtils';
 
 const CourierModal = ({
     selectedCourier,

@@ -1,815 +1,601 @@
 {
-  "description": "Mock API data for PeerPack courier delivery app - represents responses from different backend endpoints",
+  "description": "Mock API data for PeerPack courier delivery app - MVP version with actively used endpoints only",
   
   "endpoints": {
-    "GET /api/couriers": {
-      "description": "Get available couriers for a route and date range",
-      "query_params": {
-        "from": "string",
-        "to": "string", 
-        "date_from": "string (YYYY-MM-DD)",
-        "date_to": "string (YYYY-MM-DD)"
-      },
-      "response": {
-        "couriers": [
-          {
-            "id": "courier_ivan_001",
-            "name": "Иван",
-            "telegram_username": "ivan_courier",
-            "from": "Москва",
-            "to": "Санкт-Петербург",
-            "date": "2025-12-11",
-            "time": "15:00 → 17:30",
-            "airport": "Шереметьево → Пулково",
-            "avatar": "https://i.pravatar.cc/100?img=12",
-            "trips_count": 47,
-            "rating": 4.9,
-            "reviews_count": 32,
-            "price": 800,
-            "trip_comment": "Лечу по работе, могу взять документы или небольшие посылки",
-            "past_trips": [
-              { "from": "Москва", "to": "Санкт-Петербург", "date": "2025-06-15", "success": true },
-              { "from": "Санкт-Петербург", "to": "Москва", "date": "2025-06-10", "success": true }
-            ],
-            "reviews": [
-              { "rating": 5, "text": "Отличный курьер! Быстро и аккуратно доставил документы.", "date": "2025-06-16" },
-              { "rating": 5, "text": "Все супер, рекомендую!", "date": "2025-06-11" }
-            ]
-          },
-          {
-            "id": "courier_elena_002", 
-            "name": "Елена",
-            "from": "Москва",
-            "to": "Санкт-Петербург",
-            "date": "2025-08-13",
-            "time": "09:30 → 11:45",
-            "airport": "Внуково → Пулково",
-            "avatar": "https://i.pravatar.cc/100?img=44",
-            "trips_count": 28,
-            "rating": 4.8,
-            "reviews_count": 21,
-            "price": 1200,
-            "trip_comment": "Утренний рейс, удобно для срочных доставок. Место только для документов",
-            "past_trips": [
-              { "from": "Москва", "to": "Санкт-Петербург", "date": "2025-07-20", "success": true },
-              { "from": "Москва", "to": "Казань", "date": "2025-07-15", "success": true },
-              { "from": "Санкт-Петербург", "to": "Москва", "date": "2025-07-10", "success": true }
-            ],
-            "reviews": [
-              { "rating": 5, "text": "Очень пунктуальная! Доставила точно в срок.", "date": "2025-07-21" },
-              { "rating": 4, "text": "Хороший курьер, рекомендую.", "date": "2025-07-16" },
-              { "rating": 5, "text": "Профессиональный подход к работе.", "date": "2025-07-11" }
-            ]
-          },
-          {
-            "id": "courier_maxim_003",
-            "name": "Максим",
-            "telegram_username": "maxim_student",
-            "from": "Москва",
-            "to": "Санкт-Петербург",
-            "date": "2025-08-16",
-            "time": "18:00 → 20:15",
-            "airport": "Домодедово → Пулково",
-            "avatar": "https://i.pravatar.cc/100?img=68",
-            "trips_count": 15,
-            "rating": 4.6,
-            "reviews_count": 12,
-            "price": 600,
-            "trip_comment": "Студент, летаю часто к родителям. Недорого, но надежно!",
-            "past_trips": [
-              { "from": "Москва", "to": "Санкт-Петербург", "date": "2025-08-01", "success": true },
-              { "from": "Санкт-Петербург", "to": "Москва", "date": "2025-07-25", "success": true }
-            ],
-            "reviews": [
-              { "rating": 5, "text": "Молодой, но ответственный курьер!", "date": "2025-08-02" },
-              { "rating": 4, "text": "Доставил быстро и недорого.", "date": "2025-07-26" }
-            ]
-          },
-          {
-            "id": "courier_anastasia_004",
-            "name": "Анастасия", 
-            "telegram_username": "anastasia_premium",
-            "from": "Москва",
-            "to": "Санкт-Петербург",
-            "date": "2025-08-22",
-            "time": "12:30 → 14:45",
-            "airport": "Шереметьево → Пулково",
-            "avatar": "https://i.pravatar.cc/100?img=31",
-            "trips_count": 52,
-            "rating": 5.0,
-            "reviews_count": 45,
-            "price": 1500,
-            "trip_comment": "Премиум доставка. Фото отчеты, трекинг, страховка включена",
-            "past_trips": [
-              { "from": "Москва", "to": "Санкт-Петербург", "date": "2025-08-18", "success": true },
-              { "from": "Москва", "to": "Екатеринбург", "date": "2025-08-15", "success": true },
-              { "from": "Санкт-Петербург", "to": "Москва", "date": "2025-08-12", "success": true },
-              { "from": "Москва", "to": "Сочи", "date": "2025-08-08", "success": true }
-            ],
-            "reviews": [
-              { "rating": 5, "text": "Исключительно профессиональный сервис! Отчеты и фото доставки.", "date": "2025-08-19" },
-              { "rating": 5, "text": "Лучший курьер! Страховка и трекинг - все как обещано.", "date": "2025-08-16" },
-              { "rating": 5, "text": "Премиум качество! Стоит своих денег.", "date": "2025-08-13" }
-            ]
-          },
-          {
-            "id": "courier_dmitry_005",
-            "name": "Дмитрий",
-            "telegram_username": "dmitry_early",
-            "from": "Москва", 
-            "to": "Санкт-Петербург",
-            "date": "2025-08-24",
-            "time": "06:00 → 08:15",
-            "airport": "Внуково → Пулково",
-            "avatar": "https://i.pravatar.cc/100?img=17",
-            "trips_count": 34,
-            "rating": 4.7,
-            "reviews_count": 28,
-            "price": 900,
-            "trip_comment": "Самый ранний рейс. Беру только легкие посылки до 2кг",
-            "past_trips": [
-              { "from": "Москва", "to": "Санкт-Петербург", "date": "2025-08-20", "success": true },
-              { "from": "Москва", "to": "Казань", "date": "2025-08-17", "success": true },
-              { "from": "Санкт-Петербург", "to": "Москва", "date": "2025-08-14", "success": true }
-            ],
-            "reviews": [
-              { "rating": 5, "text": "Очень рано, но всегда вовремя! Надежный курьер.", "date": "2025-08-21" },
-              { "rating": 4, "text": "Ранние рейсы удобны для срочной доставки.", "date": "2025-08-18" },
-              { "rating": 5, "text": "Аккуратно обращается с посылками.", "date": "2025-08-15" }
-            ]
-          }
-        ]
-      }
-    },
-
-    "GET /api/user/packages": {
-      "description": "Get user's package templates and active deliveries",
-      "headers": {
-        "Authorization": "Bearer {token}"
-      },
-      "response": {
-        "packages": [
-          {
-            "id": "pkg_001",
-            "from": "Москва",
-            "to": "Санкт-Петербург", 
-            "description": "Документы в папке",
-            "reward": 800,
-            "status": "active",
-            "created_at": "2025-08-08T10:00:00Z",
-            "usage_count": 3,
-            "size": "s",
-            "weight": "light",
-            "tags": ["documents", "urgent"],
-            "responses": [
-              {
-                "id": "resp_001",
-                "courier_id": "courier_ivan_001",
-                "courier_name": "Иван",
-                "courier_avatar": "https://i.pravatar.cc/100?img=12",
-                "courier_rating": 4.9,
-                "status": "pending",
-                "price": 800,
-                "comment": "Принимаю! Доставлю аккуратно в срок.",
-                "date": "2025-08-11",
-                "time": "15:00 → 17:30",
-                "airport": "Шереметьево → Пулково",
-                "message": "Срочно нужно в офис",
-                "timestamp": "2025-08-10T14:00:00Z",
-                "isNew": false
-              },
-              {
-                "id": "resp_002",
-                "courier_id": "courier_elena_002", 
-                "courier_name": "Елена",
-                "courier_avatar": "https://i.pravatar.cc/100?img=44",
-                "courier_rating": 4.8,
-                "status": "accepted",
-                "price": 750,
-                "comment": "Утренний рейс, доставлю быстро и надежно!",
-                "date": "2025-08-13",
-                "time": "09:30 → 11:45", 
-                "airport": "Внуково → Пулково",
-                "message": "Утренний рейс предпочтительно",
-                "timestamp": "2025-08-10T16:30:00Z",
-                "isNew": true
-              },
-              {
-                "id": "resp_003",
-                "courier_id": "courier_dmitry_003", 
-                "courier_name": "Дмитрий",
-                "courier_avatar": "https://i.pravatar.cc/100?img=33",
-                "courier_rating": 4.7,
-                "status": "pending",
-                "price": 700,
-                "comment": "Могу взять документы, лечу по работе",
-                "date": "2025-08-12",
-                "time": "12:15 → 14:30", 
-                "airport": "Домодедово → Пулково",
-                "message": "Бюджетный вариант",
-                "timestamp": "2025-08-11T08:15:00Z",
-                "isNew": true
-              }
-            ]
-          },
-          {
-            "id": "pkg_002",
-            "from": "Москва",
-            "to": "Казань",
-            "description": "Медикаменты",
-            "reward": 1000, 
-            "status": "waiting",
-            "created_at": "2025-08-07T15:00:00Z",
-            "usage_count": 1,
-            "size": "m",
-            "weight": "medium",
-            "tags": ["medical", "fragile"],
-            "responses": [
-              {
-                "id": "resp_004",
-                "courier_id": "courier_sergey_004", 
-                "courier_name": "Сергей",
-                "courier_avatar": "https://i.pravatar.cc/100?img=22",
-                "courier_rating": 5.0,
-                "status": "pending",
-                "price": 1000,
-                "comment": "Имею опыт доставки медикаментов, все будет в порядке",
-                "date": "2025-08-12",
-                "time": "16:00 → 18:15", 
-                "airport": "Шереметьево → Казань",
-                "message": "Лекарства для бабушки",
-                "timestamp": "2025-08-11T10:00:00Z",
-                "isNew": true
-              }
-            ]
-          },
-          {
-            "id": "pkg_003",
-            "from": "Санкт-Петербург",
-            "to": "Москва",
-            "description": "Подарок - ювелирные украшения",
-            "reward": 1500, 
-            "status": "active",
-            "created_at": "2025-08-09T12:00:00Z",
-            "usage_count": 2,
-            "size": "s",
-            "weight": "light",
-            "tags": ["valuable", "gift"],
-            "responses": [
-              {
-                "id": "resp_005",
-                "courier_id": "courier_anna_005", 
-                "courier_name": "Анна",
-                "courier_avatar": "https://i.pravatar.cc/100?img=38",
-                "courier_rating": 4.9,
-                "status": "selected",
-                "price": 1500,
-                "comment": "Доставлю ценный груз с особой осторожностью",
-                "date": "2025-08-13",
-                "time": "11:00 → 13:20", 
-                "airport": "Пулково → Шереметьево",
-                "message": "Подарок на юбилей",
-                "timestamp": "2025-08-10T09:30:00Z",
-                "isNew": false
-              },
-              {
-                "id": "resp_006",
-                "courier_id": "courier_mikhail_006", 
-                "courier_name": "Михаил",
-                "courier_avatar": "https://i.pravatar.cc/100?img=45",
-                "courier_rating": 4.6,
-                "status": "declined",
-                "price": 1200,
-                "comment": "Извините, не смогу взять ценные вещи",
-                "date": "2025-08-12",
-                "time": "14:30 → 16:45", 
-                "airport": "Пулково → Внуково",
-                "message": "Дешевле вариант",
-                "timestamp": "2025-08-09T20:15:00Z",
-                "isNew": false
-              }
-            ]
-          },
-          {
-            "id": "pkg_004",
-            "from": "Москва",
-            "to": "Екатеринбург",
-            "description": "Запчасти для компьютера",
-            "reward": 900, 
-            "status": "template",
-            "created_at": "2025-08-06T18:00:00Z",
-            "usage_count": 0,
-            "size": "l",
-            "weight": "heavy",
-            "tags": ["electronics"],
-            "responses": []
-          },
-          {
-            "id": "pkg_005",
-            "from": "Санкт-Петербург",
-            "to": "Казань",
-            "description": "Книги и учебники",
-            "reward": 600, 
-            "status": "completed",
-            "created_at": "2025-08-05T14:00:00Z",
-            "usage_count": 1,
-            "size": "l",
-            "weight": "heavy",
-            "tags": ["books"],
-            "selectedCourier": "Олег",
-            "completedAt": "2025-08-06T16:30:00Z"
-          }
-        ]
-      }
-    },
-
-    "GET /api/packages/{package_id}/responses": {
-      "description": "Get courier responses for a specific package template",
-      "path_params": {
-        "package_id": "string"
-      },
-      "headers": {
-        "Authorization": "Bearer {token}"
-      },
-      "response": {
-        "responses": [
-          {
-            "id": "response_001",
-            "courier_id": "courier_ivan_001",
-            "courier_name": "Иван",
-            "courier_avatar": "https://i.pravatar.cc/100?img=12",
-            "courier_rating": 4.9,
-            "date": "2025-08-11",
-            "time": "15:00 → 17:30", 
-            "airport": "Шереметьево → Пулково",
-            "price": 800,
-            "status": "accepted",
-            "comment": "Принимаю! Доставлю аккуратно, буду на связи.",
-            "message": "Срочно нужно в офис",
-            "timestamp": "2025-08-09T14:00:00Z",
-            "is_new": false
-          }
-        ]
-      }
-    },
-
-    "GET /api/user/trips": {
-      "description": "Get user's trips (courier trips)",
-      "headers": {
-        "Authorization": "Bearer {token}"
-      },
-      "response": {
-        "trips": [
-          {
-            "id": "trip_001",
-            "name": "Никита",
-            "from": "Москва", 
-            "to": "Казань",
-            "date": "2025-08-12",
-            "time": "14:30 → 16:45",
-            "airport": "Шереметьево → Казань",
-            "avatar": "https://i.pravatar.cc/100?img=50",
-            "trips_count": 1,
-            "rating": 5.0,
-            "reviews_count": 1,
-            "price": 900,
-            "trip_comment": "Командировка, есть место для документов и небольших посылок"
-          }
-        ]
-      }
-    },
-
-    "GET /api/user/balance": {
-      "description": "Get user's wallet balance",
-      "headers": {
-        "Authorization": "Bearer {token}"
-      },
-      "response": {
-        "balance": {
-          "available": 2600,
-          "frozen": 1800,
-          "pending": 1200,
-          "total": 5600
+    
+    "courier_domain": {
+      "description": "Courier management and discovery bounded context",
+      "GET /api/couriers": {
+        "description": "Get available couriers for a route and date range",
+        "query_params": {
+          "from": "string",
+          "to": "string", 
+          "date_from": "string (YYYY-MM-DD)",
+          "date_to": "string (YYYY-MM-DD)"
         },
-        "transactions": [
-          {
-            "id": "tx_001",
-            "description": "Доставка: Документы",
-            "date": "2025-08-10T14:30:00Z",
-            "amount": 800,
-            "type": "income",
-            "status": "completed"
-          },
-          {
-            "id": "tx_002", 
-            "description": "Доставка: Лекарства",
-            "date": "2025-08-09T16:45:00Z",
-            "amount": 1000,
-            "type": "income",
-            "status": "completed"
-          }
-        ]
-      }
-    },
-
-    "GET /api/trips/{trip_id}/package-requests": {
-      "description": "Get package requests for a specific trip",
-      "path_params": {
-        "trip_id": "string"
+        "response": {
+          "couriers": [
+            {
+              "id": "courier_ivan_001",
+              "name": "Иван",
+              "telegram_username": "ivan_courier",
+              "from": "Москва",
+              "to": "Санкт-Петербург",
+              "date": "2025-12-11",
+              "time": "15:00 → 17:30",
+              "airport": "Шереметьево → Пулково",
+              "avatar": "https://i.pravatar.cc/100?img=12",
+              "trips_count": 47,
+              "rating": 4.9,
+              "reviews_count": 32,
+              "price": 800,
+              "trip_comment": "Лечу по работе, могу взять документы или небольшие посылки",
+              "past_trips": [
+                { "from": "Москва", "to": "Санкт-Петербург", "date": "2025-06-15", "success": true },
+                { "from": "Санкт-Петербург", "to": "Москва", "date": "2025-06-10", "success": true }
+              ],
+              "reviews": [
+                { "rating": 5, "text": "Отличный курьер! Быстро и аккуратно доставил документы.", "date": "2025-06-16" },
+                { "rating": 5, "text": "Все супер, рекомендую!", "date": "2025-06-11" }
+              ]
+            },
+            {
+              "id": "courier_elena_002", 
+              "name": "Елена",
+              "from": "Москва",
+              "to": "Санкт-Петербург",
+              "date": "2025-08-13",
+              "time": "09:30 → 11:45",
+              "airport": "Внуково → Пулково",
+              "avatar": "https://i.pravatar.cc/100?img=44",
+              "trips_count": 28,
+              "rating": 4.8,
+              "reviews_count": 21,
+              "price": 1200,
+              "trip_comment": "Утренний рейс, удобно для срочных доставок. Место только для документов",
+              "past_trips": [
+                { "from": "Москва", "to": "Санкт-Петербург", "date": "2025-07-20", "success": true },
+                { "from": "Москва", "to": "Казань", "date": "2025-07-15", "success": true },
+                { "from": "Санкт-Петербург", "to": "Москва", "date": "2025-07-10", "success": true }
+              ],
+              "reviews": [
+                { "rating": 5, "text": "Очень пунктуальная! Доставила точно в срок.", "date": "2025-07-21" },
+                { "rating": 4, "text": "Хороший курьер, рекомендую.", "date": "2025-07-16" },
+                { "rating": 5, "text": "Профессиональный подход к работе.", "date": "2025-07-11" }
+              ]
+            },
+            {
+              "id": "courier_maxim_003",
+              "name": "Максим",
+              "telegram_username": "maxim_student",
+              "from": "Москва",
+              "to": "Санкт-Петербург",
+              "date": "2025-08-16",
+              "time": "18:00 → 20:15",
+              "airport": "Домодедово → Пулково",
+              "avatar": "https://i.pravatar.cc/100?img=68",
+              "trips_count": 15,
+              "rating": 4.6,
+              "reviews_count": 12,
+              "price": 600,
+              "trip_comment": "Студент, летаю часто к родителям. Недорого, но надежно!",
+              "past_trips": [
+                { "from": "Москва", "to": "Санкт-Петербург", "date": "2025-08-01", "success": true },
+                { "from": "Санкт-Петербург", "to": "Москва", "date": "2025-07-25", "success": true }
+              ],
+              "reviews": [
+                { "rating": 5, "text": "Молодой, но ответственный курьер!", "date": "2025-08-02" },
+                { "rating": 4, "text": "Доставил быстро и недорого.", "date": "2025-07-26" }
+              ]
+            },
+            {
+              "id": "courier_anastasia_004",
+              "name": "Анастасия", 
+              "telegram_username": "anastasia_premium",
+              "from": "Москва",
+              "to": "Санкт-Петербург",
+              "date": "2025-08-22",
+              "time": "12:30 → 14:45",
+              "airport": "Шереметьево → Пулково",
+              "avatar": "https://i.pravatar.cc/100?img=31",
+              "trips_count": 52,
+              "rating": 5.0,
+              "reviews_count": 45,
+              "price": 1500,
+              "trip_comment": "Премиум доставка. Фото отчеты, трекинг, страховка включена",
+              "past_trips": [
+                { "from": "Москва", "to": "Санкт-Петербург", "date": "2025-08-18", "success": true },
+                { "from": "Москва", "to": "Екатеринбург", "date": "2025-08-15", "success": true },
+                { "from": "Санкт-Петербург", "to": "Москва", "date": "2025-08-12", "success": true },
+                { "from": "Москва", "to": "Сочи", "date": "2025-08-08", "success": true }
+              ],
+              "reviews": [
+                { "rating": 5, "text": "Исключительно профессиональный сервис! Отчеты и фото доставки.", "date": "2025-08-19" },
+                { "rating": 5, "text": "Лучший курьер! Страховка и трекинг - все как обещано.", "date": "2025-08-16" },
+                { "rating": 5, "text": "Премиум качество! Стоит своих денег.", "date": "2025-08-13" }
+              ]
+            },
+            {
+              "id": "courier_dmitry_005",
+              "name": "Дмитрий",
+              "telegram_username": "dmitry_early",
+              "from": "Москва", 
+              "to": "Санкт-Петербург",
+              "date": "2025-08-24",
+              "time": "06:00 → 08:15",
+              "airport": "Внуково → Пулково",
+              "avatar": "https://i.pravatar.cc/100?img=17",
+              "trips_count": 34,
+              "rating": 4.7,
+              "reviews_count": 28,
+              "price": 900,
+              "trip_comment": "Самый ранний рейс. Беру только легкие посылки до 2кг",
+              "past_trips": [
+                { "from": "Москва", "to": "Санкт-Петербург", "date": "2025-08-20", "success": true },
+                { "from": "Москва", "to": "Казань", "date": "2025-08-17", "success": true },
+                { "from": "Санкт-Петербург", "to": "Москва", "date": "2025-08-14", "success": true }
+              ],
+              "reviews": [
+                { "rating": 5, "text": "Очень рано, но всегда вовремя! Надежный курьер.", "date": "2025-08-21" },
+                { "rating": 4, "text": "Ранние рейсы удобны для срочной доставки.", "date": "2025-08-18" },
+                { "rating": 5, "text": "Аккуратно обращается с посылками.", "date": "2025-08-15" }
+              ]
+            }
+          ]
+        }
       },
-      "headers": {
-        "Authorization": "Bearer {token}"
-      },
-      "response": {
-        "requests": [
-          {
-            "id": "req_001",
-            "trip_id": "trip_001",
-            "sender_name": "Анна Петрова",
-            "sender_telegram": "anna_petrova",
-            "sender_avatar": "https://i.pravatar.cc/100?img=25",
-            "package_description": "Документы для банка",
-            "message": "Срочно нужно передать документы в офис", 
-            "reward": 800,
-            "pickup_location": "Шереметьево, терминал D",
-            "delivery_location": "Пулково, зал прилета",
-            "status": "pending",
-            "timestamp": "2025-08-10T10:00:00Z",
-            "is_new": true
-          },
-          {
-            "id": "req_002",
-            "trip_id": "trip_001", 
-            "sender_name": "Игорь Смирнов",
-            "sender_telegram": "igor_smirnov",
-            "sender_avatar": "https://i.pravatar.cc/100?img=15",
-            "package_description": "Маленькая коробка с сувенирами",
-            "message": "Привезти сувениры из командировки",
-            "reward": 600,
-            "pickup_location": "Красная площадь, у ГУМа",
-            "delivery_location": "Невский проспект, 28",
-            "status": "accepted",
-            "timestamp": "2025-08-10T08:30:00Z",
-            "is_new": false
-          },
-          {
-            "id": "req_003",
-            "trip_id": "trip_001",
-            "sender_name": "Мария Козлова",
-            "sender_telegram": "maria_kozlova", 
-            "sender_avatar": "https://i.pravatar.cc/100?img=32",
-            "package_description": "Лекарства",
-            "message": "Очень важные лекарства для бабушки",
-            "reward": 1000,
-            "pickup_location": "Аптека на Тверской, 15",
-            "delivery_location": "Московский вокзал, касса №3",
-            "status": "delivered",
-            "timestamp": "2025-08-09T16:00:00Z",
-            "is_new": false
-          },
-          {
-            "id": "req_004",
-            "trip_id": "trip_001",
-            "sender_name": "Петр Иванов",
-            "sender_telegram": "petr_ivanov",
-            "sender_avatar": "https://i.pravatar.cc/100?img=18", 
-            "package_description": "Флешка с данными",
-            "message": "Важные рабочие файлы",
-            "reward": 500,
-            "pickup_location": "Офис на Садовом кольце",
-            "delivery_location": "БЦ Сенатор, офис 305",
-            "status": "confirmed",
-            "timestamp": "2025-08-08T12:00:00Z",
-            "is_new": false
-          },
-          {
-            "id": "req_005",
-            "trip_id": "trip_001",
-            "sender_name": "Елена Волкова",
-            "sender_telegram": "elena_volkova",
-            "sender_avatar": "https://i.pravatar.cc/100?img=41", 
-            "package_description": "Подарок - часы Apple Watch",
-            "message": "День рождения у друга, очень важно доставить вовремя!",
-            "reward": 1200,
-            "pickup_location": "Apple Store на Тверской",
-            "delivery_location": "Казанский вокзал, встреча у часов",
-            "status": "pending",
-            "timestamp": "2025-08-11T09:15:00Z",
-            "is_new": true
-          },
-          {
-            "id": "req_006",
-            "trip_id": "trip_001",
-            "sender_name": "Дмитрий Орлов",
-            "sender_telegram": "dmitry_orlov",
-            "sender_avatar": "https://i.pravatar.cc/100?img=52", 
-            "package_description": "Контракты и печать компании",
-            "message": "Срочные документы для подписания сделки",
-            "reward": 1500,
-            "pickup_location": "БЦ Москва-Сити, башня Федерация",
-            "delivery_location": "Аэропорт Казань, зона вылета",
-            "status": "pending",
-            "timestamp": "2025-08-11T11:30:00Z",
-            "is_new": true
-          },
-          {
-            "id": "req_007",
-            "trip_id": "trip_001",
-            "sender_name": "Олеся Кузнецова",
-            "sender_telegram": "olesya_kuznetsova",
-            "sender_avatar": "https://i.pravatar.cc/100?img=29", 
-            "package_description": "Хрупкие сувениры из стекла",
-            "message": "Очень хрупкие стеклянные фигурки, нужна особая осторожность",
-            "reward": 900,
-            "pickup_location": "Сувенирная лавка на Арбате",
-            "delivery_location": "ТЦ Мега Казань",
-            "status": "declined",
-            "timestamp": "2025-08-10T14:20:00Z",
-            "is_new": false,
-            "decline_reason": "Слишком хрупкий груз для авиаперевозки"
-          }
-        ]
-      }
-    },
-
-    "POST /api/packages/{package_id}/responses": {
-      "description": "Courier responds to package request",
-      "path_params": {
-        "package_id": "string"
-      },
-      "headers": {
-        "Authorization": "Bearer {token}"
-      },
-      "request_body": {
-        "price": 800,
-        "comment": "Принимаю! Доставлю аккуратно, буду на связи.",
-        "date": "2025-08-11",
-        "time": "15:00 → 17:30",
-        "airport": "Шереметьево → Пулково"
-      },
-      "response": {
-        "success": true,
-        "response_id": "response_001"
-      }
-    },
-
-    "POST /api/packages/{package_id}/select-courier": {
-      "description": "Package sender selects a courier from responses",
-      "path_params": {
-        "package_id": "string"
-      }, 
-      "headers": {
-        "Authorization": "Bearer {token}"
-      },
-      "request_body": {
-        "response_id": "response_001"
-      },
-      "response": {
-        "success": true,
-        "courier_contact": {
-          "telegram_username": "ivan_courier",
-          "telegram_link": "https://t.me/ivan_courier"
+      "POST /api/couriers/{courier_id}/send-package": {
+        "description": "Send package request to courier (can be new or existing template)",
+        "path_params": {
+          "courier_id": "string"
         },
-        "escrow_info": {
-          "amount_frozen": 800,
-          "payment_method": "telegram_stars",
-          "refund_policy": "non_refundable"
-        }
-      }
-    },
-
-    "PUT /api/package-requests/{request_id}/accept": {
-      "description": "Courier accepts a package request",
-      "path_params": {
-        "request_id": "string"
-      },
-      "headers": {
-        "Authorization": "Bearer {token}"
-      },
-      "response": {
-        "success": true,
-        "new_status": "accepted",
-        "balance_update": {
-          "frozen": 1800
-        }
-      }
-    },
-
-    "PUT /api/package-requests/{request_id}/mark-delivered": {
-      "description": "Courier marks package as delivered",
-      "path_params": {
-        "request_id": "string"
-      },
-      "headers": {
-        "Authorization": "Bearer {token}"
-      },
-      "response": {
-        "success": true,
-        "new_status": "delivered",
-        "balance_update": {
-          "frozen": 800,
-          "pending": 1200
-        }
-      }
-    },
-
-    "PUT /api/package-requests/{request_id}/confirm-delivery": {
-      "description": "Package sender confirms delivery completion",
-      "path_params": {
-        "request_id": "string"
-      },
-      "headers": {
-        "Authorization": "Bearer {token}"
-      },
-      "response": {
-        "success": true,
-        "new_status": "confirmed", 
-        "balance_update": {
-          "pending": 200,
-          "available": 3600
-        }
-      }
-    },
-
-    "POST /api/user/withdraw": {
-      "description": "Request withdrawal of available balance",
-      "headers": {
-        "Authorization": "Bearer {token}"
-      },
-      "request_body": {
-        "amount": 2600,
-        "method": "telegram_stars"
-      },
-      "response": {
-        "success": true,
-        "withdrawal_id": "wd_001",
-        "estimated_completion": "2025-08-10T18:00:00Z"
-      }
-    },
-
-    "GET /api/cities": {
-      "description": "Get list of supported cities",
-      "response": {
-        "cities": [
-          "Москва", 
-          "Санкт-Петербург", 
-          "Казань", 
-          "Екатеринбург",
-          "Новосибирск", 
-          "Сочи", 
-          "Самара", 
-          "Краснодар"
-        ]
-      }
-    },
-
-    "POST /api/packages": {
-      "description": "Create new package template (first time creation)",
-      "headers": {
-        "Authorization": "Bearer {token}"
-      },
-      "request_body": {
-        "from": "Москва",
-        "to": "Санкт-Петербург",
-        "description": "Документы в папке",
-        "reward": 800,
-        "size": "s",
-        "weight": "light", 
-        "tags": ["documents", "urgent"],
-        "pickup_address": "Красная площадь, 1",
-        "delivery_address": "Невский проспект, 28"
-      },
-      "response": {
-        "success": true,
-        "package_id": "pkg_001"
-      }
-    },
-
-    "POST /api/packages/{package_id}/send-to-courier": {
-      "description": "Send existing package template to a specific courier",
-      "path_params": {
-        "package_id": "string"
-      },
-      "headers": {
-        "Authorization": "Bearer {token}"
-      },
-      "request_body": {
-        "courier_id": "courier_ivan_001",
-        "message": "Срочно нужно в офис"
-      },
-      "response": {
-        "success": true,
-        "request_id": "req_001"
-      }
-    },
-
-    "POST /api/couriers/{courier_id}/send-package": {
-      "description": "Send package request to courier (can be new or existing template)",
-      "path_params": {
-        "courier_id": "string"
-      },
-      "headers": {
-        "Authorization": "Bearer {token}"
-      },
-      "request_body": {
-        "package_id": "pkg_001",
-        "is_new_package": false,
-        "package_data": {
-          "description": "Документы в папке",
-          "reward": 800
+        "headers": {
+          "Authorization": "Bearer {token}"
         },
-        "message": "Дополнительное сообщение курьеру"
-      },
-      "response": {
-        "success": true,
-        "request_id": "req_001",
-        "package_id": "pkg_001"
-      }
-    },
-
-    "POST /api/trips": {
-      "description": "Create new courier trip",
-      "headers": {
-        "Authorization": "Bearer {token}"
-      },
-      "request_body": {
-        "from": "Москва",
-        "to": "Казань", 
-        "date": "2025-08-12",
-        "time": "14:30 → 16:45",
-        "airport": "Шереметьево → Казань",
-        "price": 900,
-        "trip_comment": "Командировка, есть место для документов и небольших посылок"
-      },
-      "response": {
-        "success": true,
-        "trip_id": "trip_001"
-      }
-    },
-
-    "GET /api/user/notifications": {
-      "description": "Get user notifications about new responses, requests, etc.",
-      "headers": {
-        "Authorization": "Bearer {token}"
-      },
-      "response": {
-        "notifications": [
-          {
-            "id": "notif_001",
-            "type": "new_package_response",
-            "package_id": "pkg_001",
-            "message": "Новый отклик на вашу посылку Москва → Санкт-Петербург",
-            "timestamp": "2025-08-10T15:30:00Z",
-            "is_read": false
-          },
-          {
-            "id": "notif_002",
-            "type": "new_package_request", 
-            "trip_id": "trip_001",
-            "message": "Новая заявка на доставку для поездки Москва → Казань",
-            "timestamp": "2025-08-10T12:00:00Z",
-            "is_read": false
-          }
-        ]
-      }
-    },
-
-    "WebSocket /ws/updates": {
-      "description": "Real-time updates for package status changes, new responses, etc.",
-      "message_types": {
-        "package_response": {
-          "type": "package_response",
+        "request_body": {
           "package_id": "pkg_001",
-          "response": {
-            "courier_name": "Иван",
-            "price": 800,
-            "comment": "Принимаю заявку!"
-          }
-        },
-        "package_request": {
-          "type": "package_request", 
-          "trip_id": "trip_001",
-          "request": {
-            "sender_name": "Анна Петрова",
-            "package_description": "Документы",
+          "is_new_package": false,
+          "package_data": {
+            "description": "Документы в папке",
             "reward": 800
-          }
+          },
+          "message": "Дополнительное сообщение курьеру"
         },
-        "status_update": {
-          "type": "status_update",
-          "request_id": "req_001", 
-          "old_status": "accepted",
+        "response": {
+          "success": true,
+          "request_id": "req_001",
+          "package_id": "pkg_001"
+        }
+      }
+    },
+    "package_domain": {
+      "description": "Package management and delivery lifecycle bounded context",
+      "GET /api/user/packages": {
+        "description": "Get user's package templates and active deliveries",
+        "headers": {
+          "Authorization": "Bearer {token}"
+        },
+        "response": {
+          "packages": [
+            {
+              "id": "pkg_001",
+              "from": "Москва",
+              "to": "Санкт-Петербург", 
+              "description": "Документы в папке",
+              "reward": 800,
+              "status": "active",
+              "created_at": "2025-08-08T10:00:00Z",
+              "usage_count": 3,
+              "size": "s",
+              "weight": "light",
+              "tags": ["documents", "urgent"]
+            },
+            {
+              "id": "pkg_002",
+              "from": "Москва",
+              "to": "Казань",
+              "description": "Медикаменты",
+              "reward": 1000, 
+              "status": "waiting",
+              "created_at": "2025-08-07T15:00:00Z",
+              "usage_count": 1,
+              "size": "m",
+              "weight": "medium",
+              "tags": ["medical", "fragile"]
+            },
+            {
+              "id": "pkg_003",
+              "from": "Санкт-Петербург",
+              "to": "Москва",
+              "description": "Подарок - ювелирные украшения",
+              "reward": 1500, 
+              "status": "active",
+              "created_at": "2025-08-09T12:00:00Z",
+              "usage_count": 2,
+              "size": "s",
+              "weight": "light",
+              "tags": ["valuable", "gift"]
+            },
+            {
+              "id": "pkg_004",
+              "from": "Москва",
+              "to": "Екатеринбург",
+              "description": "Запчасти для компьютера",
+              "reward": 900, 
+              "status": "template",
+              "created_at": "2025-08-06T18:00:00Z",
+              "usage_count": 0,
+              "size": "l",
+              "weight": "heavy",
+              "tags": ["electronics"]
+            },
+            {
+              "id": "pkg_005",
+              "from": "Санкт-Петербург",
+              "to": "Казань",
+              "description": "Книги и учебники",
+              "reward": 600, 
+              "status": "completed",
+              "created_at": "2025-08-05T14:00:00Z",
+              "usage_count": 1,
+              "size": "l",
+              "weight": "heavy",
+              "tags": ["books"],
+              "selectedCourier": "Олег",
+              "completedAt": "2025-08-06T16:30:00Z"
+            }
+          ]
+        }
+      },
+      "POST /api/packages": {
+        "description": "Create new package template (first time creation)",
+        "headers": {
+          "Authorization": "Bearer {token}"
+        },
+        "request_body": {
+          "from": "Москва",
+          "to": "Санкт-Петербург",
+          "description": "Документы в папке",
+          "reward": 800,
+          "size": "s",
+          "weight": "light", 
+          "tags": ["documents", "urgent"],
+          "pickup_address": "Красная площадь, 1",
+          "delivery_address": "Невский проспект, 28"
+        },
+        "response": {
+          "success": true,
+          "package_id": "pkg_001"
+        }
+      }
+    },
+    "trip_domain": {
+      "description": "Courier trip management and package request handling bounded context",
+      "GET /api/user/trips": {
+        "description": "Get user's trips (courier trips)",
+        "headers": {
+          "Authorization": "Bearer {token}"
+        },
+        "response": {
+          "trips": [
+            {
+              "id": "trip_001",
+              "name": "Никита",
+              "from": "Москва", 
+              "to": "Казань",
+              "date": "2025-08-12",
+              "time": "14:30 → 16:45",
+              "airport": "Шереметьево → Казань",
+              "avatar": "https://i.pravatar.cc/100?img=50",
+              "trips_count": 1,
+              "rating": 5.0,
+              "reviews_count": 1,
+              "price": 900,
+              "trip_comment": "Командировка, есть место для документов и небольших посылок"
+            }
+          ]
+        }
+      },
+      "POST /api/trips": {
+        "description": "Create new courier trip",
+        "headers": {
+          "Authorization": "Bearer {token}"
+        },
+        "request_body": {
+          "from": "Москва",
+          "to": "Казань", 
+          "date": "2025-08-12",
+          "time": "14:30 → 16:45",
+          "airport": "Шереметьево → Казань",
+          "price": 900,
+          "trip_comment": "Командировка, есть место для документов и небольших посылок"
+        },
+        "response": {
+          "success": true,
+          "trip_id": "trip_001"
+        }
+      },
+      "GET /api/trips/{trip_id}/package-requests": {
+        "description": "Get package requests for a specific trip",
+        "path_params": {
+          "trip_id": "string"
+        },
+        "headers": {
+          "Authorization": "Bearer {token}"
+        },
+        "response": {
+          "requests": [
+            {
+              "id": "req_001",
+              "trip_id": "trip_001",
+              "sender_name": "Анна Петрова",
+              "sender_telegram": "anna_petrova",
+              "sender_avatar": "https://i.pravatar.cc/100?img=25",
+              "package_description": "Документы для банка",
+              "message": "Срочно нужно передать документы в офис", 
+              "reward": 800,
+              "pickup_location": "Шереметьево, терминал D",
+              "delivery_location": "Пулково, зал прилета",
+              "status": "pending",
+              "timestamp": "2025-08-10T10:00:00Z",
+              "is_new": true
+            },
+            {
+              "id": "req_002",
+              "trip_id": "trip_001", 
+              "sender_name": "Игорь Смирнов",
+              "sender_telegram": "igor_smirnov",
+              "sender_avatar": "https://i.pravatar.cc/100?img=15",
+              "package_description": "Маленькая коробка с сувенирами",
+              "message": "Привезти сувениры из командировки",
+              "reward": 600,
+              "pickup_location": "Красная площадь, у ГУМа",
+              "delivery_location": "Невский проспект, 28",
+              "status": "accepted",
+              "timestamp": "2025-08-10T08:30:00Z",
+              "is_new": false
+            },
+            {
+              "id": "req_003",
+              "trip_id": "trip_001",
+              "sender_name": "Мария Козлова",
+              "sender_telegram": "maria_kozlova", 
+              "sender_avatar": "https://i.pravatar.cc/100?img=32",
+              "package_description": "Лекарства",
+              "message": "Очень важные лекарства для бабушки",
+              "reward": 1000,
+              "pickup_location": "Аптека на Тверской, 15",
+              "delivery_location": "Московский вокзал, касса №3",
+              "status": "delivered",
+              "timestamp": "2025-08-09T16:00:00Z",
+              "is_new": false
+            },
+            {
+              "id": "req_004",
+              "trip_id": "trip_001",
+              "sender_name": "Петр Иванов",
+              "sender_telegram": "petr_ivanov",
+              "sender_avatar": "https://i.pravatar.cc/100?img=18", 
+              "package_description": "Флешка с данными",
+              "message": "Важные рабочие файлы",
+              "reward": 500,
+              "pickup_location": "Офис на Садовом кольце",
+              "delivery_location": "БЦ Сенатор, офис 305",
+              "status": "confirmed",
+              "timestamp": "2025-08-08T12:00:00Z",
+              "is_new": false
+            },
+            {
+              "id": "req_005",
+              "trip_id": "trip_001",
+              "sender_name": "Елена Волкова",
+              "sender_telegram": "elena_volkova",
+              "sender_avatar": "https://i.pravatar.cc/100?img=41", 
+              "package_description": "Подарок - часы Apple Watch",
+              "message": "День рождения у друга, очень важно доставить вовремя!",
+              "reward": 1200,
+              "pickup_location": "Apple Store на Тверской",
+              "delivery_location": "Казанский вокзал, встреча у часов",
+              "status": "pending",
+              "timestamp": "2025-08-11T09:15:00Z",
+              "is_new": true
+            },
+            {
+              "id": "req_006",
+              "trip_id": "trip_001",
+              "sender_name": "Дмитрий Орлов",
+              "sender_telegram": "dmitry_orlov",
+              "sender_avatar": "https://i.pravatar.cc/100?img=52", 
+              "package_description": "Контракты и печать компании",
+              "message": "Срочные документы для подписания сделки",
+              "reward": 1500,
+              "pickup_location": "БЦ Москва-Сити, башня Федерация",
+              "delivery_location": "Аэропорт Казань, зона вылета",
+              "status": "pending",
+              "timestamp": "2025-08-11T11:30:00Z",
+              "is_new": true
+            },
+            {
+              "id": "req_007",
+              "trip_id": "trip_001",
+              "sender_name": "Олеся Кузнецова",
+              "sender_telegram": "olesya_kuznetsova",
+              "sender_avatar": "https://i.pravatar.cc/100?img=29", 
+              "package_description": "Хрупкие сувениры из стекла",
+              "message": "Очень хрупкие стеклянные фигурки, нужна особая осторожность",
+              "reward": 900,
+              "pickup_location": "Сувенирная лавка на Арбате",
+              "delivery_location": "ТЦ Мега Казань",
+              "status": "declined",
+              "timestamp": "2025-08-10T14:20:00Z",
+              "is_new": false,
+              "decline_reason": "Слишком хрупкий груз для авиаперевозки"
+            }
+          ]
+        }
+      }
+    },
+
+    "delivery_domain": {
+      "description": "Package delivery lifecycle and status management bounded context",
+      "PUT /api/package-requests/{request_id}/accept": {
+        "description": "Courier accepts a package request",
+        "path_params": {
+          "request_id": "string"
+        },
+        "headers": {
+          "Authorization": "Bearer {token}"
+        },
+        "response": {
+          "success": true,
+          "new_status": "accepted"
+        }
+      },
+      "PUT /api/package-requests/{request_id}/mark-delivered": {
+        "description": "Courier marks package as delivered",
+        "path_params": {
+          "request_id": "string"
+        },
+        "headers": {
+          "Authorization": "Bearer {token}"
+        },
+        "response": {
+          "success": true,
           "new_status": "delivered"
+        }
+      }
+    },
+
+    "notification_domain": {
+      "description": "User notifications and alerts bounded context",
+      "GET /api/user/notifications": {
+        "description": "Get user's notifications with unread count",
+        "headers": {
+          "Authorization": "Bearer {token}"
+        },
+        "response": {
+          "unread_count": 6,
+          "notifications": [
+            {
+              "id": "notif_001",
+              "type": "package_request_response",
+              "title": "Запрос принят!",
+              "message": "Анастасия приняла ваш запрос на доставку документов",
+              "timestamp": "2025-08-11T14:30:00Z",
+              "is_read": false,
+              "courier_name": "Анастасия",
+              "package_description": "Документы в папке",
+              "action_url": "/package/pkg_001"
+            },
+            {
+              "id": "notif_002", 
+              "type": "package_delivered",
+              "title": "Доставка завершена",
+              "message": "Максим доставил ваши документы. Пожалуйста, оцените курьера",
+              "timestamp": "2025-08-11T12:15:00Z",
+              "is_read": false,
+              "courier_name": "Максим",
+              "package_description": "Документы для банка",
+              "action_url": "/rate-courier/courier_maxim_003"
+            },
+            {
+              "id": "notif_003",
+              "type": "new_courier_available", 
+              "title": "Новый курьер на вашем маршруте",
+              "message": "Елена добавила поездку Москва → Санкт-Петербург на завтра",
+              "timestamp": "2025-08-11T09:45:00Z",
+              "is_read": false,
+              "courier_name": "Елена",
+              "route": "Москва → Санкт-Петербург",
+              "date": "2025-08-12",
+              "action_url": "/courier/courier_elena_002"
+            },
+            {
+              "id": "notif_004",
+              "type": "package_request_declined",
+              "title": "Запрос отклонён",
+              "message": "Дмитрий отклонил ваш запрос: превышен лимит веса",
+              "timestamp": "2025-08-10T16:20:00Z",
+              "is_read": false,
+              "courier_name": "Дмитрий", 
+              "package_description": "Запчасти для компьютера",
+              "decline_reason": "Превышен лимит веса для ручной клади",
+              "action_url": "/package/pkg_004"
+            },
+            {
+              "id": "notif_005",
+              "type": "trip_request_received",
+              "title": "Новый запрос на доставку",
+              "message": "Игорь хочет отправить посылку на вашем маршруте за 600₽",
+              "timestamp": "2025-08-10T11:30:00Z",
+              "is_read": false,
+              "sender_name": "Игорь Смирнов",
+              "package_description": "Маленькая коробка с сувенирами",
+              "reward": 600,
+              "action_url": "/trip-requests/req_002"
+            },
+            {
+              "id": "notif_006",
+              "type": "payment_received",
+              "title": "Получена оплата",
+              "message": "На ваш счёт поступила оплата за доставку: 800₽",
+              "timestamp": "2025-08-10T08:15:00Z",
+              "is_read": false,
+              "amount": 800,
+              "transaction_id": "tx_001",
+              "action_url": "/wallet"
+            },
+            {
+              "id": "notif_007",
+              "type": "package_request_response",
+              "title": "Запрос принят!",
+              "message": "Иван принял ваш запрос на доставку медикаментов",
+              "timestamp": "2025-08-09T15:45:00Z",
+              "is_read": true,
+              "courier_name": "Иван",
+              "package_description": "Медикаменты",
+              "action_url": "/package/pkg_002"
+            },
+            {
+              "id": "notif_008",
+              "type": "reminder",
+              "title": "Напоминание о поездке",
+              "message": "Завтра ваша поездка Москва → Казань в 14:30",
+              "timestamp": "2025-08-09T10:00:00Z",
+              "is_read": true,
+              "trip_date": "2025-08-12",
+              "route": "Москва → Казань",
+              "action_url": "/trip/trip_001"
+            }
+          ]
+        }
+      },
+      "PUT /api/notifications/{notification_id}/read": {
+        "description": "Mark notification as read",
+        "path_params": {
+          "notification_id": "string"
+        },
+        "headers": {
+          "Authorization": "Bearer {token}"
+        },
+        "response": {
+          "success": true
+        }
+      },
+      "PUT /api/notifications/mark-all-read": {
+        "description": "Mark all notifications as read",
+        "headers": {
+          "Authorization": "Bearer {token}"
+        },
+        "response": {
+          "success": true,
+          "marked_count": 6
         }
       }
     }
   },
 
   "telegram_integration": {
-    "telegram_stars_payment": {
-      "description": "Integration with Telegram Stars for payments",
-      "note": "Telegram Stars payments are non-refundable according to Telegram policy"
-    },
     "telegram_auth": {
       "description": "User authentication through Telegram mini-app",
       "user_data": {
@@ -825,11 +611,6 @@
     "package_delivery_flow": [
       "pending → accepted → delivered → confirmed",
       "pending → declined"
-    ],
-    "balance_flow": {
-      "on_accept": "payment frozen",
-      "on_delivered": "moved to pending", 
-      "on_confirmed": "released to available"
-    }
+    ]
   }
 }

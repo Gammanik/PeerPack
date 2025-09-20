@@ -1,5 +1,5 @@
 import React from 'react';
-import { sortCouriers } from '../utils/courierUtils';
+import { sortCouriers } from '../../../utils/courierUtils';
 
 const SortMenu = ({ 
     results, 

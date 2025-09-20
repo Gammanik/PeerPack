@@ -1,5 +1,5 @@
 import React from 'react';
-import { useTripRequests } from '../hooks/useApi';
+import { useTripRequests } from '../../../hooks/useApi';
 
 const TripPackagesScreen = ({ 
     trip, 

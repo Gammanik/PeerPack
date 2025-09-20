@@ -155,7 +155,13 @@ const RequestForm = ({
                 <div style={styles.modalContent}>
                     <div style={styles.tripInfo}>
                         <p><strong>Курьер:</strong> {selectedCourier.name}</p>
-                        <p><strong>Маршрут:</strong> {selectedCourier.from} → {selectedCourier.to}</p>
+                        <p><strong>Маршрут:</strong> 
+                            <span style={{marginLeft: '8px'}}>
+                                <span style={{fontWeight: '600'}}>{selectedCourier.from}</span>
+                                <span style={{color: 'var(--tg-theme-button-color, #5288c1)', margin: '0 6px', fontSize: '16px', fontWeight: '700'}}>→</span>
+                                <span style={{fontWeight: '600'}}>{selectedCourier.to}</span>
+                            </span>
+                        </p>
                         <p><strong>Дата:</strong> {selectedCourier.date}</p>
                     </div>
 
@@ -217,8 +223,10 @@ const RequestForm = ({
                                             });
                                         }}
                                     >
-                                        <div style={{ fontWeight: 600, marginBottom: 4 }}>
-                                            {pkg.from} → {pkg.to}
+                                        <div style={{ fontWeight: 600, marginBottom: 4, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                            <span>{pkg.from}</span>
+                                            <span style={{color: 'var(--tg-theme-button-color, #5288c1)', fontSize: '14px', fontWeight: '700'}}>→</span>
+                                            <span>{pkg.to}</span>
                                         </div>
                                         <div style={{ fontSize: 12, opacity: 0.7 }}>
                                             📦 {pkg.description} • ₽{pkg.reward}

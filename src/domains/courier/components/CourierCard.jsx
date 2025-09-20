@@ -1,5 +1,5 @@
 import React from 'react';
-import { renderStars } from '../utils/courierUtils';
+import { renderStars } from '../../../utils/courierUtils';
 
 const CourierCard = ({ 
     courier, 
@@ -90,7 +90,22 @@ const CourierCard = ({
         cities: {
             fontSize: 15,
             fontWeight: 600,
-            color: 'var(--tg-theme-text-color, #ffffff)'
+            color: 'var(--tg-theme-text-color, #ffffff)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
+        },
+        cityFrom: {
+            fontWeight: 600
+        },
+        routeArrow: {
+            color: 'var(--tg-theme-button-color, #5288c1)',
+            fontSize: '16px',
+            fontWeight: '700',
+            margin: '0 2px'
+        },
+        cityTo: {
+            fontWeight: 600
         },
         timeInfo: {
             display: 'flex',
@@ -180,7 +195,11 @@ const CourierCard = ({
             
             <div style={styles.routeSection}>
                 <div style={styles.routeInfo}>
-                    <div style={styles.cities}>{courier.from} → {courier.to}</div>
+                    <div style={styles.cities}>
+                        <span style={styles.cityFrom}>{courier.from}</span>
+                        <span style={styles.routeArrow}>→</span>
+                        <span style={styles.cityTo}>{courier.to}</span>
+                    </div>
                     <div style={styles.timeInfo}>
                         <span style={styles.timeHighlight}>🕐 {courier.time}</span>
                     </div>

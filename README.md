@@ -118,13 +118,11 @@ window.Telegram.WebApp.HapticFeedback.impactOccurred('heavy');
 GET  /api/couriers                           # Поиск курьеров
 GET  /api/user/packages                      # Пакеты пользователя
 GET  /api/user/trips                         # Поездки пользователя
-GET  /api/user/balance                       # Баланс пользователя
 GET  /api/trips/{trip_id}/package-requests   # Заявки по поездке
 POST /api/packages                           # Создание пакета
 POST /api/trips                              # Создание поездки
 PUT  /api/package-requests/{id}/accept       # Принятие заявки
 PUT  /api/package-requests/{id}/mark-delivered # Доставка
-POST /api/user/withdraw                      # Вывод средств
 ```
 
 ### Рекомендуемый Backend Stack:
@@ -249,6 +247,5 @@ npm run deploy       # GitHub Pages деплой
 - [ ] Rate limiting для API endpoints
 - [ ] WebSocket поддержка для real-time updates
 - [ ] File upload для аватаров и документов
-- [ ] Payment integration (Telegram Stars/Payments)
 
 **Статус:** MVP готов к backend подключению за 1-2 дня настройки

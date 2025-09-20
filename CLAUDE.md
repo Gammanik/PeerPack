@@ -22,10 +22,11 @@ npm run deploy       # Deploy to GitHub Pages
 ## Architecture Overview
 
 ### Core Structure
-- **Monolithic Main Component**: `src/SearchCouriers.jsx` (~900+ lines) - serves as the main app container with all routing logic
+- **Monolithic Main Component**: `src/SearchCouriers.jsx` (993 lines) - serves as the main app container with all routing logic and 40+ useState hooks
 - **API Service Layer**: Complete HTTP simulation with realistic delays in `src/services/api.js`
 - **Custom Hooks**: Business logic abstracted into reusable hooks in `src/hooks/useApi.js`
 - **Mock Data**: Full API specification and test data in `src/data/api-mock-data.json`
+- **Utility Functions**: Courier sorting and rating utilities in `src/utils/courierUtils.js`
 
 ### State Management Pattern
 The app uses React hooks with a custom API layer pattern:

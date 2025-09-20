@@ -1,11 +1,9 @@
 import React from 'react';
-import apiService from '../services/api';
 
 const CourierContactScreen = ({ 
     courier, 
     packageData,
-    onBack,
-    onPaymentConfirm
+    onBack
 }) => {
     const styles = {
         container: {
@@ -112,48 +110,15 @@ const CourierContactScreen = ({
             justifyContent: 'center',
             gap: 8
         },
-        escrowInfo: {
+        contactNote: {
             background: 'rgba(100, 181, 239, 0.1)',
             border: '0.5px solid rgba(100, 181, 239, 0.3)',
             borderRadius: 12,
             padding: 16,
-            marginBottom: 20
-        },
-        escrowTitle: {
-            fontSize: 16,
-            fontWeight: 600,
-            color: 'var(--tg-theme-accent-text-color, #64b5ef)',
-            marginBottom: 8,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8
-        },
-        escrowText: {
-            fontSize: 13,
+            fontSize: 14,
             color: 'var(--tg-theme-text-color, #ffffff)',
             lineHeight: 1.4,
-            marginBottom: 8
-        },
-        starsWarning: {
-            background: 'rgba(255, 215, 0, 0.1)',
-            border: '0.5px solid rgba(255, 215, 0, 0.3)',
-            borderRadius: 8,
-            padding: 12,
-            fontSize: 12,
-            color: 'var(--tg-theme-hint-color, #708499)',
-            lineHeight: 1.3
-        },
-        confirmButton: {
-            background: '#4BB34B',
-            color: 'white',
-            border: 'none',
-            borderRadius: 8,
-            padding: '16px',
-            fontSize: 16,
-            fontWeight: 600,
-            cursor: 'pointer',
-            width: '100%',
-            marginTop: 20
+            textAlign: 'center'
         }
     };
 
@@ -205,49 +170,10 @@ const CourierContactScreen = ({
                 💬 Написать в Telegram
             </button>
 
-            <div style={styles.escrowInfo}>
-                <div style={styles.escrowTitle}>
-                    🛡️ Гарантия безопасности
-                </div>
-                <div style={styles.escrowText}>
-                    • Деньги заблокированы на платформе до подтверждения доставки
-                </div>
-                <div style={styles.escrowText}>
-                    • Курьер получит оплату только после успешной доставки
-                </div>
-                <div style={styles.escrowText}>
-                    • При спорах - служба поддержки разберет ситуацию
-                </div>
-                <div style={styles.starsWarning}>
-                    ⚠️ Внимание: Платежи через Telegram Stars окончательны и не подлежат возврату согласно политике Telegram. PeerPack выступает гарантом честности сделки, но не может вернуть Stars - только перенаправить их правильному получателю.
-                </div>
+            <div style={styles.contactNote}>
+                📱 Свяжитесь с курьером через Telegram для договоренности о деталях передачи посылки: 
+                место встречи, время и способ оплаты (₽{packageData.reward}).
             </div>
-
-            <button 
-                style={styles.confirmButton}
-                onClick={async () => {
-                    try {
-                        // В реальном приложении - создание эскроу-платежа
-                        // await apiService.createEscrowPayment(packageData.id, courier.courierId);
-                        
-                        // Обновляем статус посылки
-                        // await apiService.updatePackageStatus(packageData.id, 'payment_confirmed');
-                        
-                        console.log('API Call: POST /api/packages/' + packageData.id + '/confirm-payment', {
-                            courierId: courier.courierId || courier.courier_id || courier.courier_name || courier.courierName,
-                            amount: packageData.reward
-                        });
-                        
-                        onPaymentConfirm();
-                        alert('Платеж заблокирован! Свяжитесь с курьером для передачи посылки.');
-                    } catch (error) {
-                        console.error('Ошибка подтверждения платежа:', error);
-                        alert('Ошибка подтверждения платежа');
-                    }
-                }}
-            >
-                Подтвердить и заблокировать ₽{packageData.reward}
-            </button>
         </div>
     );
 };
