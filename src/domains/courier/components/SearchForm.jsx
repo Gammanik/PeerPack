@@ -25,58 +25,76 @@ const SearchForm = ({
             margin: '0 auto',
             backgroundColor: 'var(--tg-theme-secondary-bg-color, #232e3c)',
             borderRadius: 12,
-            padding: 16,
+            padding: '12px',
             border: '0.5px solid var(--tg-theme-hint-color, #708499)',
             animation: 'slideIn 0.6s ease-out',
-            marginBottom: 16
+            marginBottom: 16,
+            '@media (min-width: 768px)': {
+                padding: 16
+            }
         },
         label: {
             display: 'block',
             marginBottom: 6,
-            fontSize: 14,
+            fontSize: '13px',
             fontWeight: 500,
-            color: 'var(--tg-theme-hint-color, #708499)'
+            color: 'var(--tg-theme-hint-color, #708499)',
+            '@media (min-width: 768px)': {
+                fontSize: 14
+            }
         },
         inputWithClear: {
             position: 'relative',
-            marginBottom: 16
+            marginBottom: 14
         },
         inputWithButton: {
             width: '100%',
-            padding: '12px 16px',
-            fontSize: 16,
+            padding: '10px 12px',
+            fontSize: '15px',
             border: '0.5px solid var(--tg-theme-hint-color, #708499)',
             borderRadius: 8,
             outline: 'none',
             backgroundColor: 'var(--tg-theme-bg-color, #17212b)',
             color: 'var(--tg-theme-text-color, #ffffff)',
             transition: 'all 0.2s ease',
-            paddingRight: '45px',
-            boxSizing: 'border-box'
+            paddingRight: '40px',
+            boxSizing: 'border-box',
+            minHeight: '44px',
+            '@media (min-width: 768px)': {
+                padding: '12px 16px',
+                fontSize: 16,
+                paddingRight: '45px'
+            }
         },
         clearButton: {
             position: 'absolute',
-            right: 10,
+            right: 8,
             top: '50%',
             transform: 'translateY(-50%)',
             background: 'var(--tg-theme-hint-color, #708499)',
             border: 'none',
             borderRadius: '50%',
-            width: 20,
-            height: 20,
+            width: 24,
+            height: 24,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             cursor: 'pointer',
-            fontSize: 12,
+            fontSize: 14,
             color: 'var(--tg-theme-bg-color, #17212b)',
-            transition: 'all 0.2s ease'
+            transition: 'all 0.2s ease',
+            '@media (min-width: 768px)': {
+                right: 10,
+                width: 20,
+                height: 20,
+                fontSize: 12
+            }
         },
         searchButton: {
             width: '100%',
-            padding: '12px 16px',
+            padding: '14px 16px',
             marginTop: 16,
-            fontSize: 16,
+            fontSize: '15px',
             fontWeight: 600,
             color: 'var(--tg-theme-button-text-color, #ffffff)',
             backgroundColor: 'var(--tg-theme-button-color, #5288c1)',
@@ -87,7 +105,13 @@ const SearchForm = ({
             alignItems: 'center',
             justifyContent: 'center',
             gap: 8,
-            transition: 'all 0.2s ease'
+            transition: 'all 0.2s ease',
+            minHeight: '48px',
+            '@media (min-width: 768px)': {
+                padding: '12px 16px',
+                fontSize: 16,
+                minHeight: 'auto'
+            }
         },
         searchButtonIcon: {
             fontSize: 20
@@ -129,12 +153,18 @@ const SearchForm = ({
                         background: 'transparent',
                         border: 'none',
                         color: 'var(--tg-theme-hint-color, #708499)',
-                        fontSize: 14,
+                        fontSize: '16px',
                         cursor: 'pointer',
                         transition: 'opacity 0.2s ease',
-                        opacity: 0.5,
-                        padding: 2,
-                        lineHeight: 1
+                        opacity: 0.6,
+                        padding: '4px 6px',
+                        lineHeight: 1,
+                        minWidth: '28px',
+                        minHeight: '28px',
+                        borderRadius: 4,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
                     }}
                     onClick={() => {
                         const tempFrom = from;
@@ -142,8 +172,8 @@ const SearchForm = ({
                         setTo(tempFrom);
                     }}
                     title="Поменять города местами"
-                    onMouseEnter={(e) => e.target.style.opacity = '0.8'}
-                    onMouseLeave={(e) => e.target.style.opacity = '0.5'}
+                    onMouseEnter={(e) => e.target.style.opacity = '0.9'}
+                    onMouseLeave={(e) => e.target.style.opacity = '0.6'}
                 >
                     ⇅
                 </button>
@@ -185,29 +215,38 @@ const SearchForm = ({
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'space-between',
-                        padding: '10px 12px',
+                        padding: '12px',
                         borderRadius: 6,
                         border: 'none',
                         background: 'var(--tg-theme-bg-color, #17212b)',
                         color: 'var(--tg-theme-text-color, #ffffff)',
-                        fontSize: 14,
+                        fontSize: '14px',
                         cursor: 'pointer',
-                        transition: 'all 0.2s ease'
+                        transition: 'all 0.2s ease',
+                        minHeight: '44px',
+                        boxSizing: 'border-box'
                     }}
                 >
                     <div style={{
                         display: 'flex',
                         alignItems: 'center',
-                        gap: 8
+                        gap: 8,
+                        flex: 1,
+                        textAlign: 'left'
                     }}>
                         <span style={{ fontSize: 16, opacity: 0.7 }}>📅</span>
-                        <span>{getDateRangeLabel()}</span>
+                        <span style={{ 
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap'
+                        }}>{getDateRangeLabel()}</span>
                     </div>
                     <span style={{ 
                         fontSize: 10, 
                         color: 'var(--tg-theme-hint-color, #708499)',
                         transform: showDatePicker ? 'rotate(180deg)' : 'rotate(0deg)',
-                        transition: 'transform 0.2s ease'
+                        transition: 'transform 0.2s ease',
+                        flexShrink: 0
                     }}>▼</span>
                 </button>
             </div>
@@ -226,7 +265,7 @@ const SearchForm = ({
                     <div style={{
                         display: 'grid',
                         gridTemplateColumns: 'repeat(3, 1fr)',
-                        gap: 6,
+                        gap: 8,
                         marginBottom: 12
                     }}>
                         {getDatePresets().map((preset, index) => (
@@ -237,16 +276,22 @@ const SearchForm = ({
                                     setShowDatePicker(false);
                                 }}
                                 style={{
-                                    padding: '8px 8px',
+                                    padding: '10px 6px',
                                     borderRadius: 6,
                                     border: 'none',
                                     background: 'var(--tg-theme-secondary-bg-color, #232e3c)',
                                     color: 'var(--tg-theme-text-color, #ffffff)',
                                     cursor: 'pointer',
-                                    fontSize: 11,
+                                    fontSize: '11px',
                                     fontWeight: 500,
                                     transition: 'all 0.2s ease',
-                                    opacity: 0.9
+                                    opacity: 0.9,
+                                    minHeight: '36px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    textAlign: 'center',
+                                    boxSizing: 'border-box'
                                 }}
                             >
                                 {preset.label}
@@ -275,14 +320,15 @@ const SearchForm = ({
                                 min={new Date().toISOString().split('T')[0]}
                                 style={{
                                     width: '100%',
-                                    padding: '8px 6px',
+                                    padding: '10px 8px',
                                     borderRadius: 6,
                                     border: 'none',
                                     outline: 'none',
-                                    fontSize: 12,
+                                    fontSize: '13px',
                                     background: 'var(--tg-theme-secondary-bg-color, #232e3c)',
                                     color: 'var(--tg-theme-text-color, #ffffff)',
-                                    boxSizing: 'border-box'
+                                    boxSizing: 'border-box',
+                                    minHeight: '40px'
                                 }}
                             />
                         </div>
@@ -300,14 +346,15 @@ const SearchForm = ({
                                 min={dateFrom || new Date().toISOString().split('T')[0]}
                                 style={{
                                     width: '100%',
-                                    padding: '8px 6px',
+                                    padding: '10px 8px',
                                     borderRadius: 6,
                                     border: 'none',
                                     outline: 'none',
-                                    fontSize: 12,
+                                    fontSize: '13px',
                                     background: 'var(--tg-theme-secondary-bg-color, #232e3c)',
                                     color: 'var(--tg-theme-text-color, #ffffff)',
-                                    boxSizing: 'border-box'
+                                    boxSizing: 'border-box',
+                                    minHeight: '40px'
                                 }}
                             />
                         </div>
