@@ -1,9 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import RequestForm from '../../domains/package/components/RequestForm.jsx';
 import { useLocale } from '../../contexts/LanguageContext.jsx';
 
 const SearchScreen = () => {
   const { t } = useLocale();
+  const [screenWidth, setScreenWidth] = useState(window.innerWidth);
+
+  useEffect(() => {
+    const handleResize = () => setScreenWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
   const [results, setResults] = useState([]);
@@ -161,9 +168,12 @@ const SearchScreen = () => {
     return airport;
   };
 
+  const isVeryNarrow = screenWidth < 400;
+  const isMobile = screenWidth < 480;
+
   const styles = {
     container: {
-      padding: '12px 16px 16px',
+      padding: isVeryNarrow ? '4px 8px 16px' : '8px 12px 16px',
       background: 'linear-gradient(135deg, var(--tg-theme-bg-color, #17212b) 0%, rgba(23, 33, 43, 0.95) 100%)',
       minHeight: '100vh'
     },
@@ -187,31 +197,36 @@ const SearchScreen = () => {
     },
     searchForm: {
       background: 'var(--tg-theme-secondary-bg-color, #232e3c)',
-      borderRadius: '16px',
-      padding: '20px',
-      marginBottom: '20px',
+      borderRadius: isVeryNarrow ? '8px' : '12px',
+      padding: isVeryNarrow ? '8px' : isMobile ? '12px' : '16px',
+      marginBottom: '16px',
       boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)',
       border: '1px solid rgba(255, 255, 255, 0.1)'
     },
     inputRow: {
       display: 'flex',
-      gap: '12px',
-      marginBottom: '16px'
+      alignItems: 'flex-end',
+      gap: isVeryNarrow ? '4px' : isMobile ? '6px' : '8px',
+      marginBottom: '16px',
+      width: '100%',
+      boxSizing: 'border-box'
     },
     input: {
-      flex: 1,
-      padding: '14px 16px',
+      width: '100%',
+      padding: isVeryNarrow ? '8px 6px' : isMobile ? '10px 8px' : '12px 12px',
       background: 'var(--tg-theme-bg-color, #17212b)',
       border: '1px solid rgba(255, 255, 255, 0.1)',
-      borderRadius: '12px',
+      borderRadius: isVeryNarrow ? '6px' : isMobile ? '8px' : '10px',
       color: 'var(--tg-theme-text-color, #ffffff)',
-      fontSize: '16px',
+      fontSize: isVeryNarrow ? '13px' : isMobile ? '14px' : '16px',
       outline: 'none',
-      transition: 'all 0.3s ease'
+      transition: 'all 0.3s ease',
+      minHeight: isVeryNarrow ? '32px' : isMobile ? '36px' : '40px',
+      boxSizing: 'border-box',
+      maxWidth: '100%'
     },
     inputContainer: {
-      position: 'relative',
-      flex: 1
+      position: 'relative'
     },
     suggestions: {
       position: 'absolute',
@@ -240,16 +255,18 @@ const SearchScreen = () => {
     },
     searchButton: {
       width: '100%',
-      padding: '14px',
+      padding: isVeryNarrow ? '10px' : isMobile ? '12px' : '14px',
       background: 'linear-gradient(135deg, var(--tg-theme-button-color, #5288c1), var(--tg-theme-accent-text-color, #64b5ef))',
       color: 'white',
       border: 'none',
-      borderRadius: '12px',
-      fontSize: '16px',
+      borderRadius: isVeryNarrow ? '8px' : '12px',
+      fontSize: isVeryNarrow ? '14px' : '16px',
       fontWeight: '600',
       cursor: 'pointer',
       transition: 'all 0.3s ease',
-      boxShadow: '0 4px 16px rgba(82, 136, 193, 0.3)'
+      boxShadow: '0 4px 16px rgba(82, 136, 193, 0.3)',
+      minHeight: isVeryNarrow ? '36px' : isMobile ? '40px' : '44px',
+      boxSizing: 'border-box'
     },
     courierCard: {
       background: 'var(--tg-theme-secondary-bg-color, #232e3c)',
@@ -401,7 +418,12 @@ const SearchScreen = () => {
 
       <div style={styles.searchForm}>
         <div style={styles.inputRow}>
-          <div style={styles.inputContainer}>
+          <div style={{
+            ...styles.inputContainer,
+            flex: '1 1 0',
+            minWidth: 0,
+            maxWidth: `calc(50% - ${isVeryNarrow ? '16px' : isMobile ? '18px' : '20px'})`
+          }}>
             <input
               style={styles.input}
               type="text"
@@ -431,7 +453,52 @@ const SearchScreen = () => {
               </div>
             )}
           </div>
-          <div style={styles.inputContainer}>
+          
+          {/* Кнопка обмена местами */}
+          <div style={{ paddingBottom: '2px', flexShrink: 0 }}>
+            <button
+              style={{
+                background: 'var(--tg-theme-secondary-bg-color, #232e3c)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                color: 'var(--tg-theme-hint-color, #708499)',
+                fontSize: isVeryNarrow ? '12px' : isMobile ? '14px' : '16px',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                padding: 0,
+                lineHeight: 1,
+                width: isVeryNarrow ? '28px' : isMobile ? '32px' : '40px',
+                height: isVeryNarrow ? '28px' : isMobile ? '32px' : '40px',
+                borderRadius: isVeryNarrow ? '6px' : isMobile ? '8px' : '10px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0
+              }}
+              onClick={() => {
+                const tempFrom = from;
+                setFrom(to);
+                setTo(tempFrom);
+              }}
+              title="Поменять местами"
+              onMouseEnter={(e) => {
+                e.target.style.background = 'var(--tg-theme-button-color, #5288c1)';
+                e.target.style.color = 'var(--tg-theme-button-text-color, #ffffff)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.background = 'var(--tg-theme-secondary-bg-color, #232e3c)';
+                e.target.style.color = 'var(--tg-theme-hint-color, #708499)';
+              }}
+            >
+              ⇅
+            </button>
+          </div>
+          
+          <div style={{
+            ...styles.inputContainer,
+            flex: '1 1 0',
+            minWidth: 0,
+            maxWidth: `calc(50% - ${isVeryNarrow ? '16px' : isMobile ? '18px' : '20px'})`
+          }}>
             <input
               style={styles.input}
               type="text"

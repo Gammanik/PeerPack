@@ -115,7 +115,9 @@ const Layout = ({ children, currentPage, onNavigate }) => {
       paddingBottom: '80px',
       maxWidth: '480px',
       margin: '0 auto',
-      width: '100%'
+      width: '100%',
+      minHeight: 'calc(100vh - 140px)',
+      boxSizing: 'border-box'
     }
   };
 

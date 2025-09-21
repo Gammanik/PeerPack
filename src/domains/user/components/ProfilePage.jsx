@@ -45,9 +45,17 @@ const ProfilePage = ({
     }, [userTrips]);
     const [activeTab, setActiveTab] = useState('packages');
     const [notificationCount] = useState(6); // Mock count from API
+    const [showStats, setShowStats] = useState(false);
 
     const packageTemplates = myPackages.filter(pkg => pkg.status === 'template' || pkg.status === 'active' || pkg.status === 'waiting');
     const completedPackages = myPackages.filter(pkg => pkg.status === 'completed');
+    
+    // Calculate statistics
+    const totalPackages = myPackages.length;
+    const activePackages = packageTemplates.length;
+    const totalTrips = userTrips.length;
+    const totalRequests = allTripRequests.length;
+    const newRequests = allTripRequests.filter(req => req.is_new && req.status === 'pending').length;
 
     const styles = {
         container: {
@@ -207,6 +215,184 @@ const ProfilePage = ({
                         </div>
                     )}
                 </button>
+            </div>
+
+            {/* Statistics Section */}
+            <div style={{
+                background: 'var(--tg-theme-secondary-bg-color, #232e3c)',
+                borderRadius: 12,
+                marginBottom: 16,
+                overflow: 'hidden',
+                border: '0.5px solid var(--tg-theme-hint-color, #708499)'
+            }}>
+                <button
+                    onClick={() => setShowStats(!showStats)}
+                    style={{
+                        width: '100%',
+                        background: 'transparent',
+                        border: 'none',
+                        padding: '12px 16px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        cursor: 'pointer',
+                        color: 'var(--tg-theme-text-color, #ffffff)'
+                    }}
+                >
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 8
+                    }}>
+                        <span style={{ fontSize: 16 }}>📊</span>
+                        <span style={{ fontSize: 15, fontWeight: 500 }}>Статистика</span>
+                        {newRequests > 0 && (
+                            <div style={{
+                                background: '#FF3B30',
+                                color: 'white',
+                                borderRadius: '50%',
+                                width: 18,
+                                height: 18,
+                                fontSize: 10,
+                                fontWeight: 600,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                            }}>
+                                {newRequests > 9 ? '9+' : newRequests}
+                            </div>
+                        )}
+                    </div>
+                    <span style={{
+                        fontSize: 12,
+                        color: 'var(--tg-theme-hint-color, #708499)',
+                        transform: showStats ? 'rotate(180deg)' : 'rotate(0deg)',
+                        transition: 'transform 0.2s ease'
+                    }}>▼</span>
+                </button>
+                
+                {showStats && (
+                    <div style={{
+                        padding: '0 16px 16px',
+                        animation: 'slideIn 0.2s ease-out'
+                    }}>
+                        <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(2, 1fr)',
+                            gap: 12,
+                            marginBottom: 12
+                        }}>
+                            <div style={{
+                                background: 'var(--tg-theme-bg-color, #17212b)',
+                                borderRadius: 8,
+                                padding: 12,
+                                textAlign: 'center'
+                            }}>
+                                <div style={{
+                                    fontSize: 20,
+                                    fontWeight: 600,
+                                    color: 'var(--tg-theme-accent-text-color, #64b5ef)',
+                                    marginBottom: 4
+                                }}>{totalPackages}</div>
+                                <div style={{
+                                    fontSize: 12,
+                                    color: 'var(--tg-theme-hint-color, #708499)'
+                                }}>📦 Всего посылок</div>
+                            </div>
+                            
+                            <div style={{
+                                background: 'var(--tg-theme-bg-color, #17212b)',
+                                borderRadius: 8,
+                                padding: 12,
+                                textAlign: 'center'
+                            }}>
+                                <div style={{
+                                    fontSize: 20,
+                                    fontWeight: 600,
+                                    color: activePackages > 0 ? '#4BB34B' : 'var(--tg-theme-hint-color, #708499)',
+                                    marginBottom: 4
+                                }}>{activePackages}</div>
+                                <div style={{
+                                    fontSize: 12,
+                                    color: 'var(--tg-theme-hint-color, #708499)'
+                                }}>⚡ Активных</div>
+                            </div>
+                            
+                            <div style={{
+                                background: 'var(--tg-theme-bg-color, #17212b)',
+                                borderRadius: 8,
+                                padding: 12,
+                                textAlign: 'center'
+                            }}>
+                                <div style={{
+                                    fontSize: 20,
+                                    fontWeight: 600,
+                                    color: 'var(--tg-theme-accent-text-color, #64b5ef)',
+                                    marginBottom: 4
+                                }}>{totalTrips}</div>
+                                <div style={{
+                                    fontSize: 12,
+                                    color: 'var(--tg-theme-hint-color, #708499)'
+                                }}>✈️ Поездок</div>
+                            </div>
+                            
+                            <div style={{
+                                background: 'var(--tg-theme-bg-color, #17212b)',
+                                borderRadius: 8,
+                                padding: 12,
+                                textAlign: 'center',
+                                ...(newRequests > 0 ? {
+                                    border: '1px solid #FF3B30',
+                                    background: 'rgba(255, 59, 48, 0.1)'
+                                } : {})
+                            }}>
+                                <div style={{
+                                    fontSize: 20,
+                                    fontWeight: 600,
+                                    color: totalRequests > 0 ? '#FFD700' : 'var(--tg-theme-hint-color, #708499)',
+                                    marginBottom: 4
+                                }}>{totalRequests}</div>
+                                <div style={{
+                                    fontSize: 12,
+                                    color: 'var(--tg-theme-hint-color, #708499)'
+                                }}>📨 Заявок</div>
+                                {newRequests > 0 && (
+                                    <div style={{
+                                        fontSize: 10,
+                                        color: '#FF3B30',
+                                        fontWeight: 600,
+                                        marginTop: 2
+                                    }}>+{newRequests} новых</div>
+                                )}
+                            </div>
+                        </div>
+                        
+                        <div style={{
+                            background: 'linear-gradient(90deg, rgba(82, 136, 193, 0.1) 0%, rgba(100, 181, 239, 0.1) 100%)',
+                            borderRadius: 8,
+                            padding: 10,
+                            textAlign: 'center'
+                        }}>
+                            <div style={{
+                                fontSize: 13,
+                                color: 'var(--tg-theme-text-color, #ffffff)',
+                                fontWeight: 500
+                            }}>
+                                🏆 Уровень активности
+                            </div>
+                            <div style={{
+                                fontSize: 18,
+                                fontWeight: 600,
+                                color: 'var(--tg-theme-accent-text-color, #64b5ef)',
+                                marginTop: 4
+                            }}>
+                                {totalPackages + totalTrips === 0 ? 'Новичок' :
+                                 totalPackages + totalTrips < 5 ? 'Начинающий' :
+                                 totalPackages + totalTrips < 15 ? 'Активный' : 'Эксперт'}
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
 
             <div style={styles.tabs}>
