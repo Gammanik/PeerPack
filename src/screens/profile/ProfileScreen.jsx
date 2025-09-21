@@ -1,9 +1,31 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PackagesSection from './components/PackagesSection.jsx';
 import TripsSection from './components/TripsSection.jsx';
 
 const ProfileScreen = () => {
   const [activeTab, setActiveTab] = useState('packages');
+  const [showStats, setShowStats] = useState(false);
+
+  // Add CSS animation for slideIn effect
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes slideIn {
+        from { 
+          opacity: 0; 
+          transform: translateY(-10px); 
+          maxHeight: 0;
+        }
+        to { 
+          opacity: 1; 
+          transform: translateY(0); 
+          maxHeight: 200px;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+    return () => document.head.removeChild(style);
+  }, []);
 
   const styles = {
     container: {
@@ -13,7 +35,7 @@ const ProfileScreen = () => {
     },
     header: {
       textAlign: 'center',
-      marginBottom: '32px',
+      marginBottom: '16px',
       padding: '20px 0'
     },
     userInfo: {
@@ -36,7 +58,12 @@ const ProfileScreen = () => {
       fontWeight: '700',
       background: 'linear-gradient(135deg, var(--tg-theme-text-color, #ffffff), var(--tg-theme-accent-text-color, #64b5ef))',
       WebkitBackgroundClip: 'text',
-      WebkitTextFillColor: 'transparent'
+      WebkitTextFillColor: 'transparent',
+      cursor: 'pointer',
+      padding: '8px 16px',
+      borderRadius: '12px',
+      transition: 'all 0.2s ease',
+      position: 'relative'
     },
     userStats: {
       display: 'flex',
@@ -102,39 +129,67 @@ const ProfileScreen = () => {
             alt="Никита"
             style={styles.avatar}
           />
-          <div style={styles.userName}>Никита</div>
-          <div style={styles.userStats}>
-            <div style={styles.statItem}>
-              <span style={styles.statNumber}>12</span>
-              <div style={styles.statLabel}>ПОЕЗДОК</div>
-            </div>
-            <div style={styles.statItem}>
-              <span style={styles.statNumber}>4.8</span>
-              <div style={styles.statLabel}>РЕЙТИНГ</div>
-            </div>
-            <div style={styles.statItem}>
-              <span style={styles.statNumber}>47</span>
-              <div style={styles.statLabel}>ОТЗЫВОВ</div>
-            </div>
+          <div 
+            style={styles.userName}
+            onClick={() => setShowStats(!showStats)}
+            onMouseEnter={(e) => {
+              e.target.style.background = 'rgba(100, 181, 239, 0.1)';
+              e.target.style.WebkitTextFillColor = 'var(--tg-theme-text-color, #ffffff)';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.background = 'transparent';
+              e.target.style.WebkitTextFillColor = 'transparent';
+            }}
+          >
+            Никита 
+            <span style={{
+              fontSize: '14px',
+              color: 'var(--tg-theme-hint-color, #708499)',
+              marginLeft: '8px',
+              transform: showStats ? 'rotate(180deg)' : 'rotate(0deg)',
+              transition: 'transform 0.2s ease',
+              display: 'inline-block'
+            }}>▼</span>
           </div>
-          <div style={styles.userStatsExtended}>
-            <div style={styles.statItem}>
-              <span style={styles.statNumber}>24</span>
-              <div style={styles.statLabel}>ПОСЫЛОК</div>
+          {showStats && (
+            <div style={{
+              animation: 'slideIn 0.3s ease-out',
+              overflow: 'hidden'
+            }}>
+              <div style={styles.userStats}>
+                <div style={styles.statItem}>
+                  <span style={styles.statNumber}>12</span>
+                  <div style={styles.statLabel}>ПОЕЗДОК</div>
+                </div>
+                <div style={styles.statItem}>
+                  <span style={styles.statNumber}>4.8</span>
+                  <div style={styles.statLabel}>РЕЙТИНГ</div>
+                </div>
+                <div style={styles.statItem}>
+                  <span style={styles.statNumber}>47</span>
+                  <div style={styles.statLabel}>ОТЗЫВОВ</div>
+                </div>
+              </div>
+              <div style={styles.userStatsExtended}>
+                <div style={styles.statItem}>
+                  <span style={styles.statNumber}>24</span>
+                  <div style={styles.statLabel}>ПОСЫЛОК</div>
+                </div>
+                <div style={styles.statItem}>
+                  <span style={styles.statNumber}>98%</span>
+                  <div style={styles.statLabel}>УСПЕШНОСТЬ</div>
+                </div>
+                <div style={styles.statItem}>
+                  <span style={styles.statNumber}>₽15k</span>
+                  <div style={styles.statLabel}>ЗАРАБОТАНО</div>
+                </div>
+                <div style={styles.statItem}>
+                  <span style={styles.statNumber}>3.2</span>
+                  <div style={styles.statLabel}>ГОДА С НАМИ</div>
+                </div>
+              </div>
             </div>
-            <div style={styles.statItem}>
-              <span style={styles.statNumber}>98%</span>
-              <div style={styles.statLabel}>УСПЕШНОСТЬ</div>
-            </div>
-            <div style={styles.statItem}>
-              <span style={styles.statNumber}>₽15k</span>
-              <div style={styles.statLabel}>ЗАРАБОТАНО</div>
-            </div>
-            <div style={styles.statItem}>
-              <span style={styles.statNumber}>3.2</span>
-              <div style={styles.statLabel}>ГОДА С НАМИ</div>
-            </div>
-          </div>
+          )}
         </div>
       </div>
 

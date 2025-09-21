@@ -3,7 +3,7 @@ import RequestForm from '../../domains/package/components/RequestForm.jsx';
 import { useLocale } from '../../contexts/LanguageContext.jsx';
 
 const SearchScreen = () => {
-  const { t } = useLocale();
+  const { t, getCities } = useLocale();
   const [screenWidth, setScreenWidth] = useState(window.innerWidth);
 
   useEffect(() => {
@@ -16,6 +16,8 @@ const SearchScreen = () => {
   const [results, setResults] = useState([]);
   const [showFromSuggestions, setShowFromSuggestions] = useState(false);
   const [showToSuggestions, setShowToSuggestions] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [searchStarted, setSearchStarted] = useState(false);
   
   // Состояние для формы отправки посылки
   const [showRequestForm, setShowRequestForm] = useState(false);
@@ -56,17 +58,27 @@ const SearchScreen = () => {
     }
   ]);
 
-  const cities = [
-    'Москва', 'Санкт-Петербург', 'Дубай', 'Стамбул', 'Тбилиси', 
-    'Екатеринбург', 'Казань', 'Новосибирск', 'Самара', 'Ростов-на-Дону',
-    'Краснодар', 'Сочи', 'Калининград', 'Минск', 'Алматы', 'Ташкент'
-  ];
+  const cityData = getCities();
+  const cities = cityData.map(city => city.local);
 
   const getSuggestions = (input) => {
     if (!input) return [];
-    return cities.filter(city => 
-      city.toLowerCase().includes(input.toLowerCase())
+    return cityData.filter(city => 
+      city.local.toLowerCase().includes(input.toLowerCase()) ||
+      city.english.toLowerCase().includes(input.toLowerCase())
     ).slice(0, 5);
+  };
+
+  const clearFromCity = () => {
+    setFrom('');
+    setResults([]);
+    setSearchStarted(false);
+  };
+
+  const clearToCity = () => {
+    setTo('');
+    setResults([]);
+    setSearchStarted(false);
   };
 
   // Функция для обработки отправки заявки
@@ -97,14 +109,23 @@ const SearchScreen = () => {
     setShowRequestForm(true);
   };
 
-  const handleSearch = () => {
+  const handleSearch = async () => {
+    if (!from || !to) return;
+    
+    setIsLoading(true);
+    setSearchStarted(true);
+    setResults([]);
+    
+    // Имитация задержки API запроса
+    await new Promise(resolve => setTimeout(resolve, 1500 + Math.random() * 1000));
+    
     const mockResults = [
       {
         id: 1,
         name: 'Ахмед',
         avatar: 'https://i.pravatar.cc/100?img=12',
-        from: 'Москва',
-        to: 'Дубай',
+        from: from || 'Москва',
+        to: to || 'Дубай',
         date: '2025-01-15',
         time: '15:00 → 23:30',
         airport: 'Шереметьево → DXB',
@@ -117,8 +138,8 @@ const SearchScreen = () => {
         id: 2,
         name: 'Фатима',
         avatar: 'https://i.pravatar.cc/100?img=44',
-        from: 'Москва',
-        to: 'Дубай',
+        from: from || 'Москва',
+        to: to || 'Дубай',
         date: '2025-01-16',
         time: '09:30 → 17:45',
         airport: 'Внуково → DXB',
@@ -131,8 +152,8 @@ const SearchScreen = () => {
         id: 3,
         name: 'Марк',
         avatar: 'https://i.pravatar.cc/100?img=68',
-        from: 'Москва',
-        to: 'Дубай',
+        from: from || 'Москва',
+        to: to || 'Дубай',
         date: '2025-01-17',
         time: '22:00 → 06:15',
         airport: 'Домодедово → DXB',
@@ -142,6 +163,8 @@ const SearchScreen = () => {
         comment: 'Ночной рейс, выгодные цены. Только документы и мелкие вещи'
       }
     ];
+    
+    setIsLoading(false);
     setResults(mockResults);
   };
 
@@ -170,6 +193,31 @@ const SearchScreen = () => {
 
   const isVeryNarrow = screenWidth < 400;
   const isMobile = screenWidth < 480;
+
+  // Добавляем CSS анимации в head
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      @keyframes shimmer {
+        0% { background-position: -200% 0; }
+        100% { background-position: 200% 0; }
+      }
+      @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.7; }
+      }
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+    `;
+    document.head.appendChild(style);
+    return () => document.head.removeChild(style);
+  }, []);
 
   const styles = {
     container: {
@@ -410,8 +458,87 @@ const SearchScreen = () => {
     emptyText: {
       fontSize: '18px',
       fontWeight: '500'
+    },
+    loadingContainer: {
+      textAlign: 'center',
+      padding: '40px 20px',
+      color: 'var(--tg-theme-hint-color, #708499)'
+    },
+    loadingSpinner: {
+      width: '40px',
+      height: '40px',
+      margin: '0 auto 20px',
+      border: '3px solid rgba(82, 136, 193, 0.2)',
+      borderTop: '3px solid var(--tg-theme-button-color, #5288c1)',
+      borderRadius: '50%',
+      animation: 'spin 1s linear infinite'
+    },
+    loadingText: {
+      fontSize: '16px',
+      fontWeight: '500',
+      marginBottom: '8px',
+      color: 'var(--tg-theme-text-color, #ffffff)'
+    },
+    loadingSubtext: {
+      fontSize: '14px',
+      opacity: 0.7
+    },
+    skeletonCard: {
+      background: 'var(--tg-theme-secondary-bg-color, #232e3c)',
+      borderRadius: '20px',
+      padding: '20px',
+      marginBottom: '16px',
+      border: '1px solid rgba(255, 255, 255, 0.1)',
+      animation: 'pulse 1.5s ease-in-out infinite'
+    },
+    skeletonLine: {
+      height: '12px',
+      background: 'linear-gradient(90deg, rgba(255,255,255,0.1) 25%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0.1) 75%)',
+      borderRadius: '6px',
+      marginBottom: '8px',
+      backgroundSize: '200% 100%',
+      animation: 'shimmer 1.5s infinite'
+    },
+    skeletonAvatar: {
+      width: '50px',
+      height: '50px',
+      borderRadius: '50%',
+      background: 'linear-gradient(90deg, rgba(255,255,255,0.1) 25%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0.1) 75%)',
+      backgroundSize: '200% 100%',
+      animation: 'shimmer 1.5s infinite'
+    },
+    fadeIn: {
+      animation: 'fadeIn 0.5s ease-out'
     }
   };
+
+  // Компонент скелетон карточки
+  const SkeletonCard = () => (
+    <div style={styles.skeletonCard}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
+          <div style={styles.skeletonAvatar}></div>
+          <div style={{ flex: 1 }}>
+            <div style={{ ...styles.skeletonLine, width: '120px', height: '16px', marginBottom: '8px' }}></div>
+            <div style={{ ...styles.skeletonLine, width: '80px', height: '12px' }}></div>
+          </div>
+        </div>
+        <div style={{ ...styles.skeletonLine, width: '60px', height: '20px' }}></div>
+      </div>
+      <div style={{ ...styles.skeletonLine, width: '200px', height: '14px', marginBottom: '12px' }}></div>
+      <div style={{ ...styles.skeletonLine, width: '150px', height: '12px', marginBottom: '8px' }}></div>
+      <div style={{ ...styles.skeletonLine, width: '180px', height: '12px' }}></div>
+    </div>
+  );
+
+  // Компонент загрузки
+  const LoadingState = () => (
+    <div style={styles.loadingContainer}>
+      <div style={styles.loadingSpinner}></div>
+      <div style={styles.loadingText}>Ищем курьеров...</div>
+      <div style={styles.loadingSubtext}>Поиск может занять несколько секунд</div>
+    </div>
+  );
 
   return (
     <div style={styles.container}>
@@ -424,18 +551,54 @@ const SearchScreen = () => {
             minWidth: 0,
             maxWidth: `calc(50% - ${isVeryNarrow ? '16px' : isMobile ? '18px' : '20px'})`
           }}>
-            <input
-              style={styles.input}
-              type="text"
-              placeholder={t('fromLabel')}
-              value={from}
-              onChange={(e) => {
-                setFrom(e.target.value);
-                setShowFromSuggestions(true);
-              }}
-              onFocus={() => setShowFromSuggestions(true)}
-              onBlur={() => setTimeout(() => setShowFromSuggestions(false), 200)}
-            />
+            <div style={{ position: 'relative', width: '100%' }}>
+              <input
+                style={{
+                  ...styles.input,
+                  paddingRight: from ? '32px' : '12px'
+                }}
+                type="text"
+                placeholder={t('fromLabel')}
+                value={from}
+                onChange={(e) => {
+                  setFrom(e.target.value);
+                  setShowFromSuggestions(true);
+                }}
+                onFocus={() => setShowFromSuggestions(true)}
+                onBlur={() => setTimeout(() => setShowFromSuggestions(false), 200)}
+              />
+              {from && (
+                <button
+                  style={{
+                    position: 'absolute',
+                    right: isVeryNarrow ? '4px' : '8px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    background: 'var(--tg-theme-hint-color, #708499)',
+                    border: 'none',
+                    borderRadius: '50%',
+                    width: isVeryNarrow ? '18px' : '20px',
+                    height: isVeryNarrow ? '18px' : '20px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    fontSize: isVeryNarrow ? '10px' : '12px',
+                    color: 'var(--tg-theme-bg-color, #17212b)',
+                    transition: 'all 0.2s ease'
+                  }}
+                  onClick={clearFromCity}
+                  onMouseEnter={(e) => {
+                    e.target.style.background = 'var(--tg-theme-text-color, #ffffff)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.background = 'var(--tg-theme-hint-color, #708499)';
+                  }}
+                >
+                  ×
+                </button>
+              )}
+            </div>
             {showFromSuggestions && getSuggestions(from).length > 0 && (
               <div style={styles.suggestions}>
                 {getSuggestions(from).map((city, index) => (
@@ -443,11 +606,11 @@ const SearchScreen = () => {
                     key={index}
                     style={styles.suggestion}
                     onMouseDown={() => {
-                      setFrom(city);
+                      setFrom(city.local);
                       setShowFromSuggestions(false);
                     }}
                   >
-                    {city}
+                    {city.local}
                   </div>
                 ))}
               </div>
@@ -499,18 +662,54 @@ const SearchScreen = () => {
             minWidth: 0,
             maxWidth: `calc(50% - ${isVeryNarrow ? '16px' : isMobile ? '18px' : '20px'})`
           }}>
-            <input
-              style={styles.input}
-              type="text"
-              placeholder={t('toLabel')}
-              value={to}
-              onChange={(e) => {
-                setTo(e.target.value);
-                setShowToSuggestions(true);
-              }}
-              onFocus={() => setShowToSuggestions(true)}
-              onBlur={() => setTimeout(() => setShowToSuggestions(false), 200)}
-            />
+            <div style={{ position: 'relative', width: '100%' }}>
+              <input
+                style={{
+                  ...styles.input,
+                  paddingRight: to ? '32px' : '12px'
+                }}
+                type="text"
+                placeholder={t('toLabel')}
+                value={to}
+                onChange={(e) => {
+                  setTo(e.target.value);
+                  setShowToSuggestions(true);
+                }}
+                onFocus={() => setShowToSuggestions(true)}
+                onBlur={() => setTimeout(() => setShowToSuggestions(false), 200)}
+              />
+              {to && (
+                <button
+                  style={{
+                    position: 'absolute',
+                    right: isVeryNarrow ? '4px' : '8px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    background: 'var(--tg-theme-hint-color, #708499)',
+                    border: 'none',
+                    borderRadius: '50%',
+                    width: isVeryNarrow ? '18px' : '20px',
+                    height: isVeryNarrow ? '18px' : '20px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    fontSize: isVeryNarrow ? '10px' : '12px',
+                    color: 'var(--tg-theme-bg-color, #17212b)',
+                    transition: 'all 0.2s ease'
+                  }}
+                  onClick={clearToCity}
+                  onMouseEnter={(e) => {
+                    e.target.style.background = 'var(--tg-theme-text-color, #ffffff)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.background = 'var(--tg-theme-hint-color, #708499)';
+                  }}
+                >
+                  ×
+                </button>
+              )}
+            </div>
             {showToSuggestions && getSuggestions(to).length > 0 && (
               <div style={styles.suggestions}>
                 {getSuggestions(to).map((city, index) => (
@@ -518,33 +717,85 @@ const SearchScreen = () => {
                     key={index}
                     style={styles.suggestion}
                     onMouseDown={() => {
-                      setTo(city);
+                      setTo(city.local);
                       setShowToSuggestions(false);
                     }}
                   >
-                    {city}
+                    {city.local}
                   </div>
                 ))}
               </div>
             )}
           </div>
         </div>
-        <button style={styles.searchButton} onClick={handleSearch}>
-          📦 {t('sendPackage')}
+        <button 
+          style={{
+            ...styles.searchButton,
+            opacity: isLoading ? 0.7 : 1,
+            cursor: isLoading ? 'not-allowed' : 'pointer'
+          }} 
+          onClick={handleSearch}
+          disabled={isLoading || !from || !to}
+        >
+          {isLoading ? (
+            <>
+              <div style={{
+                width: '16px',
+                height: '16px',
+                border: '2px solid rgba(255,255,255,0.3)',
+                borderTop: '2px solid #ffffff',
+                borderRadius: '50%',
+                animation: 'spin 1s linear infinite',
+                marginRight: '8px'
+              }}></div>
+              Поиск...
+            </>
+          ) : (
+            <>
+              📦 {t('sendPackage')}
+            </>
+          )}
         </button>
       </div>
 
-      {results.length === 0 && from && to && (
+      {/* Показываем загрузку */}
+      {isLoading && (
+        <>
+          <LoadingState />
+          <SkeletonCard />
+          <SkeletonCard />
+          <SkeletonCard />
+        </>
+      )}
+
+      {/* Показываем пустое состояние если поиск был запущен, но нет результатов */}
+      {!isLoading && searchStarted && results.length === 0 && (
+        <div style={styles.emptyState}>
+          <div style={styles.emptyIcon}>📦</div>
+          <div style={styles.emptyText}>Курьеры не найдены</div>
+          <div style={{ fontSize: '14px', marginTop: '8px', opacity: 0.7 }}>
+            Попробуйте изменить параметры поиска
+          </div>
+        </div>
+      )}
+
+      {/* Показываем начальное состояние */}
+      {!isLoading && !searchStarted && (
         <div style={styles.emptyState}>
           <div style={styles.emptyIcon}>📦</div>
           <div style={styles.emptyText}>{t('performSearch')}</div>
         </div>
       )}
 
-      {results.map(courier => (
+      {/* Показываем результаты с анимацией */}
+      {!isLoading && results.length > 0 && results.map((courier, index) => (
         <div 
           key={courier.id} 
-          style={styles.courierCard}
+          style={{
+            ...styles.courierCard,
+            ...styles.fadeIn,
+            animationDelay: `${index * 0.1}s`
+          }}
           onClick={() => handleCourierClick(courier)}
         >
           <div style={styles.courierHeader}>
