@@ -77,7 +77,8 @@ export const translations = {
       'Krasnoyarsk': 'Красноярск',
       'Perm': 'Пермь',
       'Voronezh': 'Воронеж',
-      'Volgograd': 'Волгоград'
+      'Volgograd': 'Волгоград',
+      "Tomsk": "Томск"
     }
   },
   

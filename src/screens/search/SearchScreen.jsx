@@ -22,6 +22,7 @@ const SearchScreen = () => {
   // Состояние для формы отправки посылки
   const [showRequestForm, setShowRequestForm] = useState(false);
   const [selectedCourier, setSelectedCourier] = useState(null);
+  const [showCourierModal, setShowCourierModal] = useState(false);
   const [useExistingPackage, setUseExistingPackage] = useState(false);
   const [requestForm, setRequestForm] = useState({
     packageDescription: '',
@@ -106,6 +107,12 @@ const SearchScreen = () => {
   // Функция для клика по карточке курьера
   const handleCourierClick = (courier) => {
     setSelectedCourier(courier);
+    setShowCourierModal(true);
+  };
+
+  // Функция для открытия формы отправки заявки
+  const handleSendPackageClick = () => {
+    setShowCourierModal(false);
     setShowRequestForm(true);
   };
 
@@ -132,7 +139,18 @@ const SearchScreen = () => {
         price: 1500,
         rating: 4.9,
         trips_count: 47,
-        comment: 'Регулярные рейсы в Дубай, могу взять документы и небольшие посылки'
+        reviews_count: 35,
+        comment: 'Регулярные рейсы в Дубай, могу взять документы и небольшие посылки',
+        past_trips: [
+          { from: 'Москва', to: 'Дубай', date: '2024-12-20' },
+          { from: 'Москва', to: 'Стамбул', date: '2024-12-15' },
+          { from: 'Москва', to: 'Дубай', date: '2024-12-10' }
+        ],
+        reviews: [
+          { rating: 5, text: 'Отличный курьер, все доставил быстро и в сохранности!', date: '2024-12-21' },
+          { rating: 5, text: 'Очень надежный, рекомендую!', date: '2024-12-16' },
+          { rating: 4, text: 'Хорошо, но немного задержался с доставкой', date: '2024-12-11' }
+        ]
       },
       {
         id: 2,
@@ -146,7 +164,16 @@ const SearchScreen = () => {
         price: 2000,
         rating: 4.8,
         trips_count: 28,
-        comment: 'Утренний рейс, удобно для срочных доставок. Премиум сервис'
+        reviews_count: 22,
+        comment: 'Утренний рейс, удобно для срочных доставок. Премиум сервис',
+        past_trips: [
+          { from: 'Москва', to: 'Дубай', date: '2024-12-18' },
+          { from: 'СПб', to: 'Дубай', date: '2024-12-12' }
+        ],
+        reviews: [
+          { rating: 5, text: 'Превосходный сервис, очень профессионально!', date: '2024-12-19' },
+          { rating: 5, text: 'Все супер, спасибо!', date: '2024-12-13' }
+        ]
       },
       {
         id: 3,
@@ -160,7 +187,16 @@ const SearchScreen = () => {
         price: 1200,
         rating: 4.6,
         trips_count: 15,
-        comment: 'Ночной рейс, выгодные цены. Только документы и мелкие вещи'
+        reviews_count: 12,
+        comment: 'Ночной рейс, выгодные цены. Только документы и мелкие вещи',
+        past_trips: [
+          { from: 'Москва', to: 'Дубай', date: '2024-12-14' },
+          { from: 'Москва', to: 'Абу-Даби', date: '2024-12-08' }
+        ],
+        reviews: [
+          { rating: 5, text: 'Отличная цена, все доставил как договорились', date: '2024-12-15' },
+          { rating: 4, text: 'Хорошо, но стоит улучшить коммуникацию', date: '2024-12-09' }
+        ]
       }
     ];
     
@@ -540,6 +576,238 @@ const SearchScreen = () => {
     </div>
   );
 
+  // Компонент модального окна курьера
+  const CourierModal = () => {
+    if (!showCourierModal || !selectedCourier) return null;
+
+    const modalStyles = {
+      modalOverlay: {
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0,0,0,0.6)',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 1000,
+        padding: '16px'
+      },
+      modal: {
+        backgroundColor: 'var(--tg-theme-secondary-bg-color, #232e3c)',
+        borderRadius: 12,
+        padding: 0,
+        maxWidth: 480,
+        width: '100%',
+        maxHeight: '85vh',
+        overflow: 'hidden',
+        border: '0.5px solid var(--tg-theme-hint-color, #708499)'
+      },
+      modalHeader: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: '16px 16px 12px',
+        borderBottom: '0.5px solid var(--tg-theme-hint-color, #708499)',
+        color: 'var(--tg-theme-text-color, #ffffff)'
+      },
+      closeButton: {
+        background: 'transparent',
+        border: 'none',
+        color: 'var(--tg-theme-hint-color, #708499)',
+        fontSize: 18,
+        cursor: 'pointer',
+        width: 32,
+        height: 32,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: 16
+      },
+      modalContent: {
+        padding: 16,
+        maxHeight: 'calc(85vh - 60px)',
+        overflowY: 'auto'
+      },
+      courierInfo: {
+        display: 'flex',
+        gap: 15,
+        marginBottom: 20,
+        alignItems: 'center'
+      },
+      modalAvatar: {
+        width: 60,
+        height: 60,
+        borderRadius: '50%',
+        objectFit: 'cover'
+      },
+      rating: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: 8,
+        marginBottom: 6
+      },
+      stars: {
+        color: '#ffd700',
+        fontSize: 16
+      },
+      ratingText: {
+        fontSize: 12,
+        color: 'var(--tg-theme-hint-color, #708499)'
+      },
+      trips: {
+        color: 'var(--tg-theme-hint-color, #708499)',
+        fontSize: 14,
+        margin: 0
+      },
+      tripInfo: {
+        marginBottom: 16,
+        padding: 12,
+        backgroundColor: 'var(--tg-theme-bg-color, #17212b)',
+        borderRadius: 8,
+        color: 'var(--tg-theme-text-color, #ffffff)'
+      },
+      sectionTitle: {
+        color: 'var(--tg-theme-text-color, #ffffff)',
+        fontSize: 16,
+        fontWeight: 600,
+        marginBottom: 10
+      },
+      pastTripsSection: {
+        marginBottom: 20
+      },
+      pastTrip: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: '8px 0',
+        borderBottom: '0.5px solid var(--tg-theme-hint-color, #708499)',
+        color: 'var(--tg-theme-text-color, #ffffff)'
+      },
+      tripDate: {
+        fontSize: 12,
+        color: 'var(--tg-theme-hint-color, #708499)'
+      },
+      tripStatus: {
+        color: 'var(--tg-theme-accent-text-color, #64b5ef)',
+        fontSize: 14
+      },
+      reviewsSection: {
+        marginBottom: 20
+      },
+      review: {
+        padding: '10px 0',
+        borderBottom: '0.5px solid var(--tg-theme-hint-color, #708499)'
+      },
+      reviewHeader: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 5
+      },
+      reviewDate: {
+        fontSize: 11,
+        color: 'var(--tg-theme-hint-color, #708499)'
+      },
+      reviewText: {
+        fontSize: 14,
+        color: 'var(--tg-theme-text-color, #ffffff)',
+        margin: 0
+      },
+      sendButton: {
+        width: '100%',
+        padding: 12,
+        backgroundColor: 'var(--tg-theme-button-color, #5288c1)',
+        color: 'var(--tg-theme-button-text-color, #ffffff)',
+        border: 'none',
+        borderRadius: 8,
+        fontWeight: 600,
+        fontSize: 16,
+        cursor: 'pointer'
+      }
+    };
+
+    return (
+      <div style={modalStyles.modalOverlay} onClick={() => setShowCourierModal(false)}>
+        <div style={modalStyles.modal} onClick={(e) => e.stopPropagation()}>
+          <div style={modalStyles.modalHeader}>
+            <h3>{selectedCourier.name}</h3>
+            <button 
+              style={modalStyles.closeButton}
+              onClick={() => setShowCourierModal(false)}
+            >
+              ✕
+            </button>
+          </div>
+          
+          <div style={modalStyles.modalContent}>
+            <div style={modalStyles.courierInfo}>
+              <img src={selectedCourier.avatar} alt={selectedCourier.name} style={modalStyles.modalAvatar} />
+              <div>
+                <div style={modalStyles.rating}>
+                  <span style={modalStyles.stars}>{renderStars(selectedCourier.rating)}</span>
+                  <span style={modalStyles.ratingText}>{selectedCourier.rating} ({selectedCourier.reviews_count} отзывов)</span>
+                </div>
+                <p style={modalStyles.trips}>{selectedCourier.trips_count} успешных поездок</p>
+              </div>
+            </div>
+
+            <div style={modalStyles.tripInfo}>
+              <h4 style={modalStyles.sectionTitle}>Предстоящая поездка</h4>
+              <p><strong>{selectedCourier.from} → {selectedCourier.to}</strong></p>
+              <p>{selectedCourier.date}, {selectedCourier.time}</p>
+              <p>Аэропорт: {selectedCourier.airport}</p>
+            </div>
+
+            <div style={modalStyles.pastTripsSection}>
+              <h4 style={modalStyles.sectionTitle}>Последние поездки</h4>
+              {selectedCourier.past_trips && selectedCourier.past_trips.length > 0 ? (
+                selectedCourier.past_trips.map((trip, index) => (
+                  <div key={index} style={modalStyles.pastTrip}>
+                    <span>{trip.from} → {trip.to}</span>
+                    <span style={modalStyles.tripDate}>{trip.date}</span>
+                    <span style={modalStyles.tripStatus}>✓</span>
+                  </div>
+                ))
+              ) : (
+                <div style={{ color: 'var(--tg-theme-hint-color, #708499)', fontSize: 14 }}>
+                  Нет данных о предыдущих поездках
+                </div>
+              )}
+            </div>
+
+            <div style={modalStyles.reviewsSection}>
+              <h4 style={modalStyles.sectionTitle}>Отзывы</h4>
+              {selectedCourier.reviews && selectedCourier.reviews.length > 0 ? (
+                selectedCourier.reviews.map((review, index) => (
+                  <div key={index} style={modalStyles.review}>
+                    <div style={modalStyles.reviewHeader}>
+                      <span style={modalStyles.stars}>{renderStars(review.rating)}</span>
+                      <span style={modalStyles.reviewDate}>{review.date}</span>
+                    </div>
+                    <p style={modalStyles.reviewText}>{review.text}</p>
+                  </div>
+                ))
+              ) : (
+                <div style={{ color: 'var(--tg-theme-hint-color, #708499)', fontSize: 14 }}>
+                  Пока нет отзывов
+                </div>
+              )}
+            </div>
+
+            <button 
+              style={modalStyles.sendButton}
+              onClick={handleSendPackageClick}
+            >
+              📦 Отправить посылку
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div style={styles.container}>
 
@@ -839,6 +1107,41 @@ const SearchScreen = () => {
           </div>
         </div>
       ))}
+
+      {/* Кнопка добавления поездки */}
+      {results.length > 0 && (
+        <div style={{ 
+          marginTop: '20px', 
+          marginBottom: '20px',
+          textAlign: 'center' 
+        }}>
+          <button 
+            style={{
+              background: 'transparent',
+              color: 'var(--tg-theme-link-color, #64b5ef)',
+              border: 'none',
+              fontSize: '16px',
+              cursor: 'pointer',
+              textDecoration: 'none',
+              fontWeight: '500',
+              padding: '12px 20px',
+              borderRadius: '8px',
+              transition: 'all 0.2s ease'
+            }}
+            onClick={() => alert('Функция добавления поездки будет доступна в следующем обновлении!')}
+            onMouseEnter={(e) => {
+              e.target.style.background = 'rgba(100, 181, 239, 0.1)';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.background = 'transparent';
+            }}
+          >
+            ✈️ Близится поездка? Заработайте на ней!
+          </button>
+        </div>
+      )}
+
+      <CourierModal />
 
       <RequestForm
         selectedCourier={selectedCourier}
