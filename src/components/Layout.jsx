@@ -142,12 +142,22 @@ const Layout = ({ children, currentPage, onNavigate }) => {
         <button
           style={{
             ...styles.navButton,
-            ...(currentPage === 'search' ? styles.activeNavButton : styles.inactiveNavButton)
+            ...(currentPage === 'parcels' ? styles.activeNavButton : styles.inactiveNavButton)
           }}
-          onClick={() => onNavigate('search')}
+          onClick={() => onNavigate('parcels')}
         >
-          <div style={styles.navIcon}>🔍</div>
-          <div>{t('search')}</div>
+          <div style={styles.navIcon}>📦</div>
+          <div>Посылки</div>
+        </button>
+        <button
+          style={{
+            ...styles.navButton,
+            ...(currentPage === 'trips' ? styles.activeNavButton : styles.inactiveNavButton)
+          }}
+          onClick={() => onNavigate('trips')}
+        >
+          <div style={styles.navIcon}>✈️</div>
+          <div>Поездки</div>
         </button>
         <button
           style={{

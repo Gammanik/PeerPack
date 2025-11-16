@@ -1,9 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import PackagesSection from './components/PackagesSection.jsx';
-import TripsSection from './components/TripsSection.jsx';
 
 const ProfileScreen = () => {
-  const [activeTab, setActiveTab] = useState('packages');
   const [showStats, setShowStats] = useState(false);
 
   // Add CSS animation for slideIn effect
@@ -91,32 +88,39 @@ const ProfileScreen = () => {
       color: 'var(--tg-theme-hint-color, #708499)',
       marginTop: '4px'
     },
-    tabs: {
-      display: 'flex',
-      marginBottom: '24px',
+    menuSection: {
       background: 'var(--tg-theme-secondary-bg-color, #232e3c)',
       borderRadius: '16px',
-      padding: '4px',
-      border: '1px solid rgba(255, 255, 255, 0.1)',
-      boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)'
+      overflow: 'hidden',
+      border: '1px solid rgba(255, 255, 255, 0.1)'
     },
-    tab: {
-      flex: 1,
-      padding: '14px 16px',
-      background: 'transparent',
-      border: 'none',
-      color: 'var(--tg-theme-hint-color, #708499)',
-      fontSize: '15px',
-      fontWeight: '600',
+    menuItem: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      padding: '16px 20px',
+      borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
       cursor: 'pointer',
-      borderRadius: '12px',
-      transition: 'all 0.3s ease',
-      position: 'relative'
+      transition: 'all 0.2s ease',
+      background: 'transparent'
     },
-    activeTab: {
-      background: 'linear-gradient(135deg, var(--tg-theme-button-color, #5288c1), var(--tg-theme-accent-text-color, #64b5ef))',
-      color: 'white',
-      boxShadow: '0 4px 12px rgba(82, 136, 193, 0.4)'
+    menuItemContent: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '12px'
+    },
+    menuIcon: {
+      fontSize: '20px'
+    },
+    menuLabel: {
+      fontSize: '16px',
+      color: 'var(--tg-theme-text-color, #ffffff)',
+      fontWeight: '500'
+    },
+    menuArrow: {
+      fontSize: '24px',
+      color: 'var(--tg-theme-hint-color, #708499)',
+      fontWeight: '300'
     }
   };
 
@@ -193,32 +197,55 @@ const ProfileScreen = () => {
         </div>
       </div>
 
-      <div style={styles.tabs}>
-        <button 
-          style={{
-            ...styles.tab,
-            ...(activeTab === 'packages' ? styles.activeTab : {})
-          }}
-          onClick={() => setActiveTab('packages')}
-        >
-          📦 Посылки
-        </button>
-        <button 
-          style={{
-            ...styles.tab,
-            ...(activeTab === 'trips' ? styles.activeTab : {})
-          }}
-          onClick={() => setActiveTab('trips')}
-        >
-          ✈️ Поездки
-        </button>
-      </div>
+      <div style={styles.menuSection}>
+        <div style={styles.menuItem} onClick={() => alert('Редактирование профиля')}>
+          <div style={styles.menuItemContent}>
+            <span style={styles.menuIcon}>✏️</span>
+            <span style={styles.menuLabel}>Редактировать профиль</span>
+          </div>
+          <span style={styles.menuArrow}>›</span>
+        </div>
 
-      {activeTab === 'packages' ? (
-        <PackagesSection />
-      ) : (
-        <TripsSection />
-      )}
+        <div style={styles.menuItem} onClick={() => alert('Отзывы и рейтинг')}>
+          <div style={styles.menuItemContent}>
+            <span style={styles.menuIcon}>⭐</span>
+            <span style={styles.menuLabel}>Отзывы и рейтинг</span>
+          </div>
+          <span style={styles.menuArrow}>›</span>
+        </div>
+
+        <div style={styles.menuItem} onClick={() => alert('Настройки уведомлений')}>
+          <div style={styles.menuItemContent}>
+            <span style={styles.menuIcon}>🔔</span>
+            <span style={styles.menuLabel}>Уведомления</span>
+          </div>
+          <span style={styles.menuArrow}>›</span>
+        </div>
+
+        <div style={styles.menuItem} onClick={() => alert('Способы оплаты')}>
+          <div style={styles.menuItemContent}>
+            <span style={styles.menuIcon}>💳</span>
+            <span style={styles.menuLabel}>Способы оплаты</span>
+          </div>
+          <span style={styles.menuArrow}>›</span>
+        </div>
+
+        <div style={styles.menuItem} onClick={() => alert('Настройки')}>
+          <div style={styles.menuItemContent}>
+            <span style={styles.menuIcon}>⚙️</span>
+            <span style={styles.menuLabel}>Настройки</span>
+          </div>
+          <span style={styles.menuArrow}>›</span>
+        </div>
+
+        <div style={styles.menuItem} onClick={() => alert('Помощь и поддержка')}>
+          <div style={styles.menuItemContent}>
+            <span style={styles.menuIcon}>❓</span>
+            <span style={styles.menuLabel}>Помощь и поддержка</span>
+          </div>
+          <span style={styles.menuArrow}>›</span>
+        </div>
+      </div>
     </div>
   );
 };
