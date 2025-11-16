@@ -66,8 +66,8 @@ const Layout = ({ children }) => {
     }
   };
   
-  const showHeader = !searchCollapsed && currentPage !== 'about' && currentPage !== 'profile' && currentPage !== 'notifications';
-  const showBottomNav = currentPage === 'search' || currentPage === 'profile';
+  const showHeader = !searchCollapsed && currentPage !== 'about' && currentPage !== 'profile' && currentPage !== 'notifications' && currentPage !== 'parcels' && currentPage !== 'trips';
+  const showBottomNav = currentPage === 'parcels' || currentPage === 'trips' || currentPage === 'profile';
   
   return (
     <div style={layoutStyles.page}>
@@ -114,7 +114,7 @@ const Layout = ({ children }) => {
             style={{
               background: 'transparent',
               border: 'none',
-              color: currentPage === 'search' ? theme.colors.button : theme.colors.hint,
+              color: currentPage === 'parcels' ? theme.colors.button : theme.colors.hint,
               fontSize: theme.fontSize.sm,
               cursor: 'pointer',
               display: 'flex',
@@ -122,12 +122,31 @@ const Layout = ({ children }) => {
               alignItems: 'center',
               gap: 4,
               padding: theme.spacing.xs,
-              fontWeight: currentPage === 'search' ? theme.fontWeight.semibold : theme.fontWeight.normal
+              fontWeight: currentPage === 'parcels' ? theme.fontWeight.semibold : theme.fontWeight.normal
             }}
-            onClick={() => navigateTo('search')}
+            onClick={() => navigateTo('parcels')}
           >
-            <span style={{ fontSize: theme.fontSize.lg }}>🔍</span>
-            <span>Поиск</span>
+            <span style={{ fontSize: theme.fontSize.lg }}>📦</span>
+            <span>Посылки</span>
+          </button>
+          <button
+            style={{
+              background: 'transparent',
+              border: 'none',
+              color: currentPage === 'trips' ? theme.colors.button : theme.colors.hint,
+              fontSize: theme.fontSize.sm,
+              cursor: 'pointer',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: 4,
+              padding: theme.spacing.xs,
+              fontWeight: currentPage === 'trips' ? theme.fontWeight.semibold : theme.fontWeight.normal
+            }}
+            onClick={() => navigateTo('trips')}
+          >
+            <span style={{ fontSize: theme.fontSize.lg }}>✈️</span>
+            <span>Поездки</span>
           </button>
           <button
             style={{
