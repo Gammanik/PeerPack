@@ -1,9 +1,7 @@
-import React, { useState } from 'react';
+import React from 'react';
 import PackagesSection from '../profile/components/PackagesSection.jsx';
-import AddPackageForm from '../../domains/package/components/AddPackageForm.jsx';
 
-const ParcelsScreen = () => {
-  const [showAddForm, setShowAddForm] = useState(false);
+const ParcelsScreen = ({ onNavigate }) => {
   const styles = {
     container: {
       background: 'linear-gradient(135deg, var(--tg-theme-bg-color, #17212b) 0%, rgba(23, 33, 43, 0.95) 100%)',
@@ -49,16 +47,10 @@ const ParcelsScreen = () => {
   };
 
   const handleAddPackage = () => {
-    setShowAddForm(true);
-  };
-
-  const handleCloseForm = () => {
-    setShowAddForm(false);
-  };
-
-  const handlePackageCreated = (response) => {
-    console.log('Package created successfully:', response);
-    // TODO: Refresh packages list from API
+    // Navigate to search screen to find couriers
+    if (onNavigate) {
+      onNavigate('search');
+    }
   };
 
   return (
@@ -77,13 +69,6 @@ const ParcelsScreen = () => {
       </button>
 
       <PackagesSection />
-
-      {showAddForm && (
-        <AddPackageForm
-          onClose={handleCloseForm}
-          onSuccess={handlePackageCreated}
-        />
-      )}
     </div>
   );
 };

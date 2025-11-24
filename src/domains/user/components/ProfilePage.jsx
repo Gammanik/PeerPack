@@ -44,7 +44,6 @@ const ProfilePage = ({
         }
     }, [userTrips]);
     const [activeTab, setActiveTab] = useState('packages');
-    const [notificationCount] = useState(6); // Mock count from API
     const [showStats, setShowStats] = useState(false);
 
     const packageTemplates = myPackages.filter(pkg => pkg.status === 'template' || pkg.status === 'active' || pkg.status === 'waiting');
@@ -175,46 +174,14 @@ const ProfilePage = ({
     return (
         <div style={styles.container}>
             <div style={styles.header}>
-                <button 
+                <button
                     style={styles.backButton}
                     onClick={() => setShowProfilePage(false)}
                 >
                     ← Назад
                 </button>
                 <div style={styles.title}>Профиль</div>
-                <button 
-                    style={{
-                        background: 'transparent',
-                        border: 'none',
-                        color: 'var(--tg-theme-text-color, #ffffff)',
-                        fontSize: 20,
-                        cursor: 'pointer',
-                        position: 'relative',
-                        padding: 8
-                    }}
-                    onClick={() => navigateTo('notifications')}
-                >
-                    🔔
-                    {notificationCount > 0 && (
-                        <div style={{
-                            position: 'absolute',
-                            top: 2,
-                            right: 2,
-                            background: '#FF3B30',
-                            color: 'white',
-                            borderRadius: '50%',
-                            width: 18,
-                            height: 18,
-                            fontSize: 10,
-                            fontWeight: 600,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center'
-                        }}>
-                            {notificationCount > 9 ? '9+' : notificationCount}
-                        </div>
-                    )}
-                </button>
+                <div style={{ width: 36 }}></div>
             </div>
 
             {/* Statistics Section */}
@@ -246,22 +213,6 @@ const ProfilePage = ({
                     }}>
                         <span style={{ fontSize: 16 }}>📊</span>
                         <span style={{ fontSize: 15, fontWeight: 500 }}>Статистика</span>
-                        {newRequests > 0 && (
-                            <div style={{
-                                background: '#FF3B30',
-                                color: 'white',
-                                borderRadius: '50%',
-                                width: 18,
-                                height: 18,
-                                fontSize: 10,
-                                fontWeight: 600,
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center'
-                            }}>
-                                {newRequests > 9 ? '9+' : newRequests}
-                            </div>
-                        )}
                     </div>
                     <span style={{
                         fontSize: 12,
@@ -340,11 +291,7 @@ const ProfilePage = ({
                                 background: 'var(--tg-theme-bg-color, #17212b)',
                                 borderRadius: 8,
                                 padding: 12,
-                                textAlign: 'center',
-                                ...(newRequests > 0 ? {
-                                    border: '1px solid #FF3B30',
-                                    background: 'rgba(255, 59, 48, 0.1)'
-                                } : {})
+                                textAlign: 'center'
                             }}>
                                 <div style={{
                                     fontSize: 20,
@@ -356,14 +303,6 @@ const ProfilePage = ({
                                     fontSize: 12,
                                     color: 'var(--tg-theme-hint-color, #708499)'
                                 }}>📨 Заявок</div>
-                                {newRequests > 0 && (
-                                    <div style={{
-                                        fontSize: 10,
-                                        color: '#FF3B30',
-                                        fontWeight: 600,
-                                        marginTop: 2
-                                    }}>+{newRequests} новых</div>
-                                )}
                             </div>
                         </div>
                         
