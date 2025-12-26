@@ -50,7 +50,8 @@ const cityMapping = {
     'Красноярск': 'Krasnoyarsk',
     'Пермь': 'Perm',
     'Воронеж': 'Voronezh',
-    'Волгоград': 'Volgograd'
+    'Волгоград': 'Volgograd',
+    'Дубай': 'Dubai'
 };
 
 export const getAvailableCities = (couriers) => {
@@ -68,7 +69,7 @@ export const getAvailableCities = (couriers) => {
 export const translateCityName = (cityName, toRussian = true) => {
     if (toRussian) {
         // Find Russian name by English name
-        const entry = Object.entries(cityMapping).find(([ru, en]) => en === cityName);
+        const entry = Object.entries(cityMapping).find(([_ru, en]) => en === cityName);
         return entry ? entry[0] : cityName;
     } else {
         // Find English name by Russian name

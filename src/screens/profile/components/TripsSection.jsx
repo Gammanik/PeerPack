@@ -1,11 +1,16 @@
 import React, { useState } from 'react';
+import AddTripForm from '../../../domains/user/components/AddTripForm.jsx';
 
 const TripsSection = () => {
   const [showTripRequests, setShowTripRequests] = useState(false);
   const [selectedTrip, setSelectedTrip] = useState(null);
   const [showPackagesList, setShowPackagesList] = useState(false);
   const [showResponseForm, setShowResponseForm] = useState(false);
+  const [showAddTripForm, setShowAddTripForm] = useState(false);
   const [selectedPackage, setSelectedPackage] = useState(null);
+  
+  const availableCities = ['Москва', 'Санкт-Петербург', 'Дубай', 'Сочи', 'Казань', 'Новосибирск', 'Екатеринбург'];
+  
   const [responseForm, setResponseForm] = useState({
     tripDate: '',
     tripTime: '',
@@ -142,6 +147,13 @@ const TripsSection = () => {
       canPickupFlexible: false,
       canDeliverFlexible: false
     });
+  };
+
+  const handleAddTrip = async (tripData) => {
+    console.log('Adding trip:', tripData);
+    // TODO: Implement API call to add trip
+    alert('Поездка успешно добавлена!');
+    setShowAddTripForm(false);
   };
 
   const getTagStyle = (tag) => ({
@@ -519,7 +531,7 @@ const TripsSection = () => {
       {/* Баннер добавления поездки */}
       <div 
         style={styles.addTripBanner}
-        onClick={() => alert('Функция добавления поездки будет реализована')}
+        onClick={() => setShowAddTripForm(true)}
       >
         <div style={styles.addTripTitle}>✈️ Планируете поездку?</div>
         <div style={styles.addTripSubtitle}>Предложите свои услуги доставки и заработайте</div>
@@ -867,6 +879,13 @@ const TripsSection = () => {
           </div>
         </div>
       )}
+
+      <AddTripForm
+        showAddTripForm={showAddTripForm}
+        setShowAddTripForm={setShowAddTripForm}
+        onAddTrip={handleAddTrip}
+        availableCities={availableCities}
+      />
     </>
   );
 };

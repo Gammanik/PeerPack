@@ -3,8 +3,22 @@ import LanguageToggle from './LanguageToggle.jsx';
 import { useLocale } from '../contexts/LanguageContext.jsx';
 
 const Layout = ({ children, currentPage, onNavigate }) => {
-  const [notificationCount] = useState(6);
+  const [notificationCount] = useState(0);
   const { t } = useLocale();
+
+  const handleNavigation = (page) => {
+    // Add haptic feedback if available (Telegram WebApp)
+    if (window.Telegram && window.Telegram.WebApp) {
+      window.Telegram.WebApp.HapticFeedback.impactOccurred('light');
+    }
+    
+    // Alternative: Web Vibration API
+    if ('vibrate' in navigator) {
+      navigator.vibrate(50);
+    }
+    
+    onNavigate(page);
+  };
 
   const styles = {
     container: {
@@ -106,7 +120,9 @@ const Layout = ({ children, currentPage, onNavigate }) => {
       marginBottom: '2px'
     },
     activeNavButton: {
-      color: 'var(--tg-theme-button-color, #5288c1)'
+      color: 'var(--tg-theme-button-color, #5288c1)',
+      background: 'rgba(82, 136, 193, 0.1)',
+      transform: 'scale(1.05)'
     },
     inactiveNavButton: {
       color: 'var(--tg-theme-hint-color, #708499)'
@@ -144,7 +160,7 @@ const Layout = ({ children, currentPage, onNavigate }) => {
             ...styles.navButton,
             ...(currentPage === 'parcels' ? styles.activeNavButton : styles.inactiveNavButton)
           }}
-          onClick={() => onNavigate('parcels')}
+          onClick={() => handleNavigation('parcels')}
         >
           <div style={styles.navIcon}>📦</div>
           <div>Посылки</div>
@@ -154,7 +170,7 @@ const Layout = ({ children, currentPage, onNavigate }) => {
             ...styles.navButton,
             ...(currentPage === 'trips' ? styles.activeNavButton : styles.inactiveNavButton)
           }}
-          onClick={() => onNavigate('trips')}
+          onClick={() => handleNavigation('trips')}
         >
           <div style={styles.navIcon}>✈️</div>
           <div>Поездки</div>
@@ -165,7 +181,7 @@ const Layout = ({ children, currentPage, onNavigate }) => {
             ...(currentPage === 'profile' ? styles.activeNavButton : styles.inactiveNavButton),
             position: 'relative'
           }}
-          onClick={() => onNavigate('profile')}
+          onClick={() => handleNavigation('profile')}
         >
           <div style={styles.navIcon}>👤</div>
           <div>{t('profile')}</div>

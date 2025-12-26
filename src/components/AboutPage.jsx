@@ -1,6 +1,15 @@
 import React from 'react';
+import { useAnimatedStats } from '../hooks/useAnimatedStats.js';
 
 const AboutPage = ({ onNavigate }) => {
+  const targetStats = {
+    users: 2847,
+    deliveries: 12459,
+    rating: 4.9,
+    success: 98
+  };
+  
+  const animatedStats = useAnimatedStats(targetStats);
   const styles = {
     container: {
       padding: '20px',
@@ -117,19 +126,19 @@ const AboutPage = ({ onNavigate }) => {
 
       <div style={styles.stats}>
         <div style={styles.statCard}>
-          <div style={styles.statNumber}>2,847</div>
+          <div style={styles.statNumber}>{animatedStats.users?.toLocaleString() || '0'}</div>
           <div style={styles.statLabel}>Пользователей</div>
         </div>
         <div style={styles.statCard}>
-          <div style={styles.statNumber}>12,459</div>
+          <div style={styles.statNumber}>{animatedStats.deliveries?.toLocaleString() || '0'}</div>
           <div style={styles.statLabel}>Доставок</div>
         </div>
         <div style={styles.statCard}>
-          <div style={styles.statNumber}>4.9</div>
+          <div style={styles.statNumber}>{animatedStats.rating || '0'}</div>
           <div style={styles.statLabel}>Рейтинг</div>
         </div>
         <div style={styles.statCard}>
-          <div style={styles.statNumber}>98%</div>
+          <div style={styles.statNumber}>{animatedStats.success || '0'}%</div>
           <div style={styles.statLabel}>Успешность</div>
         </div>
       </div>
