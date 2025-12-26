@@ -129,7 +129,7 @@ const ProfileScreen = () => {
       <div style={styles.header}>
         <div style={styles.userInfo}>
           <img 
-            src="https://i.pravatar.cc/100?img=50" 
+            src="https://i.pravatar.cc/100?img=50"
             alt="Никита"
             style={styles.avatar}
           />
@@ -198,14 +198,6 @@ const ProfileScreen = () => {
       </div>
 
       <div style={styles.menuSection}>
-        <div style={styles.menuItem} onClick={() => alert('Редактирование профиля')}>
-          <div style={styles.menuItemContent}>
-            <span style={styles.menuIcon}>✏️</span>
-            <span style={styles.menuLabel}>Редактировать профиль</span>
-          </div>
-          <span style={styles.menuArrow}>›</span>
-        </div>
-
         <div style={styles.menuItem} onClick={() => alert('Отзывы и рейтинг')}>
           <div style={styles.menuItemContent}>
             <span style={styles.menuIcon}>⭐</span>
@@ -218,30 +210,6 @@ const ProfileScreen = () => {
           <div style={styles.menuItemContent}>
             <span style={styles.menuIcon}>🔔</span>
             <span style={styles.menuLabel}>Уведомления</span>
-          </div>
-          <span style={styles.menuArrow}>›</span>
-        </div>
-
-        <div style={styles.menuItem} onClick={() => alert('Способы оплаты')}>
-          <div style={styles.menuItemContent}>
-            <span style={styles.menuIcon}>💳</span>
-            <span style={styles.menuLabel}>Способы оплаты</span>
-          </div>
-          <span style={styles.menuArrow}>›</span>
-        </div>
-
-        <div style={styles.menuItem} onClick={() => alert('Настройки')}>
-          <div style={styles.menuItemContent}>
-            <span style={styles.menuIcon}>⚙️</span>
-            <span style={styles.menuLabel}>Настройки</span>
-          </div>
-          <span style={styles.menuArrow}>›</span>
-        </div>
-
-        <div style={styles.menuItem} onClick={() => alert('Помощь и поддержка')}>
-          <div style={styles.menuItemContent}>
-            <span style={styles.menuIcon}>❓</span>
-            <span style={styles.menuLabel}>Помощь и поддержка</span>
           </div>
           <span style={styles.menuArrow}>›</span>
         </div>

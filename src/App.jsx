@@ -17,7 +17,7 @@ const App = () => {
   const renderCurrentPage = () => {
     switch (currentPage) {
       case 'parcels':
-        return <ParcelsScreen />;
+        return <ParcelsScreen onNavigate={handleNavigate} />;
       case 'trips':
         return <TripsScreen />;
       case 'profile':
