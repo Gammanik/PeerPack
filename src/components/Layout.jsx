@@ -116,8 +116,8 @@ const Layout = ({ children, currentPage, onNavigate }) => {
       transition: 'all 0.2s ease'
     },
     navIcon: {
-      fontSize: '18px',
-      marginBottom: '2px'
+      fontSize: '24px',
+      marginBottom: '0px'
     },
     activeNavButton: {
       color: 'var(--tg-theme-button-color, #5288c1)',
@@ -163,7 +163,6 @@ const Layout = ({ children, currentPage, onNavigate }) => {
           onClick={() => handleNavigation('parcels')}
         >
           <div style={styles.navIcon}>📦</div>
-          <div>Посылки</div>
         </button>
         <button
           style={{
@@ -173,7 +172,6 @@ const Layout = ({ children, currentPage, onNavigate }) => {
           onClick={() => handleNavigation('trips')}
         >
           <div style={styles.navIcon}>✈️</div>
-          <div>Поездки</div>
         </button>
         <button
           style={{
@@ -184,7 +182,6 @@ const Layout = ({ children, currentPage, onNavigate }) => {
           onClick={() => handleNavigation('profile')}
         >
           <div style={styles.navIcon}>👤</div>
-          <div>{t('profile')}</div>
           {notificationCount > 0 && (
             <div style={{
               position: 'absolute',
