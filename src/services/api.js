@@ -115,8 +115,12 @@ class ApiService {
         if (endpoint.includes('/package-requests/') && endpoint.includes('/mark-delivered') && method === 'PUT') {
             return mockResponse(mockApiData.endpoints['PUT /api/package-requests/{request_id}/mark-delivered'].response);
         }
-        
-        
+
+        // POST /api/couriers/{courier_id}/send-package
+        if (endpoint.includes('/couriers/') && endpoint.includes('/send-package') && method === 'POST') {
+            return mockResponse(mockApiData.endpoints['POST /api/couriers/{courier_id}/send-package'].response);
+        }
+
         return mockError('Endpoint not found', 404);
     }
 

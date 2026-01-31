@@ -5,6 +5,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Project Overview
 
 PeerPack is a P2P courier delivery platform built as a Telegram Mini App. Users can find couriers traveling between cities to deliver packages, or offer their own trips as couriers. The app uses React + Vite with a complete mock API layer ready for backend integration.
+Можно создать трип или поездку. И поездками своими откликаться на посылки и в обратную сторону
+Путешественник берет одну или несколько посылку из откликов. Отправитель может выбрать на одну посылку только одного доставщика
 
 ## Development Commands
 

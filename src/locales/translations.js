@@ -63,22 +63,84 @@ export const translations = {
     
     // Города
     cities: {
-      'Moscow': 'Москва',
-      'Saint Petersburg': 'Санкт-Петербург',
-      'Sochi': 'Сочи',
-      'Kazan': 'Казань',
-      'Novosibirsk': 'Новосибирск',
-      'Yekaterinburg': 'Екатеринбург',
-      'Nizhny Novgorod': 'Нижний Новгород',
-      'Chelyabinsk': 'Челябинск',
-      'Samara': 'Самара',
-      'Rostov-on-Don': 'Ростов-на-Дону',
-      'Ufa': 'Уфа',
-      'Krasnoyarsk': 'Красноярск',
-      'Perm': 'Пермь',
-      'Voronezh': 'Воронеж',
-      'Volgograd': 'Волгоград',
-      "Tomsk": "Томск"
+      // Россия
+      'Moscow': 'Москва, Россия',
+      'Saint Petersburg': 'Санкт-Петербург, Россия',
+      'Sochi': 'Сочи, Россия',
+      'Kazan': 'Казань, Россия',
+      'Novosibirsk': 'Новосибирск, Россия',
+      'Yekaterinburg': 'Екатеринбург, Россия',
+      'Nizhny Novgorod': 'Нижний Новгород, Россия',
+      'Chelyabinsk': 'Челябинск, Россия',
+      'Samara': 'Самара, Россия',
+      'Rostov-on-Don': 'Ростов-на-Дону, Россия',
+      'Ufa': 'Уфа, Россия',
+      'Krasnoyarsk': 'Красноярск, Россия',
+      'Perm': 'Пермь, Россия',
+      'Voronezh': 'Воронеж, Россия',
+      'Volgograd': 'Волгоград, Россия',
+      'Tomsk': 'Томск, Россия',
+      'Vladivostok': 'Владивосток, Россия',
+      'Krasnodar': 'Краснодар, Россия',
+      'Irkutsk': 'Иркутск, Россия',
+
+      // ОАЭ
+      'Dubai': 'Дубай, ОАЭ',
+      'Abu Dhabi': 'Абу-Даби, ОАЭ',
+      'Sharjah': 'Шарджа, ОАЭ',
+
+      // Турция
+      'Istanbul': 'Стамбул, Турция',
+      'Ankara': 'Анкара, Турция',
+      'Antalya': 'Анталья, Турция',
+      'Izmir': 'Измир, Турция',
+
+      // Грузия
+      'Tbilisi': 'Тбилиси, Грузия',
+      'Batumi': 'Батуми, Грузия',
+
+      // Армения
+      'Yerevan': 'Ереван, Армения',
+
+      // Азербайджан
+      'Baku': 'Баку, Азербайджан',
+
+      // Казахстан
+      'Almaty': 'Алматы, Казахстан',
+      'Nur-Sultan': 'Нур-Султан, Казахстан',
+
+      // Узбекистан
+      'Tashkent': 'Ташкент, Узбекистан',
+
+      // Киргизия
+      'Bishkek': 'Бишкек, Киргизия',
+
+      // Европа
+      'London': 'Лондон, Великобритания',
+      'Paris': 'Париж, Франция',
+      'Berlin': 'Берлин, Германия',
+      'Rome': 'Рим, Италия',
+      'Madrid': 'Мадрид, Испания',
+      'Barcelona': 'Барселона, Испания',
+      'Amsterdam': 'Амстердам, Нидерланды',
+      'Vienna': 'Вена, Австрия',
+      'Prague': 'Прага, Чехия',
+      'Warsaw': 'Варшава, Польша',
+
+      // Азия
+      'Bangkok': 'Бангкок, Таиланд',
+      'Singapore': 'Сингапур',
+      'Hong Kong': 'Гонконг',
+      'Tokyo': 'Токио, Япония',
+      'Seoul': 'Сеул, Южная Корея',
+      'Beijing': 'Пекин, Китай',
+      'Shanghai': 'Шанхай, Китай',
+
+      // Америка
+      'New York': 'Нью-Йорк, США',
+      'Los Angeles': 'Лос-Анджелес, США',
+      'Miami': 'Майами, США',
+      'Toronto': 'Торонто, Канада'
     }
   },
   
@@ -146,21 +208,84 @@ export const translations = {
     
     // Cities
     cities: {
-      'Moscow': 'Moscow',
-      'Saint Petersburg': 'Saint Petersburg',
-      'Sochi': 'Sochi',
-      'Kazan': 'Kazan',
-      'Novosibirsk': 'Novosibirsk',
-      'Yekaterinburg': 'Yekaterinburg',
-      'Nizhny Novgorod': 'Nizhny Novgorod',
-      'Chelyabinsk': 'Chelyabinsk',
-      'Samara': 'Samara',
-      'Rostov-on-Don': 'Rostov-on-Don',
-      'Ufa': 'Ufa',
-      'Krasnoyarsk': 'Krasnoyarsk',
-      'Perm': 'Perm',
-      'Voronezh': 'Voronezh',
-      'Volgograd': 'Volgograd'
+      // Russia
+      'Moscow': 'Moscow, Russia',
+      'Saint Petersburg': 'Saint Petersburg, Russia',
+      'Sochi': 'Sochi, Russia',
+      'Kazan': 'Kazan, Russia',
+      'Novosibirsk': 'Novosibirsk, Russia',
+      'Yekaterinburg': 'Yekaterinburg, Russia',
+      'Nizhny Novgorod': 'Nizhny Novgorod, Russia',
+      'Chelyabinsk': 'Chelyabinsk, Russia',
+      'Samara': 'Samara, Russia',
+      'Rostov-on-Don': 'Rostov-on-Don, Russia',
+      'Ufa': 'Ufa, Russia',
+      'Krasnoyarsk': 'Krasnoyarsk, Russia',
+      'Perm': 'Perm, Russia',
+      'Voronezh': 'Voronezh, Russia',
+      'Volgograd': 'Volgograd, Russia',
+      'Tomsk': 'Tomsk, Russia',
+      'Vladivostok': 'Vladivostok, Russia',
+      'Krasnodar': 'Krasnodar, Russia',
+      'Irkutsk': 'Irkutsk, Russia',
+
+      // UAE
+      'Dubai': 'Dubai, UAE',
+      'Abu Dhabi': 'Abu Dhabi, UAE',
+      'Sharjah': 'Sharjah, UAE',
+
+      // Turkey
+      'Istanbul': 'Istanbul, Turkey',
+      'Ankara': 'Ankara, Turkey',
+      'Antalya': 'Antalya, Turkey',
+      'Izmir': 'Izmir, Turkey',
+
+      // Georgia
+      'Tbilisi': 'Tbilisi, Georgia',
+      'Batumi': 'Batumi, Georgia',
+
+      // Armenia
+      'Yerevan': 'Yerevan, Armenia',
+
+      // Azerbaijan
+      'Baku': 'Baku, Azerbaijan',
+
+      // Kazakhstan
+      'Almaty': 'Almaty, Kazakhstan',
+      'Nur-Sultan': 'Nur-Sultan, Kazakhstan',
+
+      // Uzbekistan
+      'Tashkent': 'Tashkent, Uzbekistan',
+
+      // Kyrgyzstan
+      'Bishkek': 'Bishkek, Kyrgyzstan',
+
+      // Europe
+      'London': 'London, UK',
+      'Paris': 'Paris, France',
+      'Berlin': 'Berlin, Germany',
+      'Rome': 'Rome, Italy',
+      'Madrid': 'Madrid, Spain',
+      'Barcelona': 'Barcelona, Spain',
+      'Amsterdam': 'Amsterdam, Netherlands',
+      'Vienna': 'Vienna, Austria',
+      'Prague': 'Prague, Czech Republic',
+      'Warsaw': 'Warsaw, Poland',
+
+      // Asia
+      'Bangkok': 'Bangkok, Thailand',
+      'Singapore': 'Singapore',
+      'Hong Kong': 'Hong Kong',
+      'Tokyo': 'Tokyo, Japan',
+      'Seoul': 'Seoul, South Korea',
+      'Beijing': 'Beijing, China',
+      'Shanghai': 'Shanghai, China',
+
+      // America
+      'New York': 'New York, USA',
+      'Los Angeles': 'Los Angeles, USA',
+      'Miami': 'Miami, USA',
+      'Toronto': 'Toronto, Canada'
     }
   }
 };
