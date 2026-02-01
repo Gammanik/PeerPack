@@ -1,7 +1,7 @@
 import React from 'react';
 import TripsSection from '../profile/components/TripsSection.jsx';
 
-const TripsScreen = () => {
+const TripsScreen = ({ onNavigate }) => {
   const styles = {
     container: {
       background: 'linear-gradient(135deg, var(--tg-theme-bg-color, #17212b) 0%, rgba(23, 33, 43, 0.95) 100%)',
@@ -35,7 +35,7 @@ const TripsScreen = () => {
         <div style={styles.subtitle}>Управляйте поездками и заявками на доставку</div>
       </div>
 
-      <TripsSection />
+      <TripsSection onNavigate={onNavigate} />
     </div>
   );
 };

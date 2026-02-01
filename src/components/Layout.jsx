@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import LanguageToggle from './LanguageToggle.jsx';
 import { useLocale } from '../contexts/LanguageContext.jsx';
 
-const Layout = ({ children, currentPage, onNavigate }) => {
+const Layout = ({ children, currentPage, onNavigate, hideBottomNav = false }) => {
   const [notificationCount] = useState(0);
   const { t } = useLocale();
 
@@ -154,7 +154,8 @@ const Layout = ({ children, currentPage, onNavigate }) => {
       </div>
 
       {/* Нижняя навигация */}
-      <div style={styles.bottomNav}>
+      {!hideBottomNav && (
+        <div style={styles.bottomNav}>
         <button
           style={{
             ...styles.navButton,
@@ -204,6 +205,7 @@ const Layout = ({ children, currentPage, onNavigate }) => {
           )}
         </button>
       </div>
+      )}
     </div>
   );
 };

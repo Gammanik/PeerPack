@@ -1,11 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { supabaseApi } from '../../../services/supabaseApi.js';
 
-const PackagesSection = () => {
-  const [showPackagesList, setShowPackagesList] = useState(false);
-  const [selectedPackage, setSelectedPackage] = useState(null);
+const PackagesSection = ({ onNavigate }) => {
   const [packages, setPackages] = useState([]);
-  const [offers, setOffers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -39,22 +36,6 @@ const PackagesSection = () => {
     }
   };
 
-  // Загружаем отклики для выбранной посылки
-  const loadPackageOffers = async (parcelId) => {
-    try {
-      const { offers: parcelOffers, error: offersError } = await supabaseApi.getOffersForParcel(parcelId);
-
-      if (offersError) {
-        console.error('Error loading offers:', offersError);
-        return;
-      }
-
-      setOffers(parcelOffers || []);
-    } catch (err) {
-      console.error('Error loading offers:', err);
-    }
-  };
-
   const getStatusColor = (status) => {
     switch (status) {
       case 'open': return '#4BB34B';
@@ -77,34 +58,10 @@ const PackagesSection = () => {
     }
   };
 
-  const handlePackageClick = async (pkg) => {
-    setSelectedPackage(pkg);
-    await loadPackageOffers(pkg.id);
-    setShowPackagesList(true);
-  };
-
-  const handleResponseAction = async (offerId, action) => {
-    try {
-      const newStatus = action === 'accept' ? 'accepted' : 'rejected';
-      const { success, error: updateError } = await supabaseApi.updateOfferStatus(offerId, newStatus);
-
-      if (updateError) {
-        alert('Ошибка: ' + updateError.message);
-        return;
-      }
-
-      alert(`Отклик ${action === 'accept' ? 'принят' : 'отклонен'}!`);
-
-      // Обновляем список откликов
-      if (selectedPackage) {
-        await loadPackageOffers(selectedPackage.id);
-      }
-
-      // Обновляем список посылок
-      await loadUserParcels();
-    } catch (err) {
-      console.error('Error updating offer:', err);
-      alert('Произошла ошибка');
+  const handlePackageClick = (pkg) => {
+    // Переходим к детальной странице посылки
+    if (onNavigate) {
+      onNavigate('parcel-detail', { id: pkg.id });
     }
   };
 
@@ -186,141 +143,6 @@ const PackagesSection = () => {
       marginBottom: '-20px',
       marginLeft: '-20px',
       marginRight: '-20px'
-    },
-    modalOverlay: {
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      backgroundColor: 'rgba(0,0,0,0.8)',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      zIndex: 1000
-    },
-    modal: {
-      backgroundColor: 'var(--tg-theme-secondary-bg-color, #232e3c)',
-      borderRadius: 20,
-      padding: 0,
-      maxWidth: 480,
-      width: '100%',
-      maxHeight: '85vh',
-      overflow: 'hidden',
-      border: '1px solid rgba(255, 255, 255, 0.1)',
-      boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)'
-    },
-    modalHeader: {
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      padding: '20px 20px 16px',
-      borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-      background: 'linear-gradient(135deg, var(--tg-theme-secondary-bg-color, #232e3c), rgba(35, 46, 60, 0.8))'
-    },
-    modalTitle: {
-      fontSize: '20px',
-      fontWeight: '700',
-      color: 'var(--tg-theme-text-color, #ffffff)'
-    },
-    closeButton: {
-      background: 'transparent',
-      border: 'none',
-      color: 'var(--tg-theme-hint-color, #708499)',
-      fontSize: 20,
-      cursor: 'pointer',
-      width: 32,
-      height: 32,
-      borderRadius: '50%',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      transition: 'all 0.2s ease'
-    },
-    modalContent: {
-      padding: 20,
-      maxHeight: 'calc(85vh - 80px)',
-      overflowY: 'auto'
-    },
-    responseCard: {
-      background: 'var(--tg-theme-bg-color, #17212b)',
-      borderRadius: '16px',
-      padding: '16px',
-      marginBottom: '12px',
-      border: '1px solid rgba(255, 255, 255, 0.1)'
-    },
-    responseHeader: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: '12px',
-      marginBottom: '12px'
-    },
-    responseAvatar: {
-      width: '44px',
-      height: '44px',
-      borderRadius: '50%',
-      objectFit: 'cover',
-      border: '2px solid var(--tg-theme-button-color, #5288c1)'
-    },
-    responseAuthor: {
-      flex: 1
-    },
-    authorName: {
-      fontSize: '16px',
-      fontWeight: '600',
-      color: 'var(--tg-theme-text-color, #ffffff)',
-      marginBottom: '2px'
-    },
-    authorRating: {
-      fontSize: '13px',
-      color: 'var(--tg-theme-hint-color, #708499)'
-    },
-    responsePrice: {
-      fontSize: '18px',
-      fontWeight: '700',
-      background: 'linear-gradient(135deg, var(--tg-theme-accent-text-color, #64b5ef), var(--tg-theme-button-color, #5288c1))',
-      WebkitBackgroundClip: 'text',
-      WebkitTextFillColor: 'transparent'
-    },
-    tripDetails: {
-      fontSize: '14px',
-      color: 'var(--tg-theme-hint-color, #708499)',
-      marginBottom: '8px'
-    },
-    responseMessage: {
-      fontSize: '14px',
-      color: 'var(--tg-theme-text-color, #ffffff)',
-      fontStyle: 'italic',
-      marginBottom: '12px',
-      lineHeight: '1.4',
-      background: 'rgba(100, 181, 239, 0.1)',
-      padding: '10px 12px',
-      borderRadius: '8px',
-      border: '1px solid rgba(100, 181, 239, 0.2)'
-    },
-    responseActions: {
-      display: 'flex',
-      gap: '8px'
-    },
-    actionButton: {
-      flex: 1,
-      padding: '10px 16px',
-      borderRadius: '12px',
-      fontSize: '14px',
-      fontWeight: '600',
-      cursor: 'pointer',
-      transition: 'all 0.2s ease'
-    },
-    acceptButton: {
-      background: 'linear-gradient(135deg, #4BB34B, #45a049)',
-      color: 'white',
-      border: 'none',
-      boxShadow: '0 4px 12px rgba(75, 179, 75, 0.3)'
-    },
-    rejectButton: {
-      background: 'transparent',
-      color: 'var(--tg-theme-hint-color, #708499)',
-      border: '1px solid rgba(255, 255, 255, 0.2)'
     }
   };
 
@@ -417,129 +239,6 @@ const PackagesSection = () => {
           )}
         </div>
       ))}
-
-      {/* Модальное окно с откликами курьеров */}
-      {showPackagesList && selectedPackage && (
-        <div style={styles.modalOverlay} onClick={() => setShowPackagesList(false)}>
-          <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
-            <div style={styles.modalHeader}>
-              <div style={styles.modalTitle}>Отклики курьеров</div>
-              <button 
-                style={styles.closeButton}
-                onClick={() => setShowPackagesList(false)}
-              >
-                ✕
-              </button>
-            </div>
-            
-            <div style={styles.modalContent}>
-              <div style={{marginBottom: 16, fontSize: 14, color: 'var(--tg-theme-hint-color, #708499)'}}>
-                <p><strong>Посылка:</strong> {selectedPackage.title || selectedPackage.description}</p>
-                {selectedPackage.description && selectedPackage.title && (
-                  <p><strong>Описание:</strong> {selectedPackage.description}</p>
-                )}
-                <p><strong>Маршрут:</strong>
-                    <span style={{marginLeft: '8px'}}>
-                        <span style={{fontWeight: '600'}}>{getCity(selectedPackage.origin)}</span>
-                        <span style={{color: 'var(--tg-theme-button-color, #5288c1)', margin: '0 6px', fontSize: '16px', fontWeight: '700'}}>→</span>
-                        <span style={{fontWeight: '600'}}>{getCity(selectedPackage.destination)}</span>
-                    </span>
-                </p>
-                <p><strong>Вознаграждение:</strong> ₽{selectedPackage.reward}</p>
-              </div>
-
-              {offers.map(offer => (
-                <div key={offer.id} style={styles.responseCard}>
-                  <div style={styles.responseHeader}>
-                    <img
-                      src={offer.user?.avatar_url || 'https://i.pravatar.cc/100'}
-                      alt={offer.user?.full_name || 'Пользователь'}
-                      style={styles.responseAvatar}
-                    />
-                    <div style={styles.responseAuthor}>
-                      <div style={styles.authorName}>{offer.user?.full_name || 'Пользователь'}</div>
-                      <div style={styles.authorRating}>
-                        {offer.user?.rating && `⭐ ${offer.user.rating} • `}
-                        Отклик от {new Date(offer.created_at).toLocaleDateString('ru-RU')}
-                      </div>
-                    </div>
-                    <div style={styles.responsePrice}>₽{offer.trip?.price || selectedPackage.reward}</div>
-                  </div>
-
-                  {offer.trip && (
-                    <div style={styles.tripDetails}>
-                      ✈️ {new Date(offer.trip.depart_at).toLocaleDateString('ru-RU')}
-                      {offer.trip.flight_number && ` • Рейс ${offer.trip.flight_number}`}
-                    </div>
-                  )}
-
-                  {offer.message && (
-                    <div style={styles.responseMessage}>
-                      💬 {offer.message}
-                    </div>
-                  )}
-
-                  {offer.status === 'pending' && (
-                    <div style={styles.responseActions}>
-                      <button
-                        style={{...styles.actionButton, ...styles.acceptButton}}
-                        onClick={() => handleResponseAction(offer.id, 'accept')}
-                      >
-                        ✅ Принять
-                      </button>
-                      <button
-                        style={{...styles.actionButton, ...styles.rejectButton}}
-                        onClick={() => handleResponseAction(offer.id, 'reject')}
-                      >
-                        ❌ Отклонить
-                      </button>
-                    </div>
-                  )}
-
-                  {offer.status === 'accepted' && (
-                    <div style={{
-                      background: '#4BB34B',
-                      color: 'white',
-                      padding: '6px 12px',
-                      borderRadius: '8px',
-                      fontSize: '13px',
-                      fontWeight: '600',
-                      display: 'inline-block'
-                    }}>
-                      ✅ Принято
-                    </div>
-                  )}
-
-                  {offer.status === 'rejected' && (
-                    <div style={{
-                      background: '#888',
-                      color: 'white',
-                      padding: '6px 12px',
-                      borderRadius: '8px',
-                      fontSize: '13px',
-                      fontWeight: '600',
-                      display: 'inline-block'
-                    }}>
-                      ❌ Отклонено
-                    </div>
-                  )}
-                </div>
-              ))}
-
-              {offers.length === 0 && (
-                <div style={{
-                  textAlign: 'center',
-                  color: 'var(--tg-theme-hint-color, #708499)',
-                  fontSize: 14,
-                  padding: 20
-                }}>
-                  Пока нет откликов на эту посылку
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
     </>
   );
 };

@@ -99,7 +99,7 @@ const ParcelsScreen = ({ onNavigate }) => {
         <span>Добавить посылку</span>
       </button>
 
-      <PackagesSection key={refreshKey} />
+      <PackagesSection key={refreshKey} onNavigate={onNavigate} />
 
       <AddParcelForm
         showAddParcelForm={showAddParcelForm}
