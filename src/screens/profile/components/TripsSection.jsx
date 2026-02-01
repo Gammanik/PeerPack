@@ -89,6 +89,12 @@ const TripsSection = () => {
     }
   };
 
+  // Извлекаем только город из строки (до запятой)
+  const getCity = (location) => {
+    if (!location) return '';
+    return location.split(',')[0].trim();
+  };
+
   const handleTripClick = async (trip) => {
     setSelectedTrip(trip);
     await loadTripOffers(trip.id);
@@ -681,9 +687,9 @@ const TripsSection = () => {
             <div style={styles.cardHeader}>
               <div>
                 <div style={styles.cardTitle}>
-                  <span style={styles.tripFrom}>{trip.origin}</span>
+                  <span style={styles.tripFrom}>{getCity(trip.origin)}</span>
                   <span style={styles.tripArrow}>→</span>
-                  <span style={styles.tripTo}>{trip.destination}</span>
+                  <span style={styles.tripTo}>{getCity(trip.destination)}</span>
                 </div>
                 {trip.flight_number && (
                   <div style={styles.route}>🛫 Рейс {trip.flight_number}</div>
@@ -696,9 +702,6 @@ const TripsSection = () => {
 
             <div style={styles.cardInfo}>
               🕐 {formattedDate} в {formattedTime}
-            </div>
-            <div style={styles.cardInfo}>
-              💰 {trip.price}₽
             </div>
             {trip.capacity_kg && (
               <div style={styles.cardInfo}>
@@ -746,41 +749,84 @@ const TripsSection = () => {
               ) : null}
 
               {availableParcels.map(pkg => (
-                <div key={pkg.id} style={styles.packageCard}>
-                  <div style={styles.packageHeader}>
-                    <div style={styles.authorInfo}>
-                      <img
-                        src={pkg.user?.avatar_url || 'https://i.pravatar.cc/100'}
-                        alt={pkg.user?.full_name || 'Пользователь'}
-                        style={styles.authorAvatar}
-                      />
-                      <div style={styles.authorName}>{pkg.user?.full_name || 'Пользователь'}</div>
+                  <div key={pkg.id} style={styles.packageCard}>
+                    <div style={styles.packageHeader}>
+                      <div style={{flex: 1}}>
+                        <div style={styles.packageRoute}>
+                          <span style={{fontWeight: '600'}}>{getCity(pkg.origin)}</span>
+                          <span style={styles.tripArrow}>→</span>
+                          <span style={{fontWeight: '600'}}>{getCity(pkg.destination)}</span>
+                        </div>
+                        <div style={{...styles.authorInfo, marginTop: '6px'}}>
+                          <img
+                            src={pkg.user?.avatar_url || 'https://i.pravatar.cc/100'}
+                            alt={pkg.user?.full_name || 'Пользователь'}
+                            style={styles.authorAvatar}
+                          />
+                          <div style={styles.authorName}>{pkg.user?.full_name || 'Пользователь'}</div>
+                        </div>
+                      </div>
+                      <div style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'flex-end',
+                        gap: '4px'
+                      }}>
+                        <div style={{
+                          ...styles.reward,
+                          fontSize: '20px',
+                          fontWeight: '700'
+                        }}>
+                          ₽{pkg.reward}
+                        </div>
+                        <div style={{
+                          fontSize: '12px',
+                          color: 'var(--tg-theme-hint-color, #708499)'
+                        }}>
+                          ⚖️ {pkg.weight_kg} кг
+                        </div>
+                      </div>
                     </div>
-                    <div style={styles.reward}>{pkg.reward}₽</div>
-                  </div>
 
-                  <div style={styles.packageRoute}>
-                    <span>{pkg.origin}</span>
-                    <span style={styles.tripArrow}>→</span>
-                    <span>{pkg.destination}</span>
-                  </div>
+                    <div style={{
+                      ...styles.packageDescription,
+                      marginTop: '12px',
+                      fontSize: '15px',
+                      fontWeight: '600',
+                      color: 'var(--tg-theme-text-color, #ffffff)'
+                    }}>
+                      📦 {pkg.title || pkg.description}
+                    </div>
 
-                  <div style={styles.packageDescription}>
-                    📦 {pkg.description}
-                  </div>
+                    {pkg.description && pkg.title && (
+                      <div style={{
+                        fontSize: '13px',
+                        color: 'var(--tg-theme-hint-color, #708499)',
+                        marginTop: '6px',
+                        lineHeight: '1.4'
+                      }}>
+                        {pkg.description}
+                      </div>
+                    )}
 
-                  <div style={styles.packageFooter}>
-                    <div>📅 {new Date(pkg.created_at).toLocaleDateString('ru-RU')}</div>
-                    <div>⚖️ {pkg.weight_kg} кг</div>
-                  </div>
+                    <div style={{
+                      ...styles.packageFooter,
+                      marginTop: '12px',
+                      paddingTop: '12px',
+                      borderTop: '1px solid rgba(255, 255, 255, 0.1)'
+                    }}>
+                      <div style={{fontSize: '13px'}}>
+                        📅 {new Date(pkg.created_at).toLocaleDateString('ru-RU')}
+                      </div>
+                    </div>
 
-                  <button
-                    style={styles.responseButton}
-                    onClick={() => handlePackageResponse(pkg)}
-                  >
-                    ✈️ Откликнуться своей поездкой
-                  </button>
-                </div>
+                    <button
+                      style={styles.responseButton}
+                      onClick={() => handlePackageResponse(pkg)}
+                    >
+                      ✈️ Откликнуться своей поездкой
+                    </button>
+                  </div>
               ))}
             </div>
           </div>
@@ -805,9 +851,9 @@ const TripsSection = () => {
               <div style={{marginBottom: 16, fontSize: 14, color: 'var(--tg-theme-hint-color, #708499)'}}>
                 <p><strong>Маршрут:</strong>
                     <span style={{marginLeft: '8px'}}>
-                        <span style={{fontWeight: '600'}}>{selectedTrip.origin}</span>
+                        <span style={{fontWeight: '600'}}>{getCity(selectedTrip.origin)}</span>
                         <span style={{color: 'var(--tg-theme-button-color, #5288c1)', margin: '0 6px', fontSize: '16px', fontWeight: '700'}}>→</span>
-                        <span style={{fontWeight: '600'}}>{selectedTrip.destination}</span>
+                        <span style={{fontWeight: '600'}}>{getCity(selectedTrip.destination)}</span>
                     </span>
                 </p>
                 <p><strong>Дата:</strong> {new Date(selectedTrip.depart_at).toLocaleString('ru-RU')}</p>
@@ -842,9 +888,16 @@ const TripsSection = () => {
                   </div>
 
                   {offer.parcel && (
-                    <div style={styles.packageDescription}>
-                      📦 {offer.parcel.description}
-                    </div>
+                    <>
+                      <div style={styles.packageDescription}>
+                        📦 {offer.parcel.title || offer.parcel.description}
+                      </div>
+                      {offer.parcel.description && offer.parcel.title && (
+                        <div style={{...styles.packageDescription, fontSize: '13px', color: 'var(--tg-theme-hint-color, #708499)', marginTop: '4px'}}>
+                          {offer.parcel.description}
+                        </div>
+                      )}
+                    </>
                   )}
 
                   {offer.message && (
@@ -946,12 +999,15 @@ const TripsSection = () => {
             
             <div style={styles.modalContent}>
               <div style={{marginBottom: 16, fontSize: 14, color: 'var(--tg-theme-hint-color, #708499)'}}>
-                <p><strong>Посылка:</strong> {selectedPackage.description}</p>
+                <p><strong>Посылка:</strong> {selectedPackage.title || selectedPackage.description}</p>
+                {selectedPackage.description && selectedPackage.title && (
+                  <p><strong>Описание:</strong> {selectedPackage.description}</p>
+                )}
                 <p><strong>Маршрут:</strong>
                     <span style={{marginLeft: '8px'}}>
-                        <span style={{fontWeight: '600'}}>{selectedPackage.origin}</span>
+                        <span style={{fontWeight: '600'}}>{getCity(selectedPackage.origin)}</span>
                         <span style={{color: 'var(--tg-theme-button-color, #5288c1)', margin: '0 6px', fontSize: '16px', fontWeight: '700'}}>→</span>
-                        <span style={{fontWeight: '600'}}>{selectedPackage.destination}</span>
+                        <span style={{fontWeight: '600'}}>{getCity(selectedPackage.destination)}</span>
                     </span>
                 </p>
                 <p><strong>Вознаграждение:</strong> ₽{selectedPackage.reward}</p>

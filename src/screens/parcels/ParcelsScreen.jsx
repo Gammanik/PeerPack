@@ -14,14 +14,14 @@ const ParcelsScreen = ({ onNavigate }) => {
     try {
       const { success, parcel_id, error: parcelError } = await supabaseApi.createParcel({
         user_id: currentUserId,
+        title: parcelData.title,
         origin: parcelData.from,
         destination: parcelData.to,
-        description: parcelData.description,
+        description: parcelData.description || null,
         weight_kg: parseFloat(parcelData.weight),
         reward: parseInt(parcelData.reward),
-        pickup_location: parcelData.pickupLocation || null,
-        delivery_location: parcelData.deliveryLocation || null,
-        comment: parcelData.comment || null,
+        pickup_address: parcelData.pickupLocation || null,
+        delivery_address: parcelData.deliveryLocation || null,
         status: 'open'
       });
 

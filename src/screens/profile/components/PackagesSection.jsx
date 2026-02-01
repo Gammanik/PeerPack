@@ -369,6 +369,12 @@ const PackagesSection = () => {
     );
   }
 
+  // Извлекаем только город из строки (до запятой)
+  const getCity = (location) => {
+    if (!location) return '';
+    return location.split(',')[0].trim();
+  };
+
   return (
     <>
       {packages.map(pkg => (
@@ -379,11 +385,11 @@ const PackagesSection = () => {
         >
           <div style={styles.cardHeader}>
             <div>
-              <div style={styles.cardTitle}>{pkg.description}</div>
+              <div style={styles.cardTitle}>{pkg.title || pkg.description}</div>
               <div style={styles.route}>
-                <span style={styles.routeFrom}>{pkg.origin}</span>
+                <span style={styles.routeFrom}>{getCity(pkg.origin)}</span>
                 <span style={styles.routeArrow}>→</span>
-                <span style={styles.routeTo}>{pkg.destination}</span>
+                <span style={styles.routeTo}>{getCity(pkg.destination)}</span>
               </div>
             </div>
             <div style={{
@@ -428,12 +434,15 @@ const PackagesSection = () => {
             
             <div style={styles.modalContent}>
               <div style={{marginBottom: 16, fontSize: 14, color: 'var(--tg-theme-hint-color, #708499)'}}>
-                <p><strong>Посылка:</strong> {selectedPackage.description}</p>
+                <p><strong>Посылка:</strong> {selectedPackage.title || selectedPackage.description}</p>
+                {selectedPackage.description && selectedPackage.title && (
+                  <p><strong>Описание:</strong> {selectedPackage.description}</p>
+                )}
                 <p><strong>Маршрут:</strong>
                     <span style={{marginLeft: '8px'}}>
-                        <span style={{fontWeight: '600'}}>{selectedPackage.origin}</span>
+                        <span style={{fontWeight: '600'}}>{getCity(selectedPackage.origin)}</span>
                         <span style={{color: 'var(--tg-theme-button-color, #5288c1)', margin: '0 6px', fontSize: '16px', fontWeight: '700'}}>→</span>
-                        <span style={{fontWeight: '600'}}>{selectedPackage.destination}</span>
+                        <span style={{fontWeight: '600'}}>{getCity(selectedPackage.destination)}</span>
                     </span>
                 </p>
                 <p><strong>Вознаграждение:</strong> ₽{selectedPackage.reward}</p>

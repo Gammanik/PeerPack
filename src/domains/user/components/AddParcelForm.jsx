@@ -9,6 +9,7 @@ const AddParcelForm = ({
     const [parcelForm, setParcelForm] = useState({
         from: '',
         to: '',
+        title: '',
         description: '',
         weight: 1,
         reward: 1000,
@@ -165,11 +166,12 @@ const AddParcelForm = ({
     const rewardOptions = [500, 800, 1000, 1500, 2000, 3000, 5000];
 
     const handleSubmit = () => {
-        if (parcelForm.from && parcelForm.to && parcelForm.description) {
+        if (parcelForm.from && parcelForm.to && parcelForm.title) {
             onAddParcel(parcelForm);
             setParcelForm({
                 from: '',
                 to: '',
+                title: '',
                 description: '',
                 weight: 1,
                 reward: 1000,
@@ -179,7 +181,7 @@ const AddParcelForm = ({
             });
             setShowAddParcelForm(false);
         } else {
-            alert('Заполните обязательные поля: откуда, куда и описание');
+            alert('Заполните обязательные поля: откуда, куда и название');
         }
     };
 
@@ -259,11 +261,21 @@ const AddParcelForm = ({
                     </div>
 
                     <div style={styles.formGroup}>
-                        <label style={styles.label}>Описание посылки *</label>
+                        <label style={styles.label}>Название посылки *</label>
+                        <input
+                            value={parcelForm.title}
+                            onChange={(e) => setParcelForm({...parcelForm, title: e.target.value})}
+                            placeholder="Документы, подарок, одежда..."
+                            style={styles.input}
+                        />
+                    </div>
+
+                    <div style={styles.formGroup}>
+                        <label style={styles.label}>Описание (необязательно)</label>
                         <input
                             value={parcelForm.description}
                             onChange={(e) => setParcelForm({...parcelForm, description: e.target.value})}
-                            placeholder="Документы, подарок, одежда..."
+                            placeholder="Подробности о посылке..."
                             style={styles.input}
                         />
                     </div>
