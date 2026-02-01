@@ -5,7 +5,6 @@ import { supabaseApi } from '../../../services/supabaseApi.js';
 const TripsSection = () => {
   const [showTripRequests, setShowTripRequests] = useState(false);
   const [selectedTrip, setSelectedTrip] = useState(null);
-  const [showPackagesList, setShowPackagesList] = useState(false);
   const [showResponseForm, setShowResponseForm] = useState(false);
   const [showAddTripForm, setShowAddTripForm] = useState(false);
   const [selectedPackage, setSelectedPackage] = useState(null);
@@ -14,6 +13,8 @@ const TripsSection = () => {
   const [trips, setTrips] = useState([]);
   const [tripOffers, setTripOffers] = useState([]);
   const [availableParcels, setAvailableParcels] = useState([]);
+  const [filteredParcels, setFilteredParcels] = useState([]);
+  const [unviewedCounts, setUnviewedCounts] = useState({}); // { tripId: count }
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -51,6 +52,15 @@ const TripsSection = () => {
       }
 
       setTrips(userTrips || []);
+
+      // Загружаем количество непросмотренных заявок для каждой поездки
+      const counts = {};
+      for (const trip of userTrips || []) {
+        const { offers } = await supabaseApi.getOffersForTrip(trip.id);
+        const unviewedCount = (offers || []).filter(offer => !offer.is_viewed).length;
+        counts[trip.id] = unviewedCount;
+      }
+      setUnviewedCounts(counts);
     } catch (err) {
       console.error('Error:', err);
       setError('Произошла ошибка');
@@ -80,12 +90,14 @@ const TripsSection = () => {
 
       if (offersError) {
         console.error('Error loading offers:', offersError);
-        return;
+        return [];
       }
 
       setTripOffers(offers || []);
+      return offers || [];
     } catch (err) {
       console.error('Error loading offers:', err);
+      return [];
     }
   };
 
@@ -97,7 +109,28 @@ const TripsSection = () => {
 
   const handleTripClick = async (trip) => {
     setSelectedTrip(trip);
-    await loadTripOffers(trip.id);
+    const offersData = await loadTripOffers(trip.id);
+
+    // Помечаем все непросмотренные заявки как просмотренные
+    const unviewedOffers = offersData.filter(offer => !offer.is_viewed);
+    for (const offer of unviewedOffers) {
+      await supabaseApi.markOfferAsViewed(offer.id);
+    }
+
+    // Если были непросмотренные, обновляем список и обнуляем счетчик
+    if (unviewedOffers.length > 0) {
+      await loadTripOffers(trip.id);
+      setUnviewedCounts(prev => ({ ...prev, [trip.id]: 0 }));
+    }
+
+    // Фильтруем доступные посылки по маршруту поездки
+    const parcelsForTrip = availableParcels.filter(parcel =>
+      getCity(parcel.origin) === getCity(trip.origin) &&
+      getCity(parcel.destination) === getCity(trip.destination) &&
+      parcel.user_id !== currentUserId // Исключаем собственные посылки
+    );
+    setFilteredParcels(parcelsForTrip);
+
     setShowTripRequests(true);
   };
 
@@ -178,7 +211,6 @@ const TripsSection = () => {
 
       alert('Ваш отклик отправлен!');
       setShowResponseForm(false);
-      setShowPackagesList(false);
       setResponseForm({
         tripDate: '',
         tripTime: '',
@@ -292,37 +324,6 @@ const TripsSection = () => {
       fontWeight: '600',
       cursor: 'pointer',
       transition: 'all 0.2s ease'
-    },
-    browsePackagesBanner: {
-      background: 'linear-gradient(135deg, rgba(100, 181, 239, 0.15), rgba(82, 136, 193, 0.15))',
-      borderRadius: '16px',
-      padding: '20px',
-      marginBottom: '20px',
-      textAlign: 'center',
-      cursor: 'pointer',
-      transition: 'all 0.3s ease',
-      border: '1px solid rgba(82, 136, 193, 0.3)'
-    },
-    browseTitle: {
-      fontSize: '18px',
-      fontWeight: '600',
-      color: 'var(--tg-theme-button-color, #5288c1)',
-      marginBottom: '6px'
-    },
-    browseSubtitle: {
-      fontSize: '14px',
-      color: 'var(--tg-theme-hint-color, #708499)',
-      marginBottom: '12px'
-    },
-    browseButton: {
-      background: 'var(--tg-theme-button-color, #5288c1)',
-      border: 'none',
-      borderRadius: '10px',
-      padding: '8px 16px',
-      color: 'white',
-      fontSize: '14px',
-      fontWeight: '500',
-      cursor: 'pointer'
     },
     tripCard: {
       background: 'var(--tg-theme-secondary-bg-color, #232e3c)',
@@ -653,17 +654,6 @@ const TripsSection = () => {
         </button>
       </div>
 
-      {/* Баннер просмотра посылок */}
-      <div
-        style={styles.browsePackagesBanner}
-        onClick={() => setShowPackagesList(true)}
-      >
-        <div style={styles.browseTitle}>📦 Доступные посылки</div>
-        <div style={styles.browseSubtitle}>Откликайтесь на посылки своими поездками</div>
-        <button style={styles.browseButton}>
-          Посмотреть посылки ({availableParcels.length})
-        </button>
-      </div>
 
       {trips.length === 0 ? (
         <div style={{textAlign: 'center', padding: '40px', color: 'var(--tg-theme-hint-color, #708499)'}}>
@@ -677,11 +667,18 @@ const TripsSection = () => {
         const departAt = new Date(trip.depart_at);
         const formattedDate = departAt.toLocaleDateString('ru-RU');
         const formattedTime = departAt.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+        const unviewedCount = unviewedCounts[trip.id] || 0;
 
         return (
           <div
             key={trip.id}
-            style={styles.tripCard}
+            style={{
+              ...styles.tripCard,
+              ...(unviewedCount > 0 && {
+                border: '2px solid #FF3B30',
+                boxShadow: '0 4px 16px rgba(255, 59, 48, 0.2)'
+              })
+            }}
             onClick={() => handleTripClick(trip)}
           >
             <div style={styles.cardHeader}>
@@ -690,13 +687,30 @@ const TripsSection = () => {
                   <span style={styles.tripFrom}>{getCity(trip.origin)}</span>
                   <span style={styles.tripArrow}>→</span>
                   <span style={styles.tripTo}>{getCity(trip.destination)}</span>
+                  {unviewedCount > 0 && (
+                    <span style={{
+                      background: '#FF3B30',
+                      color: 'white',
+                      fontSize: '11px',
+                      fontWeight: '600',
+                      padding: '3px 8px',
+                      borderRadius: '10px',
+                      marginLeft: '8px'
+                    }}>
+                      {unviewedCount} NEW
+                    </span>
+                  )}
                 </div>
                 {trip.flight_number && (
                   <div style={styles.route}>🛫 Рейс {trip.flight_number}</div>
                 )}
               </div>
-              <div style={styles.responsesBadge}>
-                {trip.status}
+              <div style={{
+                ...styles.responsesBadge,
+                ...(trip.status === 'active' && { background: '#4BB34B' }),
+                ...(trip.status === 'completed' && { background: '#888' })
+              }}>
+                {trip.status === 'active' ? 'Активна' : trip.status === 'completed' ? 'Завершена' : trip.status}
               </div>
             </div>
 
@@ -722,159 +736,71 @@ const TripsSection = () => {
         );
       })}
 
-      {/* Модальное окно со списком доступных посылок */}
-      {showPackagesList && (
-        <div style={styles.modalOverlay} onClick={() => setShowPackagesList(false)}>
-          <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
-            <div style={styles.modalHeader}>
-              <div style={styles.modalTitle}>Доступные посылки</div>
-              <button 
-                style={styles.closeButton}
-                onClick={() => setShowPackagesList(false)}
-              >
-                ✕
-              </button>
-            </div>
-            
-            <div style={styles.modalContent}>
-              {availableParcels.length === 0 ? (
-                <div style={{
-                  textAlign: 'center',
-                  color: 'var(--tg-theme-hint-color, #708499)',
-                  fontSize: 14,
-                  padding: 20
-                }}>
-                  Нет доступных посылок
-                </div>
-              ) : null}
-
-              {availableParcels.map(pkg => (
-                  <div key={pkg.id} style={styles.packageCard}>
-                    <div style={styles.packageHeader}>
-                      <div style={{flex: 1}}>
-                        <div style={styles.packageRoute}>
-                          <span style={{fontWeight: '600'}}>{getCity(pkg.origin)}</span>
-                          <span style={styles.tripArrow}>→</span>
-                          <span style={{fontWeight: '600'}}>{getCity(pkg.destination)}</span>
-                        </div>
-                        <div style={{...styles.authorInfo, marginTop: '6px'}}>
-                          <img
-                            src={pkg.user?.avatar_url || 'https://i.pravatar.cc/100'}
-                            alt={pkg.user?.full_name || 'Пользователь'}
-                            style={styles.authorAvatar}
-                          />
-                          <div style={styles.authorName}>{pkg.user?.full_name || 'Пользователь'}</div>
-                        </div>
-                      </div>
-                      <div style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'flex-end',
-                        gap: '4px'
-                      }}>
-                        <div style={{
-                          ...styles.reward,
-                          fontSize: '20px',
-                          fontWeight: '700'
-                        }}>
-                          ₽{pkg.reward}
-                        </div>
-                        <div style={{
-                          fontSize: '12px',
-                          color: 'var(--tg-theme-hint-color, #708499)'
-                        }}>
-                          ⚖️ {pkg.weight_kg} кг
-                        </div>
-                      </div>
-                    </div>
-
-                    <div style={{
-                      ...styles.packageDescription,
-                      marginTop: '12px',
-                      fontSize: '15px',
-                      fontWeight: '600',
-                      color: 'var(--tg-theme-text-color, #ffffff)'
-                    }}>
-                      📦 {pkg.title || pkg.description}
-                    </div>
-
-                    {pkg.description && pkg.title && (
-                      <div style={{
-                        fontSize: '13px',
-                        color: 'var(--tg-theme-hint-color, #708499)',
-                        marginTop: '6px',
-                        lineHeight: '1.4'
-                      }}>
-                        {pkg.description}
-                      </div>
-                    )}
-
-                    <div style={{
-                      ...styles.packageFooter,
-                      marginTop: '12px',
-                      paddingTop: '12px',
-                      borderTop: '1px solid rgba(255, 255, 255, 0.1)'
-                    }}>
-                      <div style={{fontSize: '13px'}}>
-                        📅 {new Date(pkg.created_at).toLocaleDateString('ru-RU')}
-                      </div>
-                    </div>
-
-                    <button
-                      style={styles.responseButton}
-                      onClick={() => handlePackageResponse(pkg)}
-                    >
-                      ✈️ Откликнуться своей поездкой
-                    </button>
-                  </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Модальное окно с заявками на поездку */}
       {showTripRequests && selectedTrip && (
         <div style={styles.modalOverlay} onClick={() => setShowTripRequests(false)}>
           <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
             <div style={styles.modalHeader}>
-              <div style={styles.modalTitle}>Заявки на поездку</div>
-              <button 
+              <div style={styles.modalTitle}>
+                {getCity(selectedTrip.origin)} → {getCity(selectedTrip.destination)}
+              </div>
+              <button
                 style={styles.closeButton}
                 onClick={() => setShowTripRequests(false)}
               >
                 ✕
               </button>
             </div>
-            
+
             <div style={styles.modalContent}>
-              <div style={{marginBottom: 16, fontSize: 14, color: 'var(--tg-theme-hint-color, #708499)'}}>
-                <p><strong>Маршрут:</strong>
-                    <span style={{marginLeft: '8px'}}>
-                        <span style={{fontWeight: '600'}}>{getCity(selectedTrip.origin)}</span>
-                        <span style={{color: 'var(--tg-theme-button-color, #5288c1)', margin: '0 6px', fontSize: '16px', fontWeight: '700'}}>→</span>
-                        <span style={{fontWeight: '600'}}>{getCity(selectedTrip.destination)}</span>
-                    </span>
+              <div style={{marginBottom: 20, fontSize: 14, color: 'var(--tg-theme-hint-color, #708499)', paddingBottom: 16, borderBottom: '1px solid rgba(255, 255, 255, 0.1)'}}>
+                <p style={{marginBottom: 8}}>
+                  <strong>🕐 Дата:</strong> {new Date(selectedTrip.depart_at).toLocaleString('ru-RU')}
                 </p>
-                <p><strong>Дата:</strong> {new Date(selectedTrip.depart_at).toLocaleString('ru-RU')}</p>
                 {selectedTrip.flight_number && (
-                  <p><strong>Рейс:</strong> {selectedTrip.flight_number}</p>
+                  <p style={{marginBottom: 0}}><strong>🛫 Рейс:</strong> {selectedTrip.flight_number}</p>
                 )}
               </div>
 
-              {tripOffers.length === 0 && (
-                <div style={{
-                  textAlign: 'center',
-                  color: 'var(--tg-theme-hint-color, #708499)',
-                  fontSize: 14,
-                  padding: 20
-                }}>
-                  Пока нет заявок на эту поездку
-                </div>
+              {/* Секция с заявками */}
+              {tripOffers.length > 0 && (
+                <>
+                  <h3 style={{
+                    fontSize: '18px',
+                    fontWeight: '600',
+                    color: 'var(--tg-theme-text-color, #ffffff)',
+                    marginBottom: '16px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}>
+                    <span>📨</span>
+                    <span>Заявки ({tripOffers.length})</span>
+                    {tripOffers.some(o => !o.is_viewed) && (
+                      <span style={{
+                        background: '#FF3B30',
+                        color: 'white',
+                        fontSize: '10px',
+                        fontWeight: '600',
+                        padding: '2px 6px',
+                        borderRadius: '8px'
+                      }}>
+                        NEW
+                      </span>
+                    )}
+                  </h3>
+                </>
               )}
 
               {tripOffers.map(offer => (
-                <div key={offer.id} style={styles.packageCard}>
+                <div key={offer.id} style={{
+                  ...styles.packageCard,
+                  ...((!offer.is_viewed) && {
+                    border: '2px solid #FF3B30',
+                    background: 'rgba(255, 59, 48, 0.05)'
+                  })
+                }}>
                   <div style={styles.packageHeader}>
                     <div style={styles.authorInfo}>
                       <img
@@ -883,6 +809,18 @@ const TripsSection = () => {
                         style={styles.authorAvatar}
                       />
                       <div style={styles.authorName}>{offer.user?.full_name || 'Пользователь'}</div>
+                      {!offer.is_viewed && (
+                        <span style={{
+                          background: '#FF3B30',
+                          color: 'white',
+                          fontSize: '10px',
+                          fontWeight: '600',
+                          padding: '2px 6px',
+                          borderRadius: '8px'
+                        }}>
+                          NEW
+                        </span>
+                      )}
                     </div>
                     <div style={styles.reward}>₽{offer.parcel?.reward || '—'}</div>
                   </div>
@@ -978,6 +916,128 @@ const TripsSection = () => {
                   )}
                 </div>
               ))}
+
+              {/* Секция с доступными посылками по маршруту */}
+              {filteredParcels.length > 0 && (
+                <>
+                  <h3 style={{
+                    fontSize: '18px',
+                    fontWeight: '600',
+                    color: 'var(--tg-theme-text-color, #ffffff)',
+                    marginTop: tripOffers.length > 0 ? '32px' : '0',
+                    marginBottom: '16px',
+                    paddingTop: tripOffers.length > 0 ? '24px' : '0',
+                    borderTop: tripOffers.length > 0 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}>
+                    <span>📦</span>
+                    <span>Доступные посылки ({filteredParcels.length})</span>
+                  </h3>
+                  <div style={{
+                    fontSize: '13px',
+                    color: 'var(--tg-theme-hint-color, #708499)',
+                    marginBottom: '16px'
+                  }}>
+                    Откликайтесь на посылки, которые подходят под ваш маршрут
+                  </div>
+
+                  {filteredParcels.map(pkg => (
+                    <div key={pkg.id} style={styles.packageCard}>
+                      <div style={styles.packageHeader}>
+                        <div style={{flex: 1}}>
+                          <div style={{...styles.authorInfo, marginBottom: '8px'}}>
+                            <img
+                              src={pkg.user?.avatar_url || 'https://i.pravatar.cc/100'}
+                              alt={pkg.user?.full_name || 'Пользователь'}
+                              style={styles.authorAvatar}
+                            />
+                            <div style={styles.authorName}>{pkg.user?.full_name || 'Пользователь'}</div>
+                          </div>
+                        </div>
+                        <div style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'flex-end',
+                          gap: '4px'
+                        }}>
+                          <div style={{
+                            ...styles.reward,
+                            fontSize: '20px',
+                            fontWeight: '700'
+                          }}>
+                            ₽{pkg.reward}
+                          </div>
+                          <div style={{
+                            fontSize: '12px',
+                            color: 'var(--tg-theme-hint-color, #708499)'
+                          }}>
+                            ⚖️ {pkg.weight_kg} кг
+                          </div>
+                        </div>
+                      </div>
+
+                      <div style={{
+                        ...styles.packageDescription,
+                        marginTop: '12px',
+                        fontSize: '15px',
+                        fontWeight: '600',
+                        color: 'var(--tg-theme-text-color, #ffffff)'
+                      }}>
+                        📦 {pkg.title || pkg.description}
+                      </div>
+
+                      {pkg.description && pkg.title && (
+                        <div style={{
+                          fontSize: '13px',
+                          color: 'var(--tg-theme-hint-color, #708499)',
+                          marginTop: '6px',
+                          lineHeight: '1.4'
+                        }}>
+                          {pkg.description}
+                        </div>
+                      )}
+
+                      <div style={{
+                        ...styles.packageFooter,
+                        marginTop: '12px',
+                        paddingTop: '12px',
+                        borderTop: '1px solid rgba(255, 255, 255, 0.1)'
+                      }}>
+                        <div style={{fontSize: '13px'}}>
+                          📅 {new Date(pkg.created_at).toLocaleDateString('ru-RU')}
+                        </div>
+                      </div>
+
+                      <button
+                        style={styles.responseButton}
+                        onClick={() => handlePackageResponse(pkg)}
+                      >
+                        ✈️ Откликнуться своей поездкой
+                      </button>
+                    </div>
+                  ))}
+                </>
+              )}
+
+              {/* Показываем сообщение если нет ни заявок, ни доступных посылок */}
+              {tripOffers.length === 0 && filteredParcels.length === 0 && (
+                <div style={{
+                  textAlign: 'center',
+                  color: 'var(--tg-theme-hint-color, #708499)',
+                  fontSize: 14,
+                  padding: '40px 20px'
+                }}>
+                  <div style={{fontSize: '48px', marginBottom: '16px'}}>📭</div>
+                  <div style={{fontSize: '16px', fontWeight: '600', marginBottom: '8px'}}>
+                    Пока нет заявок и посылок
+                  </div>
+                  <div style={{fontSize: '14px'}}>
+                    По маршруту {getCity(selectedTrip.origin)} → {getCity(selectedTrip.destination)} пока нет доступных посылок
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

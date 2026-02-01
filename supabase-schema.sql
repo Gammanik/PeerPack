@@ -81,6 +81,7 @@ CREATE TABLE offers (
     price DECIMAL(10,2) NOT NULL,
     message TEXT,
     status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'rejected', 'accepted')),
+    is_viewed BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -342,21 +343,21 @@ VALUES
 -- Insert test offers
 INSERT INTO offers (trip_id, parcel_id, user_id, type, price, message, status, created_at)
 VALUES
-    -- Pending offers (посылки откликаются на поездки)
-    (6, 1, 1, 'parcel_to_trip', 800.00, 'Добрый день! Нужно срочно доставить документы', 'pending', NOW() - INTERVAL '1 day'),
-    (6, 4, 11, 'parcel_to_trip', 1200.00, 'День рождения у друга, очень важно доставить вовремя!', 'pending', NOW() - INTERVAL '5 hours'),
+    -- Pending offers (посылки откликаются на поездки) - НЕПРОСМОТРЕННЫЕ
+    (6, 1, 1, 'parcel_to_trip', 800.00, 'Добрый день! Нужно срочно доставить документы', 'pending', FALSE, NOW() - INTERVAL '1 day'),
+    (6, 4, 11, 'parcel_to_trip', 1200.00, 'День рождения у друга, очень важно доставить вовремя!', 'pending', FALSE, NOW() - INTERVAL '5 hours'),
 
-    -- Accepted offers (поездки откликаются на посылки)
-    (6, 2, 1, 'trip_to_parcel', 600.00, 'Могу взять вашу посылку, летаю регулярно', 'accepted', NOW() - INTERVAL '2 days'),
-    (6, 5, 1, 'trip_to_parcel', 500.00, 'Легкая посылка, без проблем доставлю', 'accepted', NOW() - INTERVAL '3 days'),
-    (3, 1, 3, 'trip_to_parcel', 800.00, 'Утренний рейс, быстрая доставка гарантирована', 'accepted', NOW() - INTERVAL '2 hours'),
+    -- Accepted offers (поездки откликаются на посылки) - ПРОСМОТРЕННЫЕ
+    (6, 2, 1, 'trip_to_parcel', 600.00, 'Могу взять вашу посылку, летаю регулярно', 'accepted', TRUE, NOW() - INTERVAL '2 days'),
+    (6, 5, 1, 'trip_to_parcel', 500.00, 'Легкая посылка, без проблем доставлю', 'accepted', TRUE, NOW() - INTERVAL '3 days'),
+    (3, 1, 3, 'trip_to_parcel', 800.00, 'Утренний рейс, быстрая доставка гарантирована', 'accepted', TRUE, NOW() - INTERVAL '2 hours'),
 
-    -- Rejected offers
-    (5, 3, 4, 'trip_to_parcel', 1000.00, 'Могу взять лекарства', 'rejected', NOW() - INTERVAL '1 day'),
+    -- Rejected offers - ПРОСМОТРЕННЫЕ
+    (5, 3, 4, 'trip_to_parcel', 1000.00, 'Могу взять лекарства', 'rejected', TRUE, NOW() - INTERVAL '1 day'),
 
-    -- Completed offers (для delivered посылок)
-    (7, 8, 12, 'trip_to_parcel', 600.00, 'Еду в Казань, могу доставить книги', 'accepted', NOW() - INTERVAL '5 days'),
-    (7, 7, 12, 'trip_to_parcel', 1000.00, 'Аккуратно доставлю медикаменты', 'accepted', NOW() - INTERVAL '4 days');
+    -- Completed offers (для delivered посылок) - ПРОСМОТРЕННЫЕ
+    (7, 8, 12, 'trip_to_parcel', 600.00, 'Еду в Казань, могу доставить книги', 'accepted', TRUE, NOW() - INTERVAL '5 days'),
+    (7, 7, 12, 'trip_to_parcel', 1000.00, 'Аккуратно доставлю медикаменты', 'accepted', TRUE, NOW() - INTERVAL '4 days');
 
 -- Insert test deliveries
 INSERT INTO deliveries (parcel_id, trip_id, carrier_user_id, status, pickup_time, delivery_time, created_at)

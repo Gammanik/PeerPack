@@ -256,7 +256,7 @@ class SupabaseApiService {
         this.checkSupabase();
         const { data, error } = await supabase
             .from('offers')
-            .update({ status })
+            .update({ status, is_viewed: true })
             .eq('id', offerId)
             .select()
             .single();
@@ -269,6 +269,23 @@ class SupabaseApiService {
         // Если оффер принят, создаем delivery
         if (status === 'accepted' && data) {
             await this.createDeliveryFromOffer(data);
+        }
+
+        return { success: true, offer: data };
+    }
+
+    async markOfferAsViewed(offerId) {
+        this.checkSupabase();
+        const { data, error } = await supabase
+            .from('offers')
+            .update({ is_viewed: true })
+            .eq('id', offerId)
+            .select()
+            .single();
+
+        if (error) {
+            console.error('Error marking offer as viewed:', error);
+            return { success: false, error };
         }
 
         return { success: true, offer: data };
