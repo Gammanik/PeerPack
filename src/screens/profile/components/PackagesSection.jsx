@@ -1,98 +1,111 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { supabaseApi } from '../../../services/supabaseApi.js';
 
 const PackagesSection = () => {
   const [showPackagesList, setShowPackagesList] = useState(false);
   const [selectedPackage, setSelectedPackage] = useState(null);
+  const [packages, setPackages] = useState([]);
+  const [offers, setOffers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const mockPackages = [
-    {
-      id: 1,
-      description: 'Документы в папке',
-      from: 'Москва',
-      to: 'Дубай',
-      status: 'active',
-      price: 1500,
-      responses: 3,
-      created: '2025-01-15'
-    },
-    {
-      id: 2,
-      description: 'Подарок - ювелирные украшения',
-      from: 'Дубай',
-      to: 'Москва',
-      status: 'completed',
-      price: 2000,
-      courier: 'Фатима',
-      created: '2025-01-10'
-    },
-    {
-      id: 3,
-      description: 'Медикаменты',
-      from: 'Москва',
-      to: 'Стамбул',
-      status: 'waiting',
-      price: 1200,
-      responses: 0,
-      created: '2025-01-12'
-    }
-  ];
+  // Временно используем тестового пользователя (ID = 1)
+  // TODO: заменить на реального пользователя из Telegram
+  const currentUserId = 1;
 
-  // Mock данные об откликах курьеров на посылки
-  const mockCourierResponses = [
-    {
-      id: 1,
-      courierName: 'Алексей К.',
-      courierAvatar: 'https://i.pravatar.cc/100?img=15',
-      courierRating: 4.7,
-      proposedPrice: 1400,
-      tripDate: '2025-01-18',
-      flightNumber: 'SU522',
-      message: 'Регулярно летаю этим рейсом, гарантирую безопасную доставку документов.',
-      responseDate: '2025-01-16',
-      status: 'pending'
-    },
-    {
-      id: 2,
-      courierName: 'Марина В.',
-      courierAvatar: 'https://i.pravatar.cc/100?img=25',
-      courierRating: 4.9,
-      proposedPrice: 1500,
-      tripDate: '2025-01-19',
-      flightNumber: 'A6142',
-      message: 'Опытный курьер, доставлю быстро и надежно. Есть рекомендации.',
-      responseDate: '2025-01-16',
-      status: 'pending'
+  // Загружаем посылки пользователя при монтировании
+  useEffect(() => {
+    loadUserParcels();
+  }, []);
+
+  const loadUserParcels = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const { parcels, error: parcelsError } = await supabaseApi.getUserParcels(currentUserId);
+
+      if (parcelsError) {
+        console.error('Error loading parcels:', parcelsError);
+        setError('Ошибка загрузки посылок');
+        return;
+      }
+
+      setPackages(parcels || []);
+    } catch (err) {
+      console.error('Error:', err);
+      setError('Произошла ошибка');
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  // Загружаем отклики для выбранной посылки
+  const loadPackageOffers = async (parcelId) => {
+    try {
+      const { offers: parcelOffers, error: offersError } = await supabaseApi.getOffersForParcel(parcelId);
+
+      if (offersError) {
+        console.error('Error loading offers:', offersError);
+        return;
+      }
+
+      setOffers(parcelOffers || []);
+    } catch (err) {
+      console.error('Error loading offers:', err);
+    }
+  };
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'active': return '#4BB34B';
-      case 'completed': return '#888';
-      case 'waiting': return '#FFD700';
+      case 'open': return '#4BB34B';
+      case 'assigned': return '#FFD700';
+      case 'in_transit': return '#5288c1';
+      case 'delivered': return '#888';
+      case 'cancelled': return '#ff4444';
       default: return '#888';
     }
   };
 
   const getStatusText = (status) => {
     switch (status) {
-      case 'active': return 'Активно';
-      case 'completed': return 'Доставлено';
-      case 'waiting': return 'Ожидание';
+      case 'open': return 'Открыто';
+      case 'assigned': return 'Назначено';
+      case 'in_transit': return 'В пути';
+      case 'delivered': return 'Доставлено';
+      case 'cancelled': return 'Отменено';
       default: return status;
     }
   };
 
-  const handlePackageClick = (pkg) => {
-    if (pkg.status === 'active' && pkg.responses > 0) {
-      setSelectedPackage(pkg);
-      setShowPackagesList(true);
-    }
+  const handlePackageClick = async (pkg) => {
+    setSelectedPackage(pkg);
+    await loadPackageOffers(pkg.id);
+    setShowPackagesList(true);
   };
 
-  const handleResponseAction = (responseId, action) => {
-    console.log(`${action} response ${responseId}`);
-    alert(`Отклик ${action === 'accept' ? 'принят' : 'отклонен'}!`);
+  const handleResponseAction = async (offerId, action) => {
+    try {
+      const newStatus = action === 'accept' ? 'accepted' : 'rejected';
+      const { success, error: updateError } = await supabaseApi.updateOfferStatus(offerId, newStatus);
+
+      if (updateError) {
+        alert('Ошибка: ' + updateError.message);
+        return;
+      }
+
+      alert(`Отклик ${action === 'accept' ? 'принят' : 'отклонен'}!`);
+
+      // Обновляем список откликов
+      if (selectedPackage) {
+        await loadPackageOffers(selectedPackage.id);
+      }
+
+      // Обновляем список посылок
+      await loadUserParcels();
+    } catch (err) {
+      console.error('Error updating offer:', err);
+      alert('Произошла ошибка');
+    }
   };
 
   const styles = {
@@ -311,11 +324,56 @@ const PackagesSection = () => {
     }
   };
 
+  // Показываем индикатор загрузки
+  if (loading) {
+    return (
+      <div style={{textAlign: 'center', padding: '40px', color: 'var(--tg-theme-hint-color, #708499)'}}>
+        <div style={{fontSize: '24px', marginBottom: '12px'}}>⏳</div>
+        <div>Загрузка посылок...</div>
+      </div>
+    );
+  }
+
+  // Показываем ошибку
+  if (error) {
+    return (
+      <div style={{textAlign: 'center', padding: '40px', color: '#ff4444'}}>
+        <div style={{fontSize: '24px', marginBottom: '12px'}}>⚠️</div>
+        <div>{error}</div>
+        <button
+          onClick={loadUserParcels}
+          style={{
+            marginTop: '16px',
+            padding: '10px 20px',
+            background: 'var(--tg-theme-button-color, #5288c1)',
+            border: 'none',
+            borderRadius: '8px',
+            color: 'white',
+            cursor: 'pointer'
+          }}
+        >
+          Попробовать снова
+        </button>
+      </div>
+    );
+  }
+
+  // Показываем пустое состояние
+  if (packages.length === 0) {
+    return (
+      <div style={{textAlign: 'center', padding: '40px', color: 'var(--tg-theme-hint-color, #708499)'}}>
+        <div style={{fontSize: '48px', marginBottom: '16px'}}>📦</div>
+        <div style={{fontSize: '18px', fontWeight: '600', marginBottom: '8px'}}>Нет посылок</div>
+        <div style={{fontSize: '14px'}}>Добавьте первую посылку, чтобы начать</div>
+      </div>
+    );
+  }
+
   return (
     <>
-      {mockPackages.map(pkg => (
-        <div 
-          key={pkg.id} 
+      {packages.map(pkg => (
+        <div
+          key={pkg.id}
           style={styles.packageCard}
           onClick={() => handlePackageClick(pkg)}
         >
@@ -323,9 +381,9 @@ const PackagesSection = () => {
             <div>
               <div style={styles.cardTitle}>{pkg.description}</div>
               <div style={styles.route}>
-                <span style={styles.routeFrom}>{pkg.from}</span>
+                <span style={styles.routeFrom}>{pkg.origin}</span>
                 <span style={styles.routeArrow}>→</span>
-                <span style={styles.routeTo}>{pkg.to}</span>
+                <span style={styles.routeTo}>{pkg.destination}</span>
               </div>
             </div>
             <div style={{
@@ -335,28 +393,21 @@ const PackagesSection = () => {
               {getStatusText(pkg.status)}
             </div>
           </div>
-          
+
           <div style={styles.cardInfo}>
-            💰 {pkg.price}₽
+            💰 {pkg.reward}₽
           </div>
-          
-          {pkg.status === 'completed' && pkg.courier && (
+
+          {pkg.status === 'delivered' && pkg.carrier_name && (
             <div style={styles.cardInfo}>
-              👤 Курьер: {pkg.courier}
+              👤 Курьер: {pkg.carrier_name}
             </div>
           )}
-          
-          {pkg.status === 'active' && pkg.responses > 0 && (
-            <>
-              <div style={styles.cardInfo}>
-                <span style={styles.responsesBadge}>
-                  {pkg.responses} откликов
-                </span>
-              </div>
-              <div style={styles.clickHint}>
-                👀 Нажмите чтобы посмотреть отклики
-              </div>
-            </>
+
+          {pkg.status === 'open' && (
+            <div style={styles.clickHint}>
+              👀 Нажмите чтобы посмотреть отклики
+            </div>
           )}
         </div>
       ))}
@@ -378,59 +429,95 @@ const PackagesSection = () => {
             <div style={styles.modalContent}>
               <div style={{marginBottom: 16, fontSize: 14, color: 'var(--tg-theme-hint-color, #708499)'}}>
                 <p><strong>Посылка:</strong> {selectedPackage.description}</p>
-                <p><strong>Маршрут:</strong> 
+                <p><strong>Маршрут:</strong>
                     <span style={{marginLeft: '8px'}}>
-                        <span style={{fontWeight: '600'}}>{selectedPackage.from}</span>
+                        <span style={{fontWeight: '600'}}>{selectedPackage.origin}</span>
                         <span style={{color: 'var(--tg-theme-button-color, #5288c1)', margin: '0 6px', fontSize: '16px', fontWeight: '700'}}>→</span>
-                        <span style={{fontWeight: '600'}}>{selectedPackage.to}</span>
+                        <span style={{fontWeight: '600'}}>{selectedPackage.destination}</span>
                     </span>
                 </p>
-                <p><strong>Вознаграждение:</strong> ₽{selectedPackage.price}</p>
+                <p><strong>Вознаграждение:</strong> ₽{selectedPackage.reward}</p>
               </div>
 
-              {mockCourierResponses.map(response => (
-                <div key={response.id} style={styles.responseCard}>
+              {offers.map(offer => (
+                <div key={offer.id} style={styles.responseCard}>
                   <div style={styles.responseHeader}>
-                    <img 
-                      src={response.courierAvatar} 
-                      alt={response.courierName}
+                    <img
+                      src={offer.user?.avatar_url || 'https://i.pravatar.cc/100'}
+                      alt={offer.user?.full_name || 'Пользователь'}
                       style={styles.responseAvatar}
                     />
                     <div style={styles.responseAuthor}>
-                      <div style={styles.authorName}>{response.courierName}</div>
-                      <div style={styles.authorRating}>⭐ {response.courierRating} • Отклик от {response.responseDate}</div>
+                      <div style={styles.authorName}>{offer.user?.full_name || 'Пользователь'}</div>
+                      <div style={styles.authorRating}>
+                        {offer.user?.rating && `⭐ ${offer.user.rating} • `}
+                        Отклик от {new Date(offer.created_at).toLocaleDateString('ru-RU')}
+                      </div>
                     </div>
-                    <div style={styles.responsePrice}>₽{response.proposedPrice}</div>
+                    <div style={styles.responsePrice}>₽{offer.trip?.price || selectedPackage.reward}</div>
                   </div>
 
-                  <div style={styles.tripDetails}>
-                    ✈️ {response.tripDate} • Рейс {response.flightNumber}
-                  </div>
+                  {offer.trip && (
+                    <div style={styles.tripDetails}>
+                      ✈️ {new Date(offer.trip.depart_at).toLocaleDateString('ru-RU')}
+                      {offer.trip.flight_number && ` • Рейс ${offer.trip.flight_number}`}
+                    </div>
+                  )}
 
-                  <div style={styles.responseMessage}>
-                    💬 {response.message}
-                  </div>
+                  {offer.message && (
+                    <div style={styles.responseMessage}>
+                      💬 {offer.message}
+                    </div>
+                  )}
 
-                  {response.status === 'pending' && (
+                  {offer.status === 'pending' && (
                     <div style={styles.responseActions}>
-                      <button 
+                      <button
                         style={{...styles.actionButton, ...styles.acceptButton}}
-                        onClick={() => handleResponseAction(response.id, 'accept')}
+                        onClick={() => handleResponseAction(offer.id, 'accept')}
                       >
                         ✅ Принять
                       </button>
-                      <button 
+                      <button
                         style={{...styles.actionButton, ...styles.rejectButton}}
-                        onClick={() => handleResponseAction(response.id, 'reject')}
+                        onClick={() => handleResponseAction(offer.id, 'reject')}
                       >
                         ❌ Отклонить
                       </button>
                     </div>
                   )}
+
+                  {offer.status === 'accepted' && (
+                    <div style={{
+                      background: '#4BB34B',
+                      color: 'white',
+                      padding: '6px 12px',
+                      borderRadius: '8px',
+                      fontSize: '13px',
+                      fontWeight: '600',
+                      display: 'inline-block'
+                    }}>
+                      ✅ Принято
+                    </div>
+                  )}
+
+                  {offer.status === 'rejected' && (
+                    <div style={{
+                      background: '#888',
+                      color: 'white',
+                      padding: '6px 12px',
+                      borderRadius: '8px',
+                      fontSize: '13px',
+                      fontWeight: '600',
+                      display: 'inline-block'
+                    }}>
+                      ❌ Отклонено
+                    </div>
+                  )}
                 </div>
               ))}
 
-              {mockCourierResponses.length === 0 && (
+              {offers.length === 0 && (
                 <div style={{
                   textAlign: 'center',
                   color: 'var(--tg-theme-hint-color, #708499)',

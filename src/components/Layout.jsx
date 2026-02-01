@@ -176,6 +176,15 @@ const Layout = ({ children, currentPage, onNavigate }) => {
         <button
           style={{
             ...styles.navButton,
+            ...(currentPage === 'test' ? styles.activeNavButton : styles.inactiveNavButton)
+          }}
+          onClick={() => handleNavigation('test')}
+        >
+          <div style={styles.navIcon}>🧪</div>
+        </button>
+        <button
+          style={{
+            ...styles.navButton,
             ...(currentPage === 'profile' ? styles.activeNavButton : styles.inactiveNavButton),
             position: 'relative'
           }}

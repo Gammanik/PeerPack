@@ -1,0 +1,93 @@
+@startuml PeerPack_Database_Schema
+
+skinparam packageStyle rectangle
+skinparam linetype ortho
+skinparam shadowing false
+
+skinparam package {
+  BackgroundColor #eef3f7
+  BorderColor #607D8B
+  FontSize 14
+  FontStyle bold
+}
+
+skinparam entity {
+  BackgroundColor #ffffff
+  BorderColor #757575
+  FontSize 12
+}
+
+' ========== ПОЛЬЗОВАТЕЛИ ==========
+package "Пользователи" #lightblue {
+  entity users {
+    full_name : varchar
+    rating : decimal
+    --
+    ● id : bigint
+  }
+}
+
+' ========== ПОЕЗДКИ ==========
+package "Поездки" #lightgreen {
+  entity trips {
+    ● user_id : bigint
+    origin : varchar
+    destination : varchar
+    depart_at : timestamp
+    capacity_kg : int
+    --
+    ● id : bigint
+  }
+}
+
+' ========== ПОСЫЛКИ ==========
+package "Посылки" #lightyellow {
+  entity parcels {
+    ● user_id : bigint
+    title : varchar
+    weight_kg : decimal
+    reward : decimal
+    status : open | assigned | delivered
+    --
+    ● id : bigint
+  }
+}
+
+' ========== ОФЕРЫ ==========
+package "Отклики" #lightgray {
+  entity offers {
+    ● trip_id : bigint
+    ● parcel_id : bigint
+    type : parcel_to_trip | trip_to_parcel
+    price : decimal
+    status : pending | rejected | accepted
+    --
+    ● id : bigint
+  }
+}
+
+' ========== ДОСТАВКИ ==========
+package "Доставки" #mistyrose {
+  entity deliveries {
+    ● parcel_id : bigint
+    ● trip_id : bigint
+    ● carrier_user_id : bigint
+    status : assigned | in_transit | delivered
+    --
+    ● id : bigint
+  }
+}
+
+' ========== СВЯЗИ ==========
+users ||--o{ trips
+users ||--o{ parcels
+users ||--o{ offers
+users ||--o{ deliveries
+
+trips ||--o{ offers
+parcels ||--o{ offers
+
+trips ||--o{ deliveries
+parcels ||--|| deliveries
+
+@enduml

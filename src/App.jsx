@@ -5,6 +5,7 @@ import ProfileScreen from './screens/profile/ProfileScreen.jsx';
 import ParcelsScreen from './screens/parcels/ParcelsScreen.jsx';
 import TripsScreen from './screens/trips/TripsScreen.jsx';
 import AboutPage from './components/AboutPage.jsx';
+import SupabaseTestScreen from './screens/test/SupabaseTestScreen.jsx';
 import { LanguageProvider } from './contexts/LanguageContext.jsx';
 
 const App = () => {
@@ -26,6 +27,8 @@ const App = () => {
         return <AboutPage onNavigate={handleNavigate} />;
       case 'search':
         return <SearchScreen />;
+      case 'test':
+        return <SupabaseTestScreen />;
       default:
         return <ParcelsScreen />;
     }

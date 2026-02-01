@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import AddTripForm from '../../../domains/user/components/AddTripForm.jsx';
+import { supabaseApi } from '../../../services/supabaseApi.js';
 
 const TripsSection = () => {
   const [showTripRequests, setShowTripRequests] = useState(false);
@@ -8,9 +9,19 @@ const TripsSection = () => {
   const [showResponseForm, setShowResponseForm] = useState(false);
   const [showAddTripForm, setShowAddTripForm] = useState(false);
   const [selectedPackage, setSelectedPackage] = useState(null);
-  
+
+  // Данные из Supabase
+  const [trips, setTrips] = useState([]);
+  const [tripOffers, setTripOffers] = useState([]);
+  const [availableParcels, setAvailableParcels] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Временно используем тестового пользователя
+  const currentUserId = 1;
+
   const availableCities = ['Москва', 'Санкт-Петербург', 'Дубай', 'Сочи', 'Казань', 'Новосибирск', 'Екатеринбург'];
-  
+
   const [responseForm, setResponseForm] = useState({
     tripDate: '',
     tripTime: '',
@@ -21,139 +32,201 @@ const TripsSection = () => {
     canDeliverFlexible: false
   });
 
-  const mockTrips = [
-    {
-      id: 1,
-      from: 'Москва',
-      to: 'Дубай',
-      date: '2025-01-20',
-      time: '14:30 → 22:45',
-      airport: 'Шереметьево → DXB',
-      requests: 3,
-      price: 1800,
-      comment: 'Командировка в Дубай, есть место для документов и посылок'
-    }
-  ];
+  // Загружаем поездки пользователя при монтировании
+  useEffect(() => {
+    loadUserTrips();
+    loadAvailableParcels();
+  }, []);
 
-  // Mock данные о заявках на поездку
-  const mockTripRequests = [
-    {
-      id: 1,
-      authorName: 'Анна К.',
-      authorAvatar: 'https://i.pravatar.cc/100?img=5',
-      packageDescription: 'Документы для визы',
-      reward: 1500,
-      message: 'Очень срочно нужно доставить документы! Готова оплатить дополнительно за быструю доставку.',
-      requestDate: '2025-01-18',
-      status: 'pending'
-    },
-    {
-      id: 2,
-      authorName: 'Георгий П.',
-      authorAvatar: 'https://i.pravatar.cc/100?img=12',
-      packageDescription: 'Лекарства для бабушки',
-      reward: 1200,
-      message: 'Важные лекарства, буду очень благодарен за помощь',
-      requestDate: '2025-01-19',
-      status: 'pending'
-    },
-    {
-      id: 3,
-      authorName: 'Мария С.',
-      authorAvatar: 'https://i.pravatar.cc/100?img=31',
-      packageDescription: 'Подарок на свадьбу',
-      reward: 2000,
-      message: 'Ювелирные украшения в подарок на свадьбу подруги. Очень деликатная посылка.',
-      requestDate: '2025-01-17',
-      status: 'accepted'
-    }
-  ];
+  const loadUserTrips = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const { trips: userTrips, error: tripsError } = await supabaseApi.getUserTrips(currentUserId);
 
-  // Mock данные доступных посылок для откликов
-  const mockAvailablePackages = [
-    {
-      id: 1,
-      from: 'Москва',
-      to: 'Дубай',
-      description: 'Документы для визы',
-      reward: 1500,
-      size: 'xs',
-      weight: 'light',
-      tags: ['documents', 'urgent'],
-      author: 'Анна К.',
-      authorAvatar: 'https://i.pravatar.cc/100?img=5',
-      deadline: '2025-01-20',
-      responses: 2
-    },
-    {
-      id: 2,
-      from: 'Москва',
-      to: 'Дубай',
-      description: 'Подарок другу на день рождения',
-      reward: 800,
-      size: 's',
-      weight: 'medium',
-      tags: ['fragile'],
-      author: 'Дмитрий М.',
-      authorAvatar: 'https://i.pravatar.cc/100?img=8',
-      deadline: '2025-01-18',
-      responses: 0
-    }
-  ];
+      if (tripsError) {
+        console.error('Error loading trips:', tripsError);
+        setError('Ошибка загрузки поездок');
+        return;
+      }
 
-  const handleTripClick = (trip) => {
+      setTrips(userTrips || []);
+    } catch (err) {
+      console.error('Error:', err);
+      setError('Произошла ошибка');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadAvailableParcels = async () => {
+    try {
+      const { parcels, error: parcelsError } = await supabaseApi.getParcels();
+
+      if (parcelsError) {
+        console.error('Error loading parcels:', parcelsError);
+        return;
+      }
+
+      setAvailableParcels(parcels || []);
+    } catch (err) {
+      console.error('Error loading parcels:', err);
+    }
+  };
+
+  const loadTripOffers = async (tripId) => {
+    try {
+      const { offers, error: offersError } = await supabaseApi.getOffersForTrip(tripId);
+
+      if (offersError) {
+        console.error('Error loading offers:', offersError);
+        return;
+      }
+
+      setTripOffers(offers || []);
+    } catch (err) {
+      console.error('Error loading offers:', err);
+    }
+  };
+
+  const handleTripClick = async (trip) => {
     setSelectedTrip(trip);
+    await loadTripOffers(trip.id);
     setShowTripRequests(true);
   };
 
-  const handleRequestAction = (requestId, action) => {
-    console.log(`${action} request ${requestId}`);
-    alert(`Заявка ${action === 'accept' ? 'принята' : 'отклонена'}!`);
+  const handleRequestAction = async (offerId, action) => {
+    try {
+      const newStatus = action === 'accept' ? 'accepted' : 'rejected';
+      const { success, error: updateError } = await supabaseApi.updateOfferStatus(offerId, newStatus);
+
+      if (updateError) {
+        alert('Ошибка: ' + updateError.message);
+        return;
+      }
+
+      alert(`Заявка ${action === 'accept' ? 'принята' : 'отклонена'}!`);
+
+      // Обновляем список откликов
+      if (selectedTrip) {
+        await loadTripOffers(selectedTrip.id);
+      }
+
+      // Обновляем список поездок
+      await loadUserTrips();
+    } catch (err) {
+      console.error('Error updating offer:', err);
+      alert('Произошла ошибка');
+    }
   };
 
   const handlePackageResponse = (pkg) => {
     setSelectedPackage(pkg);
     setShowResponseForm(true);
-    
+
     // Предзаполняем форму данными поездки
-    const matchingTrip = mockTrips.find(trip => 
-      trip.from === pkg.from && trip.to === pkg.to
+    const matchingTrip = trips.find(trip =>
+      trip.origin === pkg.origin && trip.destination === pkg.destination
     );
-    
+
     if (matchingTrip) {
+      const departAt = new Date(matchingTrip.depart_at);
       setResponseForm({
         ...responseForm,
-        tripDate: matchingTrip.date,
-        tripTime: matchingTrip.time.split(' → ')[0],
+        tripDate: departAt.toISOString().split('T')[0],
+        tripTime: departAt.toTimeString().split(' ')[0].slice(0, 5),
         price: pkg.reward.toString()
       });
     }
   };
 
-  const handleSendResponse = () => {
-    console.log('Отправляем отклик:', {
-      package: selectedPackage,
-      response: responseForm
-    });
-    alert('Ваш отклик отправлен!');
-    setShowResponseForm(false);
-    setShowPackagesList(false);
-    setResponseForm({
-      tripDate: '',
-      tripTime: '',
-      price: '',
-      message: '',
-      flightNumber: '',
-      canPickupFlexible: false,
-      canDeliverFlexible: false
-    });
+  const handleSendResponse = async () => {
+    if (!selectedPackage) return;
+
+    try {
+      // Находим подходящую поездку пользователя
+      const matchingTrip = trips.find(trip =>
+        trip.origin === selectedPackage.origin &&
+        trip.destination === selectedPackage.destination
+      );
+
+      if (!matchingTrip) {
+        alert('Поездка не найдена. Создайте поездку сначала.');
+        return;
+      }
+
+      // Создаем отклик
+      const { success, error: offerError } = await supabaseApi.createOffer({
+        parcel_id: selectedPackage.id,
+        trip_id: matchingTrip.id,
+        user_id: currentUserId,
+        type: 'trip_to_parcel',
+        message: responseForm.message,
+        status: 'pending'
+      });
+
+      if (offerError) {
+        alert('Ошибка: ' + offerError.message);
+        return;
+      }
+
+      alert('Ваш отклик отправлен!');
+      setShowResponseForm(false);
+      setShowPackagesList(false);
+      setResponseForm({
+        tripDate: '',
+        tripTime: '',
+        price: '',
+        message: '',
+        flightNumber: '',
+        canPickupFlexible: false,
+        canDeliverFlexible: false
+      });
+
+      await loadUserTrips();
+    } catch (err) {
+      console.error('Error sending response:', err);
+      alert('Произошла ошибка');
+    }
   };
 
   const handleAddTrip = async (tripData) => {
-    console.log('Adding trip:', tripData);
-    // TODO: Implement API call to add trip
-    alert('Поездка успешно добавлена!');
-    setShowAddTripForm(false);
+    try {
+      // Маппинг полей из формы в формат API
+      const capacityMap = {
+        'small': 1,
+        'medium': 5,
+        'large': 10,
+        'xl': 20
+      };
+
+      // Комбинируем дату и время
+      const departDateTime = `${tripData.date}T${tripData.time}:00`;
+
+      const { success, trip_id, error: tripError } = await supabaseApi.createTrip({
+        user_id: currentUserId,
+        origin: tripData.from,
+        destination: tripData.to,
+        depart_at: new Date(departDateTime).toISOString(),
+        price: parseInt(tripData.price),
+        capacity_kg: capacityMap[tripData.capacity] || 5,
+        flight_number: tripData.transportDetails || null,
+        comment: tripData.comment || null,
+        status: 'active'
+      });
+
+      if (tripError) {
+        alert('Ошибка: ' + tripError.message);
+        return;
+      }
+
+      alert('Поездка успешно добавлена!');
+      setShowAddTripForm(false);
+      await loadUserTrips();
+    } catch (err) {
+      console.error('Error adding trip:', err);
+      alert('Произошла ошибка');
+    }
   };
 
   const getTagStyle = (tag) => ({
@@ -526,10 +599,44 @@ const TripsSection = () => {
     }
   };
 
+  // Показываем индикатор загрузки
+  if (loading) {
+    return (
+      <div style={{textAlign: 'center', padding: '40px', color: 'var(--tg-theme-hint-color, #708499)'}}>
+        <div style={{fontSize: '24px', marginBottom: '12px'}}>⏳</div>
+        <div>Загрузка поездок...</div>
+      </div>
+    );
+  }
+
+  // Показываем ошибку
+  if (error) {
+    return (
+      <div style={{textAlign: 'center', padding: '40px', color: '#ff4444'}}>
+        <div style={{fontSize: '24px', marginBottom: '12px'}}>⚠️</div>
+        <div>{error}</div>
+        <button
+          onClick={loadUserTrips}
+          style={{
+            marginTop: '16px',
+            padding: '10px 20px',
+            background: 'var(--tg-theme-button-color, #5288c1)',
+            border: 'none',
+            borderRadius: '8px',
+            color: 'white',
+            cursor: 'pointer'
+          }}
+        >
+          Попробовать снова
+        </button>
+      </div>
+    );
+  }
+
   return (
     <>
       {/* Баннер добавления поездки */}
-      <div 
+      <div
         style={styles.addTripBanner}
         onClick={() => setShowAddTripForm(true)}
       >
@@ -541,53 +648,76 @@ const TripsSection = () => {
       </div>
 
       {/* Баннер просмотра посылок */}
-      <div 
+      <div
         style={styles.browsePackagesBanner}
         onClick={() => setShowPackagesList(true)}
       >
         <div style={styles.browseTitle}>📦 Доступные посылки</div>
         <div style={styles.browseSubtitle}>Откликайтесь на посылки своими поездками</div>
         <button style={styles.browseButton}>
-          Посмотреть посылки
+          Посмотреть посылки ({availableParcels.length})
         </button>
       </div>
 
-      {mockTrips.map(trip => (
-        <div 
-          key={trip.id} 
-          style={styles.tripCard}
-          onClick={() => handleTripClick(trip)}
-        >
-          <div style={styles.cardHeader}>
-            <div>
-              <div style={styles.cardTitle}>
-                <span style={styles.tripFrom}>{trip.from}</span>
-                <span style={styles.tripArrow}>→</span>
-                <span style={styles.tripTo}>{trip.to}</span>
-              </div>
-              <div style={styles.route}>🛫 {trip.airport}</div>
-            </div>
-            <div style={styles.responsesBadge}>
-              {trip.requests} заявок
-            </div>
-          </div>
-          
-          <div style={styles.cardInfo}>
-            🕐 {trip.date} в {trip.time}
-          </div>
-          <div style={styles.cardInfo}>
-            💰 {trip.price}₽
-          </div>
-          
-          <div style={styles.comment}>
-            💬 {trip.comment}
-          </div>
-          
-          <div style={styles.clickHint}>
-            👀 Нажмите чтобы посмотреть заявки
-          </div>
+      {trips.length === 0 ? (
+        <div style={{textAlign: 'center', padding: '40px', color: 'var(--tg-theme-hint-color, #708499)'}}>
+          <div style={{fontSize: '48px', marginBottom: '16px'}}>✈️</div>
+          <div style={{fontSize: '18px', fontWeight: '600', marginBottom: '8px'}}>Нет поездок</div>
+          <div style={{fontSize: '14px'}}>Добавьте первую поездку, чтобы начать зарабатывать</div>
         </div>
-      ))}
+      ) : null}
+
+      {trips.map(trip => {
+        const departAt = new Date(trip.depart_at);
+        const formattedDate = departAt.toLocaleDateString('ru-RU');
+        const formattedTime = departAt.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+
+        return (
+          <div
+            key={trip.id}
+            style={styles.tripCard}
+            onClick={() => handleTripClick(trip)}
+          >
+            <div style={styles.cardHeader}>
+              <div>
+                <div style={styles.cardTitle}>
+                  <span style={styles.tripFrom}>{trip.origin}</span>
+                  <span style={styles.tripArrow}>→</span>
+                  <span style={styles.tripTo}>{trip.destination}</span>
+                </div>
+                {trip.flight_number && (
+                  <div style={styles.route}>🛫 Рейс {trip.flight_number}</div>
+                )}
+              </div>
+              <div style={styles.responsesBadge}>
+                {trip.status}
+              </div>
+            </div>
+
+            <div style={styles.cardInfo}>
+              🕐 {formattedDate} в {formattedTime}
+            </div>
+            <div style={styles.cardInfo}>
+              💰 {trip.price}₽
+            </div>
+            {trip.capacity_kg && (
+              <div style={styles.cardInfo}>
+                📦 До {trip.capacity_kg} кг
+              </div>
+            )}
+
+            {trip.comment && (
+              <div style={styles.comment}>
+                💬 {trip.comment}
+              </div>
+            )}
+
+            <div style={styles.clickHint}>
+              👀 Нажмите чтобы посмотреть заявки
+            </div>
+          </div>
+        );
+      })}
 
       {/* Модальное окно со списком доступных посылок */}
       {showPackagesList && (
@@ -604,43 +734,47 @@ const TripsSection = () => {
             </div>
             
             <div style={styles.modalContent}>
-              {mockAvailablePackages.map(pkg => (
+              {availableParcels.length === 0 ? (
+                <div style={{
+                  textAlign: 'center',
+                  color: 'var(--tg-theme-hint-color, #708499)',
+                  fontSize: 14,
+                  padding: 20
+                }}>
+                  Нет доступных посылок
+                </div>
+              ) : null}
+
+              {availableParcels.map(pkg => (
                 <div key={pkg.id} style={styles.packageCard}>
                   <div style={styles.packageHeader}>
                     <div style={styles.authorInfo}>
-                      <img src={pkg.authorAvatar} alt={pkg.author} style={styles.authorAvatar} />
-                      <div style={styles.authorName}>{pkg.author}</div>
+                      <img
+                        src={pkg.user?.avatar_url || 'https://i.pravatar.cc/100'}
+                        alt={pkg.user?.full_name || 'Пользователь'}
+                        style={styles.authorAvatar}
+                      />
+                      <div style={styles.authorName}>{pkg.user?.full_name || 'Пользователь'}</div>
                     </div>
                     <div style={styles.reward}>{pkg.reward}₽</div>
                   </div>
 
                   <div style={styles.packageRoute}>
-                    <span>{pkg.from}</span>
+                    <span>{pkg.origin}</span>
                     <span style={styles.tripArrow}>→</span>
-                    <span>{pkg.to}</span>
+                    <span>{pkg.destination}</span>
                   </div>
 
                   <div style={styles.packageDescription}>
                     📦 {pkg.description}
                   </div>
 
-                  <div style={styles.tagsContainer}>
-                    {pkg.tags.map(tag => (
-                      <span key={tag} style={getTagStyle(tag)}>
-                        {tag === 'urgent' ? '⚡ Срочно' :
-                         tag === 'documents' ? '📄 Документы' :
-                         tag === 'fragile' ? '🔸 Хрупкое' :
-                         tag === 'valuable' ? '💎 Ценное' : tag}
-                      </span>
-                    ))}
-                  </div>
-
                   <div style={styles.packageFooter}>
-                    <div>⏰ До {pkg.deadline}</div>
-                    <div>👥 {pkg.responses} откликов</div>
+                    <div>📅 {new Date(pkg.created_at).toLocaleDateString('ru-RU')}</div>
+                    <div>⚖️ {pkg.weight_kg} кг</div>
                   </div>
 
-                  <button 
+                  <button
                     style={styles.responseButton}
                     onClick={() => handlePackageResponse(pkg)}
                   >
@@ -669,48 +803,69 @@ const TripsSection = () => {
             
             <div style={styles.modalContent}>
               <div style={{marginBottom: 16, fontSize: 14, color: 'var(--tg-theme-hint-color, #708499)'}}>
-                <p><strong>Маршрут:</strong> 
+                <p><strong>Маршрут:</strong>
                     <span style={{marginLeft: '8px'}}>
-                        <span style={{fontWeight: '600'}}>{selectedTrip.from}</span>
+                        <span style={{fontWeight: '600'}}>{selectedTrip.origin}</span>
                         <span style={{color: 'var(--tg-theme-button-color, #5288c1)', margin: '0 6px', fontSize: '16px', fontWeight: '700'}}>→</span>
-                        <span style={{fontWeight: '600'}}>{selectedTrip.to}</span>
+                        <span style={{fontWeight: '600'}}>{selectedTrip.destination}</span>
                     </span>
                 </p>
-                <p><strong>Дата:</strong> {selectedTrip.date} в {selectedTrip.time}</p>
-                <p><strong>Рейс:</strong> {selectedTrip.airport}</p>
+                <p><strong>Дата:</strong> {new Date(selectedTrip.depart_at).toLocaleString('ru-RU')}</p>
+                {selectedTrip.flight_number && (
+                  <p><strong>Рейс:</strong> {selectedTrip.flight_number}</p>
+                )}
               </div>
 
-              {mockTripRequests.map(request => (
-                <div key={request.id} style={styles.packageCard}>
+              {tripOffers.length === 0 && (
+                <div style={{
+                  textAlign: 'center',
+                  color: 'var(--tg-theme-hint-color, #708499)',
+                  fontSize: 14,
+                  padding: 20
+                }}>
+                  Пока нет заявок на эту поездку
+                </div>
+              )}
+
+              {tripOffers.map(offer => (
+                <div key={offer.id} style={styles.packageCard}>
                   <div style={styles.packageHeader}>
                     <div style={styles.authorInfo}>
-                      <img src={request.authorAvatar} alt={request.authorName} style={styles.authorAvatar} />
-                      <div style={styles.authorName}>{request.authorName}</div>
+                      <img
+                        src={offer.user?.avatar_url || 'https://i.pravatar.cc/100'}
+                        alt={offer.user?.full_name || 'Пользователь'}
+                        style={styles.authorAvatar}
+                      />
+                      <div style={styles.authorName}>{offer.user?.full_name || 'Пользователь'}</div>
                     </div>
-                    <div style={styles.reward}>₽{request.reward}</div>
+                    <div style={styles.reward}>₽{offer.parcel?.reward || '—'}</div>
                   </div>
 
-                  <div style={styles.packageDescription}>
-                    📦 {request.packageDescription}
-                  </div>
+                  {offer.parcel && (
+                    <div style={styles.packageDescription}>
+                      📦 {offer.parcel.description}
+                    </div>
+                  )}
 
-                  <div style={{
-                    fontSize: '13px',
-                    color: 'var(--tg-theme-hint-color, #708499)',
-                    fontStyle: 'italic',
-                    marginBottom: '12px',
-                    lineHeight: '1.4',
-                    background: 'rgba(100, 181, 239, 0.1)',
-                    padding: '10px 12px',
-                    borderRadius: '8px',
-                    border: '1px solid rgba(100, 181, 239, 0.2)'
-                  }}>
-                    💬 {request.message}
-                  </div>
+                  {offer.message && (
+                    <div style={{
+                      fontSize: '13px',
+                      color: 'var(--tg-theme-hint-color, #708499)',
+                      fontStyle: 'italic',
+                      marginBottom: '12px',
+                      lineHeight: '1.4',
+                      background: 'rgba(100, 181, 239, 0.1)',
+                      padding: '10px 12px',
+                      borderRadius: '8px',
+                      border: '1px solid rgba(100, 181, 239, 0.2)'
+                    }}>
+                      💬 {offer.message}
+                    </div>
+                  )}
 
-                  {request.status === 'pending' ? (
+                  {offer.status === 'pending' ? (
                     <div style={{display: 'flex', gap: '8px'}}>
-                      <button 
+                      <button
                         style={{
                           flex: 1,
                           padding: '8px 12px',
@@ -722,11 +877,11 @@ const TripsSection = () => {
                           color: 'white',
                           border: 'none'
                         }}
-                        onClick={() => handleRequestAction(request.id, 'accept')}
+                        onClick={() => handleRequestAction(offer.id, 'accept')}
                       >
                         ✅ Принять
                       </button>
-                      <button 
+                      <button
                         style={{
                           flex: 1,
                           padding: '8px 12px',
@@ -738,12 +893,12 @@ const TripsSection = () => {
                           color: 'var(--tg-theme-hint-color, #708499)',
                           border: '1px solid rgba(255, 255, 255, 0.2)'
                         }}
-                        onClick={() => handleRequestAction(request.id, 'reject')}
+                        onClick={() => handleRequestAction(offer.id, 'reject')}
                       >
                         ❌ Отклонить
                       </button>
                     </div>
-                  ) : (
+                  ) : offer.status === 'accepted' ? (
                     <div style={{
                       background: '#4BB34B',
                       color: 'white',
@@ -754,6 +909,18 @@ const TripsSection = () => {
                       display: 'inline-block'
                     }}>
                       ✅ Принято
+                    </div>
+                  ) : (
+                    <div style={{
+                      background: '#888',
+                      color: 'white',
+                      padding: '4px 8px',
+                      borderRadius: '6px',
+                      fontSize: '12px',
+                      fontWeight: '500',
+                      display: 'inline-block'
+                    }}>
+                      ❌ Отклонено
                     </div>
                   )}
                 </div>
@@ -780,11 +947,11 @@ const TripsSection = () => {
             <div style={styles.modalContent}>
               <div style={{marginBottom: 16, fontSize: 14, color: 'var(--tg-theme-hint-color, #708499)'}}>
                 <p><strong>Посылка:</strong> {selectedPackage.description}</p>
-                <p><strong>Маршрут:</strong> 
+                <p><strong>Маршрут:</strong>
                     <span style={{marginLeft: '8px'}}>
-                        <span style={{fontWeight: '600'}}>{selectedPackage.from}</span>
+                        <span style={{fontWeight: '600'}}>{selectedPackage.origin}</span>
                         <span style={{color: 'var(--tg-theme-button-color, #5288c1)', margin: '0 6px', fontSize: '16px', fontWeight: '700'}}>→</span>
-                        <span style={{fontWeight: '600'}}>{selectedPackage.to}</span>
+                        <span style={{fontWeight: '600'}}>{selectedPackage.destination}</span>
                     </span>
                 </p>
                 <p><strong>Вознаграждение:</strong> ₽{selectedPackage.reward}</p>
