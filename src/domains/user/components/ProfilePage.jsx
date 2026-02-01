@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAppContext } from '../../../shared/context/AppContext.jsx';
-import apiService from '../../../services/api';
+import { supabaseApi } from '../../../services/supabaseApi';
 
 const ProfilePage = ({ 
     setShowProfilePage, 
@@ -22,8 +22,8 @@ const ProfilePage = ({
 
                 for (const trip of userTrips) {
                     try {
-                        const tripRequestsData = await apiService.getTripPackageRequests(trip.id);
-                        requests.push(...(tripRequestsData.requests || []));
+                        const tripRequestsData = await supabaseApi.getOffersForTrip(trip.id);
+                        requests.push(...(tripRequestsData.offers || []));
                     } catch (error) {
                         console.error(`Ошибка загрузки заявок для поездки ${trip.id}:`, error);
                     }

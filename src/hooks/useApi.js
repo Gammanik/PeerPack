@@ -1,23 +1,31 @@
 import { useState, useEffect } from 'react';
-import apiService from '../services/api';
+import { supabaseApi } from '../services/supabaseApi';
+import { useUser } from '../shared/context/UserContext';
 
 export const useUserData = () => {
+    const { user } = useUser();
     const [packages, setPackages] = useState([]);
     const [trips, setTrips] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     const loadUserData = async () => {
+        if (!user?.id) {
+            console.log('User not loaded yet, skipping data fetch');
+            setLoading(false);
+            return;
+        }
+
         try {
             setLoading(true);
             setError(null);
-            
+
             const [packagesResponse, tripsResponse] = await Promise.all([
-                apiService.getUserPackages(),
-                apiService.getUserTrips()
+                supabaseApi.getUserParcels(user.id),
+                supabaseApi.getUserTrips(user.id)
             ]);
-            
-            setPackages(packagesResponse.packages || []);
+
+            setPackages(packagesResponse.parcels || []);
             setTrips(tripsResponse.trips || []);
         } catch (err) {
             setError(err.message);
@@ -29,7 +37,7 @@ export const useUserData = () => {
 
     useEffect(() => {
         loadUserData();
-    }, []);
+    }, [user?.id]);
 
     const refreshUserData = () => loadUserData();
 
@@ -55,8 +63,8 @@ export const useTripRequests = (tripId) => {
         try {
             setLoading(true);
             setError(null);
-            const response = await apiService.getTripPackageRequests(tripId);
-            setRequests(response.requests || []);
+            const response = await supabaseApi.getOffersForTrip(tripId);
+            setRequests(response.offers || []);
         } catch (err) {
             setError(err.message);
             console.error('Error loading trip requests:', err);
@@ -69,11 +77,11 @@ export const useTripRequests = (tripId) => {
         loadRequests();
     }, [tripId]);
 
-    const acceptRequest = async (requestId) => {
+    const acceptRequest = async (offerId) => {
         try {
-            await apiService.acceptPackageRequest(requestId);
-            setRequests(prev => prev.map(req => 
-                req.id === requestId ? {...req, status: 'accepted'} : req
+            await supabaseApi.updateOfferStatus(offerId, 'accepted');
+            setRequests(prev => prev.map(req =>
+                req.id === offerId ? {...req, status: 'accepted'} : req
             ));
         } catch (err) {
             console.error('Error accepting request:', err);
@@ -81,12 +89,11 @@ export const useTripRequests = (tripId) => {
         }
     };
 
-    const markDelivered = async (requestId) => {
+    const markDelivered = async (deliveryId) => {
         try {
-            await apiService.markPackageDelivered(requestId);
-            setRequests(prev => prev.map(req => 
-                req.id === requestId ? {...req, status: 'delivered'} : req
-            ));
+            await supabaseApi.updateDeliveryStatus(deliveryId, 'delivered');
+            // Reload requests to reflect changes
+            await loadRequests();
         } catch (err) {
             console.error('Error marking delivered:', err);
             throw err;
@@ -113,9 +120,9 @@ export const useCourierSearch = () => {
         try {
             setLoading(true);
             setError(null);
-            const response = await apiService.getCouriers(searchParams);
-            setCouriers(response.couriers || []);
-            return response.couriers || [];
+            const response = await supabaseApi.getTrips(searchParams);
+            setCouriers(response.trips || []);
+            return response.trips || [];
         } catch (err) {
             setError(err.message);
             console.error('Ошибка поиска курьеров:', err);
@@ -135,9 +142,18 @@ export const useCourierSearch = () => {
 };
 
 export const usePackageActions = () => {
+    const { user } = useUser();
+
     const createPackage = async (packageData) => {
+        if (!user?.id) {
+            throw new Error('User not authenticated');
+        }
+
         try {
-            const response = await apiService.createPackage(packageData);
+            const response = await supabaseApi.createParcel({
+                ...packageData,
+                user_id: user.id
+            });
             return response;
         } catch (err) {
             console.error('Error creating package:', err);
@@ -146,8 +162,15 @@ export const usePackageActions = () => {
     };
 
     const createTrip = async (tripData) => {
+        if (!user?.id) {
+            throw new Error('User not authenticated');
+        }
+
         try {
-            const response = await apiService.createTrip(tripData);
+            const response = await supabaseApi.createTrip({
+                ...tripData,
+                user_id: user.id
+            });
             return response;
         } catch (err) {
             console.error('Error creating trip:', err);
@@ -155,9 +178,18 @@ export const usePackageActions = () => {
         }
     };
 
-    const sendPackageToCourier = async (courierId, packageData) => {
+    const sendPackageToCourier = async (tripId, parcelId, offerData) => {
+        if (!user?.id) {
+            throw new Error('User not authenticated');
+        }
+
         try {
-            const response = await apiService.sendPackageToCourier(courierId, packageData);
+            const response = await supabaseApi.createOffer({
+                trip_id: tripId,
+                parcel_id: parcelId,
+                user_id: user.id,
+                ...offerData
+            });
             return response;
         } catch (err) {
             console.error('Error sending package to courier:', err);

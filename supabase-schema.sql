@@ -294,16 +294,78 @@ INSERT INTO users (telegram_id, telegram_username, full_name, avatar_url, rating
 VALUES
     (123456789, 'nikita_user', 'Никита Иванов', 'https://i.pravatar.cc/100?img=50', 5.0),
     (987654321, 'ivan_courier', 'Иван Петров', 'https://i.pravatar.cc/100?img=12', 4.9),
-    (555555555, 'elena_travel', 'Елена Смирнова', 'https://i.pravatar.cc/100?img=44', 4.8);
+    (555555555, 'elena_travel', 'Елена Смирнова', 'https://i.pravatar.cc/100?img=44', 4.8),
+    (111222333, 'maxim_student', 'Максим Соколов', 'https://i.pravatar.cc/100?img=68', 4.6),
+    (444555666, 'anastasia_premium', 'Анастасия Волкова', 'https://i.pravatar.cc/100?img=31', 5.0),
+    (777888999, 'dmitry_early', 'Дмитрий Орлов', 'https://i.pravatar.cc/100?img=17', 4.7),
+    (222333444, 'anna_petrova', 'Анна Петрова', 'https://i.pravatar.cc/100?img=25', 4.9),
+    (333444555, 'igor_smirnov', 'Игорь Смирнов', 'https://i.pravatar.cc/100?img=15', 4.8),
+    (666777888, 'maria_kozlova', 'Мария Козлова', 'https://i.pravatar.cc/100?img=32', 5.0),
+    (888999000, 'petr_ivanov', 'Петр Иванов', 'https://i.pravatar.cc/100?img=18', 4.7),
+    (999000111, 'elena_volkova', 'Елена Волкова', 'https://i.pravatar.cc/100?img=41', 4.9),
+    (100200300, 'oleg_courier', 'Олег Смирнов', 'https://i.pravatar.cc/100?img=22', 4.8);
 
 -- Insert test trips
-INSERT INTO trips (user_id, origin, destination, depart_at, capacity_kg, price_per_kg, description)
+INSERT INTO trips (user_id, origin, destination, depart_at, capacity_kg, price_per_kg, description, status)
 VALUES
-    (2, 'Москва, Россия', 'Дубай, ОАЭ', NOW() + INTERVAL '5 days', 10, 50.00, 'Лечу по работе, могу взять посылки'),
-    (3, 'Санкт-Петербург, Россия', 'Стамбул, Турция', NOW() + INTERVAL '3 days', 5, 45.00, 'Есть место для документов');
+    (2, 'Москва, Россия', 'Санкт-Петербург, Россия', NOW() + INTERVAL '3 hours', 5, 160.00, 'Лечу по работе, могу взять документы или небольшие посылки', 'active'),
+    (3, 'Москва, Россия', 'Санкт-Петербург, Россия', NOW() + INTERVAL '5 hours', 3, 400.00, 'Утренний рейс, удобно для срочных доставок. Место только для документов', 'active'),
+    (4, 'Москва, Россия', 'Санкт-Петербург, Россия', NOW() + INTERVAL '8 hours', 5, 120.00, 'Студент, летаю часто к родителям. Недорого, но надежно!', 'active'),
+    (5, 'Москва, Россия', 'Санкт-Петербург, Россия', NOW() + INTERVAL '12 hours', 10, 150.00, 'Премиум доставка. Фото отчеты, трекинг, страховка включена', 'active'),
+    (6, 'Москва, Россия', 'Санкт-Петербург, Россия', NOW() + INTERVAL '1 day', 2, 450.00, 'Самый ранний рейс. Беру только легкие посылки до 2кг', 'active'),
+    (1, 'Москва, Россия', 'Казань, Россия', NOW() + INTERVAL '2 days', 7, 128.57, 'Командировка, есть место для документов и небольших посылок', 'active'),
+    (12, 'Санкт-Петербург, Россия', 'Казань, Россия', NOW() - INTERVAL '2 days', 8, 75.00, 'Обратный рейс после командировки', 'completed'),
+    (2, 'Москва, Россия', 'Дубай, ОАЭ', NOW() + INTERVAL '5 days', 10, 50.00, 'Лечу по работе, могу взять посылки', 'active'),
+    (3, 'Санкт-Петербург, Россия', 'Стамбул, Турция', NOW() + INTERVAL '7 days', 5, 45.00, 'Есть место для документов', 'active');
 
 -- Insert test parcels
-INSERT INTO parcels (user_id, title, origin, destination, weight_kg, reward, description, pickup_address, delivery_address)
+INSERT INTO parcels (user_id, title, origin, destination, weight_kg, reward, pickup_address, delivery_address, description, status)
 VALUES
-    (1, 'Документы для визы', 'Москва, Россия', 'Дубай, ОАЭ', 0.5, 1500.00, 'Срочные документы для получения визы', 'ул. Тверская, 1', 'Dubai Mall'),
-    (1, 'Подарок другу', 'Москва, Россия', 'Стамбул, Турция', 2.0, 800.00, 'Небольшой подарок на день рождения', 'Красная площадь', 'Sultanahmet');
+    -- Open parcels
+    (1, 'Документы в папке', 'Москва, Россия', 'Санкт-Петербург, Россия', 0.5, 800.00, 'Шереметьево, терминал D', 'Пулково, зал прилета', 'Срочно нужно передать документы в офис', 'open'),
+    (7, 'Маленькая коробка с сувенирами', 'Москва, Россия', 'Казань, Россия', 1.5, 600.00, 'Красная площадь, у ГУМа', 'Казанский Кремль, касса', 'Привезти сувениры из командировки', 'open'),
+    (9, 'Лекарства', 'Москва, Россия', 'Казань, Россия', 0.8, 1000.00, 'Аптека на Тверской, 15', 'Больница №7, регистратура', 'Очень важные лекарства для бабушки', 'open'),
+    (11, 'Подарок - часы Apple Watch', 'Москва, Россия', 'Казань, Россия', 0.3, 1200.00, 'Apple Store на Тверской', 'Казанский вокзал, встреча у часов', 'День рождения у друга, очень важно доставить вовремя!', 'open'),
+
+    -- Assigned parcels
+    (10, 'Флешка с данными', 'Москва, Россия', 'Казань, Россия', 0.05, 500.00, 'Офис на Садовом кольце', 'БЦ Сенатор, офис 305', 'Важные рабочие файлы', 'assigned'),
+    (8, 'Контракты и печать компании', 'Москва, Россия', 'Казань, Россия', 0.7, 1500.00, 'БЦ Москва-Сити, башня Федерация', 'Аэропорт Казань, зона вылета', 'Срочные документы для подписания сделки', 'assigned'),
+
+    -- Delivered parcels
+    (7, 'Медикаменты для клиники', 'Москва, Россия', 'Казань, Россия', 2.0, 1000.00, 'Аптека 36.6 на Тверской', 'Больница №7, регистратура', 'Медикаменты для клиники', 'delivered'),
+    (1, 'Книги и учебники', 'Санкт-Петербург, Россия', 'Казань, Россия', 3.5, 600.00, 'Дом книги на Невском', 'КФУ, библиотека', 'Учебники для университета', 'delivered'),
+
+    -- International parcels
+    (1, 'Документы для визы', 'Москва, Россия', 'Дубай, ОАЭ', 0.5, 1500.00, 'ул. Тверская, 1', 'Dubai Mall', 'Срочные документы для получения визы', 'open'),
+    (1, 'Подарок другу', 'Санкт-Петербург, Россия', 'Стамбул, Турция', 2.0, 800.00, 'Красная площадь', 'Sultanahmet', 'Небольшой подарок на день рождения', 'open');
+
+-- Insert test offers
+INSERT INTO offers (trip_id, parcel_id, user_id, type, price, message, status, created_at)
+VALUES
+    -- Pending offers (посылки откликаются на поездки)
+    (6, 1, 1, 'parcel_to_trip', 800.00, 'Добрый день! Нужно срочно доставить документы', 'pending', NOW() - INTERVAL '1 day'),
+    (6, 4, 11, 'parcel_to_trip', 1200.00, 'День рождения у друга, очень важно доставить вовремя!', 'pending', NOW() - INTERVAL '5 hours'),
+
+    -- Accepted offers (поездки откликаются на посылки)
+    (6, 2, 1, 'trip_to_parcel', 600.00, 'Могу взять вашу посылку, летаю регулярно', 'accepted', NOW() - INTERVAL '2 days'),
+    (6, 5, 1, 'trip_to_parcel', 500.00, 'Легкая посылка, без проблем доставлю', 'accepted', NOW() - INTERVAL '3 days'),
+    (3, 1, 3, 'trip_to_parcel', 800.00, 'Утренний рейс, быстрая доставка гарантирована', 'accepted', NOW() - INTERVAL '2 hours'),
+
+    -- Rejected offers
+    (5, 3, 4, 'trip_to_parcel', 1000.00, 'Могу взять лекарства', 'rejected', NOW() - INTERVAL '1 day'),
+
+    -- Completed offers (для delivered посылок)
+    (7, 8, 12, 'trip_to_parcel', 600.00, 'Еду в Казань, могу доставить книги', 'accepted', NOW() - INTERVAL '5 days'),
+    (7, 7, 12, 'trip_to_parcel', 1000.00, 'Аккуратно доставлю медикаменты', 'accepted', NOW() - INTERVAL '4 days');
+
+-- Insert test deliveries
+INSERT INTO deliveries (parcel_id, trip_id, carrier_user_id, status, pickup_time, delivery_time, created_at)
+VALUES
+    -- In transit deliveries
+    (5, 6, 1, 'in_transit', NOW() - INTERVAL '2 hours', NULL, NOW() - INTERVAL '3 days'),
+    (2, 6, 1, 'assigned', NULL, NULL, NOW() - INTERVAL '2 days'),
+    (6, 6, 1, 'assigned', NULL, NULL, NOW() - INTERVAL '1 day'),
+
+    -- Delivered
+    (8, 7, 12, 'delivered', NOW() - INTERVAL '3 days', NOW() - INTERVAL '2 days', NOW() - INTERVAL '5 days'),
+    (7, 7, 12, 'delivered', NOW() - INTERVAL '4 days', NOW() - INTERVAL '3 days', NOW() - INTERVAL '4 days');
