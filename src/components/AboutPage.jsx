@@ -1,14 +1,14 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useAnimatedStats } from '../hooks/useAnimatedStats.js';
 
 const AboutPage = ({ onNavigate }) => {
-  const targetStats = {
+  const targetStats = useMemo(() => ({
     users: 2847,
     deliveries: 12459,
     rating: 4.9,
     success: 98
-  };
-  
+  }), []);
+
   const animatedStats = useAnimatedStats(targetStats);
   const styles = {
     container: {
@@ -66,7 +66,9 @@ const AboutPage = ({ onNavigate }) => {
       background: 'linear-gradient(135deg, var(--tg-theme-accent-text-color, #64b5ef), var(--tg-theme-button-color, #5288c1))',
       WebkitBackgroundClip: 'text',
       WebkitTextFillColor: 'transparent',
-      marginBottom: '4px'
+      backgroundClip: 'text',
+      marginBottom: '4px',
+      minHeight: '29px'
     },
     statLabel: {
       fontSize: '12px',
@@ -126,19 +128,27 @@ const AboutPage = ({ onNavigate }) => {
 
       <div style={styles.stats}>
         <div style={styles.statCard}>
-          <div style={styles.statNumber}>{animatedStats.users?.toLocaleString() || '0'}</div>
+          <div style={styles.statNumber}>
+            {animatedStats.users != null ? animatedStats.users.toLocaleString() : ''}
+          </div>
           <div style={styles.statLabel}>Пользователей</div>
         </div>
         <div style={styles.statCard}>
-          <div style={styles.statNumber}>{animatedStats.deliveries?.toLocaleString() || '0'}</div>
+          <div style={styles.statNumber}>
+            {animatedStats.deliveries != null ? animatedStats.deliveries.toLocaleString() : ''}
+          </div>
           <div style={styles.statLabel}>Доставок</div>
         </div>
         <div style={styles.statCard}>
-          <div style={styles.statNumber}>{animatedStats.rating || '0'}</div>
+          <div style={styles.statNumber}>
+            {animatedStats.rating != null ? animatedStats.rating : ''}
+          </div>
           <div style={styles.statLabel}>Рейтинг</div>
         </div>
         <div style={styles.statCard}>
-          <div style={styles.statNumber}>{animatedStats.success || '0'}%</div>
+          <div style={styles.statNumber}>
+            {animatedStats.success != null ? `${animatedStats.success}%` : ''}
+          </div>
           <div style={styles.statLabel}>Успешность</div>
         </div>
       </div>

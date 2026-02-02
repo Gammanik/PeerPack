@@ -53,9 +53,7 @@ const ProfileScreen = () => {
     userName: {
       fontSize: '24px',
       fontWeight: '700',
-      background: 'linear-gradient(135deg, var(--tg-theme-text-color, #ffffff), var(--tg-theme-accent-text-color, #64b5ef))',
-      WebkitBackgroundClip: 'text',
-      WebkitTextFillColor: 'transparent',
+      color: 'var(--tg-theme-text-color, #ffffff)',
       cursor: 'pointer',
       padding: '8px 16px',
       borderRadius: '12px',
@@ -133,16 +131,14 @@ const ProfileScreen = () => {
             alt="Никита"
             style={styles.avatar}
           />
-          <div 
+          <div
             style={styles.userName}
             onClick={() => setShowStats(!showStats)}
             onMouseEnter={(e) => {
               e.target.style.background = 'rgba(100, 181, 239, 0.1)';
-              e.target.style.WebkitTextFillColor = 'var(--tg-theme-text-color, #ffffff)';
             }}
             onMouseLeave={(e) => {
               e.target.style.background = 'transparent';
-              e.target.style.WebkitTextFillColor = 'transparent';
             }}
           >
             Никита 
