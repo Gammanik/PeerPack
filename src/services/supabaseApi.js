@@ -469,7 +469,36 @@ class SupabaseApiService {
             return { review: null, error };
         }
 
+        // Обновляем рейтинг пользователя
+        await this.updateUserRating(reviewData.reviewed_user_id);
+
         return { success: true, review_id: data.id, review: data };
+    }
+
+    async updateUserRating(userId) {
+        this.checkSupabase();
+
+        // Получаем все отзывы пользователя
+        const { data: reviews, error } = await supabase
+            .from('reviews')
+            .select('rating')
+            .eq('reviewed_user_id', userId);
+
+        if (error || !reviews || reviews.length === 0) {
+            return;
+        }
+
+        // Вычисляем средний рейтинг
+        const avgRating = reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
+
+        // Обновляем пользователя
+        await supabase
+            .from('users')
+            .update({
+                rating: avgRating,
+                reviews_count: reviews.length
+            })
+            .eq('id', userId);
     }
 
     async canUserReviewDelivery(userId, deliveryId) {
@@ -798,6 +827,166 @@ class SupabaseApiService {
             };
         } catch (error) {
             console.error('Error creating demo trip:', error);
+            return { success: false, error: error.message };
+        }
+    }
+
+    /**
+     * Создание демо-отзывов для пользователя
+     * Создает несколько завершенных доставок с отзывами
+     */
+    async createDemoReviews(userId) {
+        this.checkSupabase();
+
+        try {
+            console.log(`🎬 Creating demo reviews for user ${userId}`);
+
+            // Проверяем, есть ли уже отзывы у пользователя
+            const { reviews: existingReviews } = await this.getReviewsForUser(userId);
+            if (existingReviews && existingReviews.length > 0) {
+                console.log('✅ User already has reviews, skipping');
+                return { success: true, skipped: true };
+            }
+
+            // Получаем других пользователей для создания отзывов
+            const { data: otherUsers } = await supabase
+                .from('users')
+                .select('id, full_name')
+                .neq('id', userId)
+                .limit(5);
+
+            if (!otherUsers || otherUsers.length < 2) {
+                console.warn('⚠️ Not enough users to create demo reviews');
+                return { success: false, error: 'Not enough users' };
+            }
+
+            // Создаем несколько завершенных доставок
+            const demoReviewsData = [
+                {
+                    rating: 5,
+                    comment: 'Отличный курьер! Все доставил быстро и аккуратно. Посылка пришла в отличном состоянии. Рекомендую!',
+                    reviewerName: otherUsers[0].full_name
+                },
+                {
+                    rating: 5,
+                    comment: 'Супер! Очень ответственный человек, все прошло гладко. Буду обращаться еще раз.',
+                    reviewerName: otherUsers[1].full_name
+                },
+                {
+                    rating: 4,
+                    comment: 'Все хорошо, доставил вовремя. Небольшая задержка на получении, но в целом доволен.',
+                    reviewerName: otherUsers[2]?.full_name || otherUsers[0].full_name
+                },
+                {
+                    rating: 5,
+                    comment: 'Профессионал! Связывался на каждом этапе, все четко и в срок. Спасибо большое!',
+                    reviewerName: otherUsers[3]?.full_name || otherUsers[1].full_name
+                },
+                {
+                    rating: 5,
+                    comment: 'Очень доволен! Быстро, аккуратно, вежливо. Посылка пришла даже раньше срока.',
+                    reviewerName: otherUsers[4]?.full_name || otherUsers[0].full_name
+                },
+                {
+                    rating: 4,
+                    comment: 'Хорошая работа, все получил в целости и сохранности. Рекомендую этого курьера.',
+                    reviewerName: otherUsers[1].full_name
+                },
+                {
+                    rating: 5,
+                    comment: 'Надежный человек, можно доверить любую посылку. Всегда на связи, отвечает быстро.',
+                    reviewerName: otherUsers[0].full_name
+                },
+                {
+                    rating: 5,
+                    comment: 'Замечательный опыт! Курьер очень вежливый и пунктуальный. Буду обращаться снова!',
+                    reviewerName: otherUsers[2]?.full_name || otherUsers[1].full_name
+                }
+            ];
+
+            let reviewsCreated = 0;
+
+            for (let i = 0; i < Math.min(demoReviewsData.length, otherUsers.length); i++) {
+                const reviewData = demoReviewsData[i];
+                const reviewer = otherUsers[i % otherUsers.length];
+
+                // Создаем завершенную доставку
+                const now = new Date();
+                const pastDate = new Date(now.getTime() - (30 + i * 5) * 24 * 60 * 60 * 1000);
+
+                // Создаем посылку от reviewer
+                const { parcel } = await this.createParcel({
+                    user_id: reviewer.id,
+                    title: `Посылка #${i + 1}`,
+                    origin: 'Москва, Россия',
+                    destination: 'Санкт-Петербург, Россия',
+                    weight_kg: 1.0,
+                    reward: 500.00,
+                    pickup_address: 'Центр',
+                    delivery_address: 'Центр',
+                    description: 'Доставленная посылка',
+                    status: 'delivered'
+                });
+
+                if (!parcel) continue;
+
+                // Создаем поездку пользователя
+                const { trip } = await this.createTrip({
+                    user_id: userId,
+                    origin: 'Москва, Россия',
+                    destination: 'Санкт-Петербург, Россия',
+                    depart_at: pastDate.toISOString(),
+                    capacity_kg: 5,
+                    price: 800.00,
+                    comment: 'Завершенная поездка',
+                    status: 'completed'
+                });
+
+                if (!trip) continue;
+
+                // Создаем завершенную доставку
+                const { data: delivery, error: deliveryError } = await supabase
+                    .from('deliveries')
+                    .insert({
+                        parcel_id: parcel.id,
+                        trip_id: trip.id,
+                        carrier_user_id: userId,
+                        status: 'delivered',
+                        pickup_time: pastDate.toISOString(),
+                        delivery_time: new Date(pastDate.getTime() + 24 * 60 * 60 * 1000).toISOString()
+                    })
+                    .select()
+                    .single();
+
+                if (deliveryError || !delivery) {
+                    console.error('Error creating delivery:', deliveryError);
+                    continue;
+                }
+
+                // Создаем отзыв от reviewer к userId
+                const { success } = await this.createReview({
+                    delivery_id: delivery.id,
+                    reviewer_user_id: reviewer.id,
+                    reviewed_user_id: userId,
+                    rating: reviewData.rating,
+                    comment: reviewData.comment
+                });
+
+                if (success) {
+                    reviewsCreated++;
+                    console.log(`✅ Created demo review ${reviewsCreated} from ${reviewer.full_name}`);
+                }
+            }
+
+            console.log(`🎉 Created ${reviewsCreated} demo reviews for user ${userId}`);
+
+            return {
+                success: true,
+                reviewsCreated
+            };
+
+        } catch (error) {
+            console.error('Error creating demo reviews:', error);
             return { success: false, error: error.message };
         }
     }

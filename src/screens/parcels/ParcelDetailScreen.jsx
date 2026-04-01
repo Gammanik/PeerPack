@@ -163,7 +163,9 @@ const ParcelDetailScreen = ({ parcelId, onBack, onNavigate }) => {
       width: '40px',
       height: '40px',
       borderRadius: '50%',
-      objectFit: 'cover'
+      objectFit: 'cover',
+      cursor: 'pointer',
+      transition: 'all 0.2s ease'
     },
     courierName: {
       fontSize: '15px',
@@ -374,6 +376,21 @@ const ParcelDetailScreen = ({ parcelId, onBack, onNavigate }) => {
                         src={courier?.avatar_url || 'https://i.pravatar.cc/100'}
                         alt={courier?.full_name || 'Курьер'}
                         style={styles.courierAvatar}
+                        onClick={() => onNavigate && onNavigate('reviews', {
+                          userId: courier?.id,
+                          userName: courier?.full_name,
+                          userAvatar: courier?.avatar_url,
+                          userRating: courier?.rating,
+                          reviewsCount: courier?.reviews_count || 0
+                        })}
+                        onMouseEnter={(e) => {
+                          e.target.style.transform = 'scale(1.1)';
+                          e.target.style.boxShadow = '0 4px 12px rgba(82, 136, 193, 0.4)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.target.style.transform = 'scale(1)';
+                          e.target.style.boxShadow = 'none';
+                        }}
                       />
                       <div>
                         <div style={styles.courierName}>

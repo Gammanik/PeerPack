@@ -39,7 +39,8 @@ export const UserProvider = ({ children }) => {
           telegram_username: 'nikita_user',
           full_name: 'Никита Иванов',
           avatar_url: 'https://i.pravatar.cc/100?img=50',
-          rating: 5.0
+          rating: 4.8,
+          reviews_count: 8
         };
         setUser(mockUser);
       }

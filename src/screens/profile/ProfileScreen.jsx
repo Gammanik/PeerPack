@@ -1,96 +1,203 @@
 import React, { useState, useEffect } from 'react';
+import { useUser } from '../../shared/context/UserContext.jsx';
+import { supabaseApi } from '../../services/supabaseApi.js';
+import UserRating from '../../components/UserRating.jsx';
 
-const ProfileScreen = () => {
-  const [showStats, setShowStats] = useState(false);
+const ProfileScreen = ({ onNavigate }) => {
+  const { user } = useUser();
+  const [activeDeliveries, setActiveDeliveries] = useState([]);
+  const [stats, setStats] = useState({
+    trips: 0,
+    parcels: 0,
+    completedDeliveries: 0
+  });
+  const [loading, setLoading] = useState(true);
 
-  // Add CSS animation for slideIn effect
   useEffect(() => {
-    const style = document.createElement('style');
-    style.textContent = `
-      @keyframes slideIn {
-        from { 
-          opacity: 0; 
-          transform: translateY(-10px); 
-          maxHeight: 0;
-        }
-        to { 
-          opacity: 1; 
-          transform: translateY(0); 
-          maxHeight: 200px;
-        }
-      }
-    `;
-    document.head.appendChild(style);
-    return () => document.head.removeChild(style);
-  }, []);
+    if (user?.id) {
+      loadProfileData();
+    }
+  }, [user?.id]);
+
+  const loadProfileData = async () => {
+    try {
+      setLoading(true);
+
+      // Загружаем активные доставки
+      const { deliveries } = await supabaseApi.getActiveDeliveriesForUser(user.id);
+      setActiveDeliveries(deliveries || []);
+
+      // Загружаем статистику
+      const { trips } = await supabaseApi.getUserTrips(user.id);
+      const { parcels } = await supabaseApi.getUserParcels(user.id);
+
+      setStats({
+        trips: trips?.length || 0,
+        parcels: parcels?.length || 0,
+        completedDeliveries: trips?.filter(t => t.status === 'completed').length || 0
+      });
+    } catch (err) {
+      console.error('Error loading profile data:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const styles = {
     container: {
       background: 'linear-gradient(135deg, var(--tg-theme-bg-color, #17212b) 0%, rgba(23, 33, 43, 0.95) 100%)',
       minHeight: '100vh',
-      padding: '16px'
+      paddingBottom: '80px'
     },
     header: {
-      textAlign: 'center',
-      marginBottom: '16px',
-      padding: '20px 0'
+      background: 'linear-gradient(180deg, rgba(82, 136, 193, 0.15) 0%, transparent 100%)',
+      padding: '32px 20px 24px',
+      borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
     },
-    userInfo: {
+    userCard: {
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
+      gap: '16px'
+    },
+    avatarContainer: {
+      position: 'relative'
+    },
+    avatar: {
+      width: '100px',
+      height: '100px',
+      borderRadius: '50%',
+      objectFit: 'cover',
+      border: '4px solid var(--tg-theme-button-color, #5288c1)',
+      boxShadow: '0 12px 40px rgba(82, 136, 193, 0.4)',
+      cursor: 'pointer',
+      transition: 'all 0.3s ease'
+    },
+    verifiedBadge: {
+      position: 'absolute',
+      bottom: '5px',
+      right: '5px',
+      background: 'linear-gradient(135deg, #4BB34B, #45a049)',
+      borderRadius: '50%',
+      width: '28px',
+      height: '28px',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      fontSize: '16px',
+      border: '3px solid var(--tg-theme-bg-color, #17212b)',
+      boxShadow: '0 4px 12px rgba(75, 179, 75, 0.4)'
+    },
+    userName: {
+      fontSize: '26px',
+      fontWeight: '800',
+      color: 'var(--tg-theme-text-color, #ffffff)',
+      textAlign: 'center',
+      marginBottom: '4px'
+    },
+    userHandle: {
+      fontSize: '14px',
+      color: 'var(--tg-theme-hint-color, #708499)',
+      textAlign: 'center',
+      marginBottom: '12px'
+    },
+    ratingContainer: {
+      display: 'flex',
+      justifyContent: 'center',
+      marginBottom: '8px'
+    },
+    content: {
+      padding: '20px'
+    },
+    sectionTitle: {
+      fontSize: '18px',
+      fontWeight: '700',
+      color: 'var(--tg-theme-text-color, #ffffff)',
+      marginBottom: '12px',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '8px'
+    },
+    statsGrid: {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(3, 1fr)',
       gap: '12px',
       marginBottom: '24px'
     },
-    avatar: {
-      width: '80px',
-      height: '80px',
-      borderRadius: '50%',
-      objectFit: 'cover',
-      border: '3px solid var(--tg-theme-button-color, #5288c1)',
-      boxShadow: '0 8px 24px rgba(82, 136, 193, 0.3)'
-    },
-    userName: {
-      fontSize: '24px',
-      fontWeight: '700',
-      color: 'var(--tg-theme-text-color, #ffffff)',
-      cursor: 'pointer',
-      padding: '8px 16px',
-      borderRadius: '12px',
+    statCard: {
+      background: 'var(--tg-theme-secondary-bg-color, #232e3c)',
+      borderRadius: '16px',
+      padding: '16px 12px',
+      textAlign: 'center',
+      border: '1px solid rgba(255, 255, 255, 0.1)',
       transition: 'all 0.2s ease',
-      position: 'relative'
+      cursor: 'pointer'
     },
-    userStats: {
-      display: 'flex',
-      gap: '24px',
-      justifyContent: 'center',
-      marginBottom: '16px'
-    },
-    userStatsExtended: {
-      display: 'flex',
-      gap: '16px',
-      justifyContent: 'center',
-      flexWrap: 'wrap'
-    },
-    statItem: {
-      textAlign: 'center'
-    },
-    statNumber: {
-      fontSize: '20px',
-      fontWeight: '700',
-      color: 'var(--tg-theme-accent-text-color, #64b5ef)',
+    statIcon: {
+      fontSize: '28px',
+      marginBottom: '8px',
       display: 'block'
     },
+    statNumber: {
+      fontSize: '24px',
+      fontWeight: '800',
+      background: 'linear-gradient(135deg, var(--tg-theme-accent-text-color, #64b5ef), var(--tg-theme-button-color, #5288c1))',
+      WebkitBackgroundClip: 'text',
+      WebkitTextFillColor: 'transparent',
+      marginBottom: '4px'
+    },
     statLabel: {
-      fontSize: '12px',
+      fontSize: '11px',
       color: 'var(--tg-theme-hint-color, #708499)',
-      marginTop: '4px'
+      fontWeight: '600',
+      textTransform: 'uppercase',
+      letterSpacing: '0.5px'
+    },
+    deliveryCard: {
+      background: 'var(--tg-theme-secondary-bg-color, #232e3c)',
+      borderRadius: '16px',
+      padding: '16px',
+      marginBottom: '12px',
+      border: '1px solid rgba(255, 255, 255, 0.1)',
+      cursor: 'pointer',
+      transition: 'all 0.2s ease'
+    },
+    deliveryHeader: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: '12px'
+    },
+    deliveryTitle: {
+      fontSize: '15px',
+      fontWeight: '600',
+      color: 'var(--tg-theme-text-color, #ffffff)'
+    },
+    statusBadge: {
+      padding: '4px 10px',
+      borderRadius: '12px',
+      fontSize: '11px',
+      fontWeight: '600',
+      textTransform: 'uppercase'
+    },
+    deliveryRoute: {
+      fontSize: '14px',
+      color: 'var(--tg-theme-text-color, #ffffff)',
+      marginBottom: '8px',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '6px'
+    },
+    deliveryInfo: {
+      fontSize: '13px',
+      color: 'var(--tg-theme-hint-color, #708499)'
     },
     menuSection: {
       background: 'var(--tg-theme-secondary-bg-color, #232e3c)',
       borderRadius: '16px',
       overflow: 'hidden',
-      border: '1px solid rgba(255, 255, 255, 0.1)'
+      border: '1px solid rgba(255, 255, 255, 0.1)',
+      marginBottom: '16px'
     },
     menuItem: {
       display: 'flex',
@@ -108,106 +215,245 @@ const ProfileScreen = () => {
       gap: '12px'
     },
     menuIcon: {
-      fontSize: '20px'
+      fontSize: '22px',
+      width: '28px',
+      textAlign: 'center'
     },
     menuLabel: {
       fontSize: '16px',
       color: 'var(--tg-theme-text-color, #ffffff)',
       fontWeight: '500'
     },
+    menuBadge: {
+      background: '#FF3B30',
+      color: 'white',
+      fontSize: '11px',
+      fontWeight: '600',
+      padding: '2px 8px',
+      borderRadius: '10px',
+      marginLeft: '8px'
+    },
     menuArrow: {
       fontSize: '24px',
       color: 'var(--tg-theme-hint-color, #708499)',
       fontWeight: '300'
+    },
+    emptyState: {
+      textAlign: 'center',
+      padding: '40px 20px',
+      color: 'var(--tg-theme-hint-color, #708499)'
     }
   };
 
   return (
     <div style={styles.container}>
+      {/* Шапка профиля */}
       <div style={styles.header}>
-        <div style={styles.userInfo}>
-          <img 
-            src="https://i.pravatar.cc/100?img=50"
-            alt="Никита"
-            style={styles.avatar}
-          />
-          <div
-            style={styles.userName}
-            onClick={() => setShowStats(!showStats)}
-            onMouseEnter={(e) => {
-              e.target.style.background = 'rgba(100, 181, 239, 0.1)';
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.background = 'transparent';
-            }}
-          >
-            Никита 
-            <span style={{
-              fontSize: '14px',
-              color: 'var(--tg-theme-hint-color, #708499)',
-              marginLeft: '8px',
-              transform: showStats ? 'rotate(180deg)' : 'rotate(0deg)',
-              transition: 'transform 0.2s ease',
-              display: 'inline-block'
-            }}>▼</span>
+        <div style={styles.userCard}>
+          <div style={styles.avatarContainer}>
+            <img
+              src={user?.avatar_url || "https://i.pravatar.cc/100?img=50"}
+              alt={user?.full_name || "Пользователь"}
+              style={styles.avatar}
+              onClick={() => onNavigate && onNavigate('reviews', {
+                userId: user?.id,
+                userName: user?.full_name,
+                userAvatar: user?.avatar_url,
+                userRating: user?.rating,
+                reviewsCount: user?.reviews_count || 0
+              })}
+              onMouseEnter={(e) => {
+                e.target.style.transform = 'scale(1.05)';
+                e.target.style.boxShadow = '0 16px 48px rgba(82, 136, 193, 0.6)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.transform = 'scale(1)';
+                e.target.style.boxShadow = '0 12px 40px rgba(82, 136, 193, 0.4)';
+              }}
+            />
+            <div style={styles.verifiedBadge}>✓</div>
           </div>
-          {showStats && (
-            <div style={{
-              animation: 'slideIn 0.3s ease-out',
-              overflow: 'hidden'
-            }}>
-              <div style={styles.userStats}>
-                <div style={styles.statItem}>
-                  <span style={styles.statNumber}>12</span>
-                  <div style={styles.statLabel}>ПОЕЗДОК</div>
-                </div>
-                <div style={styles.statItem}>
-                  <span style={styles.statNumber}>4.8</span>
-                  <div style={styles.statLabel}>РЕЙТИНГ</div>
-                </div>
-                <div style={styles.statItem}>
-                  <span style={styles.statNumber}>47</span>
-                  <div style={styles.statLabel}>ОТЗЫВОВ</div>
-                </div>
-              </div>
-              <div style={styles.userStatsExtended}>
-                <div style={styles.statItem}>
-                  <span style={styles.statNumber}>24</span>
-                  <div style={styles.statLabel}>ПОСЫЛОК</div>
-                </div>
-                <div style={styles.statItem}>
-                  <span style={styles.statNumber}>98%</span>
-                  <div style={styles.statLabel}>УСПЕШНОСТЬ</div>
-                </div>
-                <div style={styles.statItem}>
-                  <span style={styles.statNumber}>₽15k</span>
-                  <div style={styles.statLabel}>ЗАРАБОТАНО</div>
-                </div>
-                <div style={styles.statItem}>
-                  <span style={styles.statNumber}>3.2</span>
-                  <div style={styles.statLabel}>ГОДА С НАМИ</div>
-                </div>
-              </div>
+
+          <div>
+            <div style={styles.userName}>
+              {user?.full_name || "Пользователь"}
             </div>
-          )}
+            {user?.telegram_username && (
+              <div style={styles.userHandle}>
+                @{user.telegram_username}
+              </div>
+            )}
+            <div style={styles.ratingContainer}>
+              <UserRating
+                rating={user?.rating}
+                reviewsCount={user?.reviews_count || 0}
+                size="large"
+              />
+            </div>
+          </div>
         </div>
       </div>
 
-      <div style={styles.menuSection}>
-        <div style={styles.menuItem} onClick={() => alert('Отзывы и рейтинг')}>
-          <div style={styles.menuItemContent}>
-            <span style={styles.menuIcon}>⭐</span>
-            <span style={styles.menuLabel}>Отзывы и рейтинг</span>
+      {/* Контент */}
+      <div style={styles.content}>
+        {/* Статистика */}
+        <h3 style={styles.sectionTitle}>
+          <span>📊</span>
+          <span>Статистика</span>
+        </h3>
+        <div style={styles.statsGrid}>
+          <div style={styles.statCard}>
+            <span style={styles.statIcon}>✈️</span>
+            <div style={styles.statNumber}>{stats.trips}</div>
+            <div style={styles.statLabel}>Поездок</div>
           </div>
-          <span style={styles.menuArrow}>›</span>
+          <div style={styles.statCard}>
+            <span style={styles.statIcon}>📦</span>
+            <div style={styles.statNumber}>{stats.parcels}</div>
+            <div style={styles.statLabel}>Посылок</div>
+          </div>
+          <div style={styles.statCard}>
+            <span style={styles.statIcon}>✅</span>
+            <div style={styles.statNumber}>{stats.completedDeliveries}</div>
+            <div style={styles.statLabel}>Завершено</div>
+          </div>
         </div>
 
-        <div style={styles.menuItem} onClick={() => alert('Настройки уведомлений')}>
-          <div style={styles.menuItemContent}>
-            <span style={styles.menuIcon}>🔔</span>
-            <span style={styles.menuLabel}>Уведомления</span>
+        {/* Активные доставки */}
+        {activeDeliveries.length > 0 && (
+          <>
+            <h3 style={styles.sectionTitle}>
+              <span>🚚</span>
+              <span>Активные доставки ({activeDeliveries.length})</span>
+            </h3>
+            {activeDeliveries.slice(0, 3).map(delivery => (
+              <div
+                key={delivery.id}
+                style={styles.deliveryCard}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'rgba(82, 136, 193, 0.1)';
+                  e.currentTarget.style.transform = 'translateX(4px)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'var(--tg-theme-secondary-bg-color, #232e3c)';
+                  e.currentTarget.style.transform = 'translateX(0)';
+                }}
+              >
+                <div style={styles.deliveryHeader}>
+                  <div style={styles.deliveryTitle}>
+                    {delivery.parcel?.title || 'Доставка'}
+                  </div>
+                  <span style={{
+                    ...styles.statusBadge,
+                    background: delivery.status === 'in_transit' ? '#FFD700' : '#4BB34B',
+                    color: delivery.status === 'in_transit' ? '#1a1a1a' : 'white'
+                  }}>
+                    {delivery.status === 'assigned' ? 'Назначено' : 'В пути'}
+                  </span>
+                </div>
+                <div style={styles.deliveryRoute}>
+                  <span>📍</span>
+                  <span>{delivery.parcel?.origin?.split(',')[0]} → {delivery.parcel?.destination?.split(',')[0]}</span>
+                </div>
+                <div style={styles.deliveryInfo}>
+                  Роль: {delivery.userRole === 'carrier' ? 'Курьер' : 'Отправитель'}
+                </div>
+              </div>
+            ))}
+          </>
+        )}
+
+        {/* Меню */}
+        <h3 style={styles.sectionTitle}>
+          <span>⚙️</span>
+          <span>Настройки и информация</span>
+        </h3>
+        <div style={styles.menuSection}>
+          <div
+            style={styles.menuItem}
+            onClick={() => onNavigate && onNavigate('reviews', {
+              userId: user?.id,
+              userName: user?.full_name,
+              userAvatar: user?.avatar_url,
+              userRating: user?.rating,
+              reviewsCount: user?.reviews_count || 0
+            })}
+            onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(100, 181, 239, 0.1)'}
+            onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+          >
+            <div style={styles.menuItemContent}>
+              <span style={styles.menuIcon}>⭐</span>
+              <span style={styles.menuLabel}>
+                Отзывы и рейтинг
+                {user?.reviews_count > 0 && (
+                  <span style={styles.menuBadge}>{user.reviews_count}</span>
+                )}
+              </span>
+            </div>
+            <span style={styles.menuArrow}>›</span>
           </div>
-          <span style={styles.menuArrow}>›</span>
+
+          <div
+            style={styles.menuItem}
+            onClick={() => alert('Настройки уведомлений')}
+            onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(100, 181, 239, 0.1)'}
+            onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+          >
+            <div style={styles.menuItemContent}>
+              <span style={styles.menuIcon}>🔔</span>
+              <span style={styles.menuLabel}>Уведомления</span>
+            </div>
+            <span style={styles.menuArrow}>›</span>
+          </div>
+
+          <div
+            style={styles.menuItem}
+            onClick={() => alert('Настройки профиля')}
+            onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(100, 181, 239, 0.1)'}
+            onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+          >
+            <div style={styles.menuItemContent}>
+              <span style={styles.menuIcon}>👤</span>
+              <span style={styles.menuLabel}>Редактировать профиль</span>
+            </div>
+            <span style={styles.menuArrow}>›</span>
+          </div>
+
+          <div
+            style={styles.menuItem}
+            onClick={() => onNavigate && onNavigate('about')}
+            onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(100, 181, 239, 0.1)'}
+            onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+          >
+            <div style={styles.menuItemContent}>
+              <span style={styles.menuIcon}>ℹ️</span>
+              <span style={styles.menuLabel}>О приложении</span>
+            </div>
+            <span style={styles.menuArrow}>›</span>
+          </div>
+
+          <div
+            style={{...styles.menuItem, borderBottom: 'none'}}
+            onClick={() => alert('Помощь и поддержка')}
+            onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(100, 181, 239, 0.1)'}
+            onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+          >
+            <div style={styles.menuItemContent}>
+              <span style={styles.menuIcon}>💬</span>
+              <span style={styles.menuLabel}>Помощь</span>
+            </div>
+            <span style={styles.menuArrow}>›</span>
+          </div>
+        </div>
+
+        {/* Версия приложения */}
+        <div style={{
+          textAlign: 'center',
+          padding: '20px',
+          color: 'var(--tg-theme-hint-color, #708499)',
+          fontSize: '13px'
+        }}>
+          PeerPack v1.0.0
         </div>
       </div>
     </div>

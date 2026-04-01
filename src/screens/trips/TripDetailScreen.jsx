@@ -238,7 +238,9 @@ const TripDetailScreen = ({ tripId, onBack, onNavigate }) => {
       width: '32px',
       height: '32px',
       borderRadius: '50%',
-      objectFit: 'cover'
+      objectFit: 'cover',
+      cursor: 'pointer',
+      transition: 'all 0.2s ease'
     },
     authorName: {
       fontSize: '14px',
@@ -534,6 +536,21 @@ const TripDetailScreen = ({ tripId, onBack, onNavigate }) => {
                       src={offer.user?.avatar_url || 'https://i.pravatar.cc/100'}
                       alt={offer.user?.full_name || 'Пользователь'}
                       style={styles.authorAvatar}
+                      onClick={() => onNavigate && onNavigate('reviews', {
+                        userId: offer.user?.id,
+                        userName: offer.user?.full_name,
+                        userAvatar: offer.user?.avatar_url,
+                        userRating: offer.user?.rating,
+                        reviewsCount: offer.user?.reviews_count || 0
+                      })}
+                      onMouseEnter={(e) => {
+                        e.target.style.transform = 'scale(1.1)';
+                        e.target.style.boxShadow = '0 4px 12px rgba(82, 136, 193, 0.4)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.transform = 'scale(1)';
+                        e.target.style.boxShadow = 'none';
+                      }}
                     />
                     <div>
                       <div style={styles.authorName}>{offer.user?.full_name || 'Пользователь'}</div>
@@ -631,6 +648,21 @@ const TripDetailScreen = ({ tripId, onBack, onNavigate }) => {
                       src={pkg.user?.avatar_url || 'https://i.pravatar.cc/100'}
                       alt={pkg.user?.full_name || 'Пользователь'}
                       style={styles.authorAvatar}
+                      onClick={() => onNavigate && onNavigate('reviews', {
+                        userId: pkg.user?.id,
+                        userName: pkg.user?.full_name,
+                        userAvatar: pkg.user?.avatar_url,
+                        userRating: pkg.user?.rating,
+                        reviewsCount: pkg.user?.reviews_count || 0
+                      })}
+                      onMouseEnter={(e) => {
+                        e.target.style.transform = 'scale(1.1)';
+                        e.target.style.boxShadow = '0 4px 12px rgba(82, 136, 193, 0.4)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.transform = 'scale(1)';
+                        e.target.style.boxShadow = 'none';
+                      }}
                     />
                     <div style={styles.authorName}>{pkg.user?.full_name || 'Пользователь'}</div>
                   </div>
