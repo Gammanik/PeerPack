@@ -2,13 +2,16 @@ import React, { useState } from 'react';
 import PackagesSection from '../profile/components/PackagesSection.jsx';
 import AddParcelForm from '../../domains/user/components/AddParcelForm.jsx';
 import { supabaseApi } from '../../services/supabaseApi.js';
+import { useUser } from '../../shared/context/UserContext.jsx';
 
 const ParcelsScreen = ({ onNavigate }) => {
+  const { user } = useUser();
+  const currentUserId = user?.id;
+
   const [showAddParcelForm, setShowAddParcelForm] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
 
   const availableCities = ['Москва', 'Санкт-Петербург', 'Дубай', 'Сочи', 'Казань', 'Новосибирск', 'Екатеринбург', 'Стамбул', 'Анталья', 'Милан', 'Париж'];
-  const currentUserId = 1; // TODO: replace with real user ID from Telegram
 
   const handleAddParcel = async (parcelData) => {
     try {

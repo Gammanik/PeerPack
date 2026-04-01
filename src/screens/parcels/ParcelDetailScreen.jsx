@@ -1,18 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { supabaseApi } from '../../services/supabaseApi.js';
+import { useUser } from '../../shared/context/UserContext.jsx';
+import UserRating from '../../components/UserRating.jsx';
 
 const ParcelDetailScreen = ({ parcelId, onBack, onNavigate }) => {
+  const { user } = useUser();
+  const currentUserId = user?.id;
+
   const [parcel, setParcel] = useState(null);
   const [parcelOffers, setParcelOffers] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const currentUserId = 1; // TODO: Get from UserContext
-
   useEffect(() => {
-    loadParcelDetails();
-  }, [parcelId]);
+    if (currentUserId && parcelId) {
+      loadParcelDetails();
+    }
+  }, [parcelId, currentUserId]);
 
   const loadParcelDetails = async () => {
+    if (!currentUserId) return;
+
     try {
       setLoading(true);
 
@@ -375,11 +382,11 @@ const ParcelDetailScreen = ({ parcelId, onBack, onNavigate }) => {
                             <span style={styles.badge}>NEW</span>
                           )}
                         </div>
-                        {courier?.rating && (
-                          <div style={styles.rating}>
-                            ⭐ {courier.rating.toFixed(1)}
-                          </div>
-                        )}
+                        <UserRating
+                          rating={courier?.rating}
+                          reviewsCount={courier?.reviews_count || 0}
+                          size="small"
+                        />
                       </div>
                     </div>
                     <div style={styles.price}>

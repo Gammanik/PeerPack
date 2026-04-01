@@ -1,21 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { supabaseApi } from '../../../services/supabaseApi.js';
+import { useUser } from '../../../shared/context/UserContext.jsx';
 
 const PackagesSection = ({ onNavigate }) => {
+  const { user } = useUser();
+  const currentUserId = user?.id;
+
   const [packages, setPackages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Временно используем тестового пользователя (ID = 1)
-  // TODO: заменить на реального пользователя из Telegram
-  const currentUserId = 1;
-
   // Загружаем посылки пользователя при монтировании
   useEffect(() => {
-    loadUserParcels();
-  }, []);
+    if (currentUserId) {
+      loadUserParcels();
+    }
+  }, [currentUserId]);
 
   const loadUserParcels = async () => {
+    if (!currentUserId) return;
+
     try {
       setLoading(true);
       setError(null);

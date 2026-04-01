@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import AddTripForm from '../../../domains/user/components/AddTripForm.jsx';
 import { supabaseApi } from '../../../services/supabaseApi.js';
+import { useUser } from '../../../shared/context/UserContext.jsx';
 
 const TripsSection = ({ onNavigate }) => {
+  const { user } = useUser();
+  const currentUserId = user?.id;
+
   const [showAddTripForm, setShowAddTripForm] = useState(false);
 
   // Данные из Supabase
@@ -11,17 +15,18 @@ const TripsSection = ({ onNavigate }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Временно используем тестового пользователя
-  const currentUserId = 1;
-
   const availableCities = ['Москва', 'Санкт-Петербург', 'Дубай', 'Сочи', 'Казань', 'Новосибирск', 'Екатеринбург'];
 
   // Загружаем поездки пользователя при монтировании
   useEffect(() => {
-    loadUserTrips();
-  }, []);
+    if (currentUserId) {
+      loadUserTrips();
+    }
+  }, [currentUserId]);
 
   const loadUserTrips = async () => {
+    if (!currentUserId) return;
+
     try {
       setLoading(true);
       setError(null);
@@ -107,52 +112,34 @@ const TripsSection = ({ onNavigate }) => {
 
   const styles = {
     addTripBanner: {
-      background: 'linear-gradient(135deg, var(--tg-theme-button-color, #5288c1), var(--tg-theme-accent-text-color, #64b5ef))',
-      borderRadius: '20px',
-      padding: '24px',
+      background: 'var(--tg-theme-button-color, #5288c1)',
+      borderRadius: '16px',
+      padding: '20px',
       marginBottom: '20px',
       textAlign: 'center',
       cursor: 'pointer',
-      transition: 'all 0.3s ease',
-      boxShadow: '0 8px 24px rgba(82, 136, 193, 0.3)',
-      border: '1px solid rgba(255, 255, 255, 0.1)'
+      transition: 'transform 0.2s ease',
+      border: 'none'
     },
     addTripTitle: {
-      fontSize: '20px',
-      fontWeight: '700',
+      fontSize: '17px',
+      fontWeight: '600',
       color: 'white',
-      marginBottom: '8px'
+      marginBottom: '6px'
     },
     addTripSubtitle: {
-      fontSize: '15px',
-      color: 'rgba(255, 255, 255, 0.9)',
-      marginBottom: '16px'
-    },
-    addTripButton: {
-      background: 'rgba(255, 255, 255, 0.2)',
-      border: '1px solid rgba(255, 255, 255, 0.3)',
-      borderRadius: '12px',
-      padding: '10px 20px',
-      color: 'white',
-      fontSize: '15px',
-      fontWeight: '600',
-      cursor: 'pointer',
-      transition: 'all 0.2s ease'
+      fontSize: '14px',
+      color: 'rgba(255, 255, 255, 0.85)',
+      marginBottom: '0'
     },
     tripCard: {
       background: 'var(--tg-theme-secondary-bg-color, #232e3c)',
-      borderRadius: '20px',
-      padding: '20px',
-      marginBottom: '16px',
-      border: '1px solid rgba(255, 255, 255, 0.1)',
+      borderRadius: '12px',
+      padding: '16px',
+      marginBottom: '12px',
+      border: '1px solid rgba(255, 255, 255, 0.06)',
       cursor: 'pointer',
-      transition: 'all 0.3s ease',
-      boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)',
-      '&:hover': {
-        transform: 'translateY(-2px)',
-        boxShadow: '0 8px 24px rgba(0, 0, 0, 0.15)',
-        borderColor: 'var(--tg-theme-button-color, #5288c1)'
-      }
+      transition: 'background 0.2s ease'
     },
     cardHeader: {
       display: 'flex',
@@ -181,15 +168,15 @@ const TripsSection = ({ onNavigate }) => {
       fontWeight: '600'
     },
     route: {
-      fontSize: '15px',
+      fontSize: '14px',
       color: 'var(--tg-theme-hint-color, #708499)'
     },
     responsesBadge: {
-      background: 'linear-gradient(135deg, var(--tg-theme-accent-text-color, #64b5ef), var(--tg-theme-button-color, #5288c1))',
-      color: 'white',
-      padding: '6px 12px',
-      borderRadius: '12px',
-      fontSize: '13px',
+      background: 'rgba(100, 181, 239, 0.15)',
+      color: 'var(--tg-theme-button-color, #5288c1)',
+      padding: '4px 10px',
+      borderRadius: '8px',
+      fontSize: '12px',
       fontWeight: '600'
     },
     cardInfo: {
@@ -198,28 +185,13 @@ const TripsSection = ({ onNavigate }) => {
       fontSize: '15px'
     },
     comment: {
-      fontSize: '14px',
-      color: 'var(--tg-theme-text-color, #ffffff)',
-      background: 'rgba(100, 181, 239, 0.1)',
-      padding: '12px 16px',
-      borderRadius: '12px',
-      fontStyle: 'italic',
-      marginTop: '12px',
-      border: '1px solid rgba(100, 181, 239, 0.2)'
-    },
-    clickHint: {
-      textAlign: 'center',
-      padding: '12px',
-      background: 'linear-gradient(135deg, rgba(82, 136, 193, 0.1), rgba(100, 181, 239, 0.1))',
-      borderTop: '1px solid rgba(82, 136, 193, 0.2)',
-      color: 'var(--tg-theme-button-color, #5288c1)',
-      fontSize: '14px',
-      fontWeight: '500',
-      marginTop: '12px',
-      borderRadius: '0 0 20px 20px',
-      marginBottom: '-20px',
-      marginLeft: '-20px',
-      marginRight: '-20px'
+      fontSize: '13px',
+      color: 'var(--tg-theme-hint-color, #708499)',
+      background: 'rgba(255, 255, 255, 0.03)',
+      padding: '10px 12px',
+      borderRadius: '8px',
+      marginTop: '10px',
+      border: '1px solid rgba(255, 255, 255, 0.05)'
     }
   };
 
@@ -264,11 +236,8 @@ const TripsSection = ({ onNavigate }) => {
         style={styles.addTripBanner}
         onClick={() => setShowAddTripForm(true)}
       >
-        <div style={styles.addTripTitle}>✈️ Планируете поездку?</div>
-        <div style={styles.addTripSubtitle}>Предложите свои услуги доставки и заработайте</div>
-        <button style={styles.addTripButton}>
-          + Добавить поездку
-        </button>
+        <div style={styles.addTripTitle}>+ Добавить поездку</div>
+        <div style={styles.addTripSubtitle}>Предложите услуги доставки и заработайте</div>
       </div>
 
 
@@ -308,13 +277,13 @@ const TripsSection = ({ onNavigate }) => {
                     <span style={{
                       background: '#FF3B30',
                       color: 'white',
-                      fontSize: '11px',
-                      fontWeight: '600',
-                      padding: '3px 8px',
-                      borderRadius: '10px',
-                      marginLeft: '8px'
+                      fontSize: '10px',
+                      fontWeight: '700',
+                      padding: '2px 6px',
+                      borderRadius: '6px',
+                      marginLeft: '6px'
                     }}>
-                      {unviewedCount} NEW
+                      {unviewedCount}
                     </span>
                   )}
                 </div>
@@ -324,8 +293,14 @@ const TripsSection = ({ onNavigate }) => {
               </div>
               <div style={{
                 ...styles.responsesBadge,
-                ...(trip.status === 'active' && { background: '#4BB34B' }),
-                ...(trip.status === 'completed' && { background: '#888' })
+                ...(trip.status === 'active' && {
+                  background: 'rgba(75, 179, 75, 0.15)',
+                  color: '#4BB34B'
+                }),
+                ...(trip.status === 'completed' && {
+                  background: 'rgba(136, 136, 136, 0.15)',
+                  color: '#888'
+                })
               }}>
                 {trip.status === 'active' ? 'Активна' : trip.status === 'completed' ? 'Завершена' : trip.status}
               </div>
@@ -342,13 +317,9 @@ const TripsSection = ({ onNavigate }) => {
 
             {trip.comment && (
               <div style={styles.comment}>
-                💬 {trip.comment}
+                {trip.comment}
               </div>
             )}
-
-            <div style={styles.clickHint}>
-              👀 Нажмите чтобы посмотреть заявки
-            </div>
           </div>
         );
       })}

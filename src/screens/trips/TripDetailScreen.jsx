@@ -1,15 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { supabaseApi } from '../../services/supabaseApi.js';
+import { useUser } from '../../shared/context/UserContext.jsx';
+import UserRating from '../../components/UserRating.jsx';
 
 const TripDetailScreen = ({ tripId, onBack, onNavigate }) => {
+  const { user } = useUser();
+  const currentUserId = user?.id;
+
   const [trip, setTrip] = useState(null);
   const [tripOffers, setTripOffers] = useState([]);
   const [availableParcels, setAvailableParcels] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showResponseForm, setShowResponseForm] = useState(false);
   const [selectedPackage, setSelectedPackage] = useState(null);
-
-  const currentUserId = 1; // TODO: Get from UserContext
 
   const [responseForm, setResponseForm] = useState({
     tripDate: '',
@@ -22,10 +25,14 @@ const TripDetailScreen = ({ tripId, onBack, onNavigate }) => {
   });
 
   useEffect(() => {
-    loadTripDetails();
-  }, [tripId]);
+    if (currentUserId && tripId) {
+      loadTripDetails();
+    }
+  }, [tripId, currentUserId]);
 
   const loadTripDetails = async () => {
+    if (!currentUserId) return;
+
     try {
       setLoading(true);
 
@@ -528,7 +535,14 @@ const TripDetailScreen = ({ tripId, onBack, onNavigate }) => {
                       alt={offer.user?.full_name || 'Пользователь'}
                       style={styles.authorAvatar}
                     />
-                    <div style={styles.authorName}>{offer.user?.full_name || 'Пользователь'}</div>
+                    <div>
+                      <div style={styles.authorName}>{offer.user?.full_name || 'Пользователь'}</div>
+                      <UserRating
+                        rating={offer.user?.rating}
+                        reviewsCount={offer.user?.reviews_count || 0}
+                        size="small"
+                      />
+                    </div>
                     {!offer.is_viewed && (
                       <span style={styles.badge}>NEW</span>
                     )}
