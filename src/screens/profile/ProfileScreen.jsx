@@ -302,7 +302,18 @@ const ProfileScreen = ({ onNavigate }) => {
           <span>Статистика</span>
         </h3>
         <div style={styles.statsGrid}>
-          <div style={styles.statCard}>
+          <div
+            style={styles.statCard}
+            onClick={() => onNavigate && onNavigate('trip-history')}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'rgba(82, 136, 193, 0.1)';
+              e.currentTarget.style.transform = 'scale(1.02)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'var(--tg-theme-secondary-bg-color, #232e3c)';
+              e.currentTarget.style.transform = 'scale(1)';
+            }}
+          >
             <span style={styles.statIcon}>✈️</span>
             <div style={styles.statNumber}>{stats.trips}</div>
             <div style={styles.statLabel}>Поездок</div>
@@ -421,7 +432,7 @@ const ProfileScreen = ({ onNavigate }) => {
 
           <div
             style={styles.menuItem}
-            onClick={() => onNavigate && onNavigate('about')}
+            onClick={() => onNavigate && onNavigate('about', { from: 'profile' })}
             onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(100, 181, 239, 0.1)'}
             onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
           >

@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { useAnimatedStats } from '../hooks/useAnimatedStats.js';
 
-const AboutPage = ({ onNavigate }) => {
+const AboutPage = ({ onNavigate, onBack }) => {
   const targetStats = useMemo(() => ({
     users: 2847,
     deliveries: 12459,
@@ -172,9 +172,9 @@ const AboutPage = ({ onNavigate }) => {
         </div>
       </div>
 
-      <button 
+      <button
         style={styles.backButton}
-        onClick={() => onNavigate('search')}
+        onClick={onBack || (() => onNavigate('profile'))}
       >
         ← Назад
       </button>

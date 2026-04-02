@@ -9,6 +9,7 @@ const PackagesSection = ({ onNavigate }) => {
   const [packages, setPackages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [filterStatus, setFilterStatus] = useState('all'); // all, open, assigned, delivered, cancelled
 
   // Загружаем посылки пользователя при монтировании
   useEffect(() => {
@@ -69,7 +70,45 @@ const PackagesSection = ({ onNavigate }) => {
     }
   };
 
+  // Фильтруем посылки по статусу
+  const filteredPackages = packages.filter(pkg => {
+    if (filterStatus === 'all') return true;
+    return pkg.status === filterStatus;
+  });
+
+  const filterCounts = {
+    all: packages.length,
+    open: packages.filter(p => p.status === 'open').length,
+    assigned: packages.filter(p => p.status === 'assigned').length,
+    delivered: packages.filter(p => p.status === 'delivered').length,
+    cancelled: packages.filter(p => p.status === 'cancelled').length
+  };
+
   const styles = {
+    filterTabs: {
+      display: 'flex',
+      gap: '8px',
+      marginBottom: '16px',
+      overflowX: 'auto',
+      padding: '4px'
+    },
+    filterTab: {
+      padding: '8px 16px',
+      borderRadius: '12px',
+      border: '1px solid rgba(255, 255, 255, 0.1)',
+      background: 'var(--tg-theme-secondary-bg-color, #232e3c)',
+      color: 'var(--tg-theme-hint-color, #708499)',
+      fontSize: '14px',
+      fontWeight: '500',
+      cursor: 'pointer',
+      transition: 'all 0.2s ease',
+      whiteSpace: 'nowrap'
+    },
+    filterTabActive: {
+      background: 'var(--tg-theme-button-color, #5288c1)',
+      color: 'white',
+      border: '1px solid var(--tg-theme-button-color, #5288c1)'
+    },
     packageCard: {
       background: 'var(--tg-theme-secondary-bg-color, #232e3c)',
       borderRadius: '20px',
@@ -203,7 +242,70 @@ const PackagesSection = ({ onNavigate }) => {
 
   return (
     <>
-      {packages.map(pkg => (
+      {/* Табы фильтрации */}
+      <div style={styles.filterTabs}>
+        <div
+          style={{
+            ...styles.filterTab,
+            ...(filterStatus === 'all' && styles.filterTabActive)
+          }}
+          onClick={() => setFilterStatus('all')}
+        >
+          Все ({filterCounts.all})
+        </div>
+        <div
+          style={{
+            ...styles.filterTab,
+            ...(filterStatus === 'open' && styles.filterTabActive)
+          }}
+          onClick={() => setFilterStatus('open')}
+        >
+          Открытые ({filterCounts.open})
+        </div>
+        <div
+          style={{
+            ...styles.filterTab,
+            ...(filterStatus === 'assigned' && styles.filterTabActive)
+          }}
+          onClick={() => setFilterStatus('assigned')}
+        >
+          Назначенные ({filterCounts.assigned})
+        </div>
+        <div
+          style={{
+            ...styles.filterTab,
+            ...(filterStatus === 'delivered' && styles.filterTabActive)
+          }}
+          onClick={() => setFilterStatus('delivered')}
+        >
+          Доставленные ({filterCounts.delivered})
+        </div>
+        {filterCounts.cancelled > 0 && (
+          <div
+            style={{
+              ...styles.filterTab,
+              ...(filterStatus === 'cancelled' && styles.filterTabActive)
+            }}
+            onClick={() => setFilterStatus('cancelled')}
+          >
+            Отмененные ({filterCounts.cancelled})
+          </div>
+        )}
+      </div>
+
+      {filteredPackages.length === 0 ? (
+        <div style={{textAlign: 'center', padding: '40px', color: 'var(--tg-theme-hint-color, #708499)'}}>
+          <div style={{fontSize: '48px', marginBottom: '16px'}}>📦</div>
+          <div style={{fontSize: '18px', fontWeight: '600', marginBottom: '8px'}}>
+            Нет посылок с таким статусом
+          </div>
+          <div style={{fontSize: '14px'}}>
+            Измените фильтр для просмотра других посылок
+          </div>
+        </div>
+      ) : null}
+
+      {filteredPackages.map(pkg => (
         <div
           key={pkg.id}
           style={styles.packageCard}

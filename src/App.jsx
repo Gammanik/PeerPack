@@ -7,6 +7,7 @@ import ParcelsScreen from './screens/parcels/ParcelsScreen.jsx';
 import ParcelDetailScreen from './screens/parcels/ParcelDetailScreen.jsx';
 import TripsScreen from './screens/trips/TripsScreen.jsx';
 import TripDetailScreen from './screens/trips/TripDetailScreen.jsx';
+import TripHistoryScreen from './screens/trips/TripHistoryScreen.jsx';
 import AboutPage from './components/AboutPage.jsx';
 import { LanguageProvider } from './contexts/LanguageContext.jsx';
 
@@ -24,6 +25,10 @@ const App = () => {
     } else if (route.page === 'parcel-detail') {
       handleNavigate('parcels');
     } else if (route.page === 'reviews') {
+      handleNavigate('profile');
+    } else if (route.page === 'about') {
+      handleNavigate(route.params.from || 'profile');
+    } else if (route.page === 'trip-history') {
       handleNavigate('profile');
     } else {
       handleNavigate('parcels');
@@ -65,8 +70,10 @@ const App = () => {
             onBack={handleBack}
           />
         );
+      case 'trip-history':
+        return <TripHistoryScreen onBack={handleBack} />;
       case 'about':
-        return <AboutPage onNavigate={handleNavigate} />;
+        return <AboutPage onNavigate={handleNavigate} onBack={handleBack} />;
       case 'search':
         return <SearchScreen onNavigate={handleNavigate} />;
       default:
@@ -75,7 +82,7 @@ const App = () => {
   };
 
   // Скрываем нижнюю навигацию на детальных страницах
-  const hideBottomNav = route.page === 'trip-detail' || route.page === 'parcel-detail' || route.page === 'reviews';
+  const hideBottomNav = route.page === 'trip-detail' || route.page === 'parcel-detail' || route.page === 'reviews' || route.page === 'about' || route.page === 'trip-history';
 
   return (
     <LanguageProvider>

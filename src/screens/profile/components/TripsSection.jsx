@@ -8,6 +8,7 @@ const TripsSection = ({ onNavigate }) => {
   const currentUserId = user?.id;
 
   const [showAddTripForm, setShowAddTripForm] = useState(false);
+  const [filterStatus, setFilterStatus] = useState('all'); // all, active, completed, cancelled
 
   // Данные из Supabase
   const [trips, setTrips] = useState([]);
@@ -110,7 +111,40 @@ const TripsSection = ({ onNavigate }) => {
     }
   };
 
+  // Фильтруем поездки по статусу
+  const filteredTrips = trips.filter(trip => {
+    if (filterStatus === 'all') return true;
+    if (filterStatus === 'active') return trip.status === 'active';
+    if (filterStatus === 'completed') return trip.status === 'completed';
+    if (filterStatus === 'cancelled') return trip.status === 'cancelled';
+    return true;
+  });
+
   const styles = {
+    filterTabs: {
+      display: 'flex',
+      gap: '8px',
+      marginBottom: '16px',
+      overflowX: 'auto',
+      padding: '4px'
+    },
+    filterTab: {
+      padding: '8px 16px',
+      borderRadius: '12px',
+      border: '1px solid rgba(255, 255, 255, 0.1)',
+      background: 'var(--tg-theme-secondary-bg-color, #232e3c)',
+      color: 'var(--tg-theme-hint-color, #708499)',
+      fontSize: '14px',
+      fontWeight: '500',
+      cursor: 'pointer',
+      transition: 'all 0.2s ease',
+      whiteSpace: 'nowrap'
+    },
+    filterTabActive: {
+      background: 'var(--tg-theme-button-color, #5288c1)',
+      color: 'white',
+      border: '1px solid var(--tg-theme-button-color, #5288c1)'
+    },
     addTripBanner: {
       background: 'var(--tg-theme-button-color, #5288c1)',
       borderRadius: '16px',
@@ -229,6 +263,13 @@ const TripsSection = ({ onNavigate }) => {
     );
   }
 
+  const filterCounts = {
+    all: trips.length,
+    active: trips.filter(t => t.status === 'active').length,
+    completed: trips.filter(t => t.status === 'completed').length,
+    cancelled: trips.filter(t => t.status === 'cancelled').length
+  };
+
   return (
     <>
       {/* Баннер добавления поездки */}
@@ -240,16 +281,62 @@ const TripsSection = ({ onNavigate }) => {
         <div style={styles.addTripSubtitle}>Предложите услуги доставки и заработайте</div>
       </div>
 
+      {/* Табы фильтрации */}
+      <div style={styles.filterTabs}>
+        <div
+          style={{
+            ...styles.filterTab,
+            ...(filterStatus === 'all' && styles.filterTabActive)
+          }}
+          onClick={() => setFilterStatus('all')}
+        >
+          Все ({filterCounts.all})
+        </div>
+        <div
+          style={{
+            ...styles.filterTab,
+            ...(filterStatus === 'active' && styles.filterTabActive)
+          }}
+          onClick={() => setFilterStatus('active')}
+        >
+          Активные ({filterCounts.active})
+        </div>
+        <div
+          style={{
+            ...styles.filterTab,
+            ...(filterStatus === 'completed' && styles.filterTabActive)
+          }}
+          onClick={() => setFilterStatus('completed')}
+        >
+          Завершенные ({filterCounts.completed})
+        </div>
+        {filterCounts.cancelled > 0 && (
+          <div
+            style={{
+              ...styles.filterTab,
+              ...(filterStatus === 'cancelled' && styles.filterTabActive)
+            }}
+            onClick={() => setFilterStatus('cancelled')}
+          >
+            Отмененные ({filterCounts.cancelled})
+          </div>
+        )}
+      </div>
 
-      {trips.length === 0 ? (
+
+      {filteredTrips.length === 0 ? (
         <div style={{textAlign: 'center', padding: '40px', color: 'var(--tg-theme-hint-color, #708499)'}}>
           <div style={{fontSize: '48px', marginBottom: '16px'}}>✈️</div>
-          <div style={{fontSize: '18px', fontWeight: '600', marginBottom: '8px'}}>Нет поездок</div>
-          <div style={{fontSize: '14px'}}>Добавьте первую поездку, чтобы начать зарабатывать</div>
+          <div style={{fontSize: '18px', fontWeight: '600', marginBottom: '8px'}}>
+            {trips.length === 0 ? 'Нет поездок' : `Нет ${filterStatus === 'active' ? 'активных' : filterStatus === 'completed' ? 'завершенных' : 'отмененных'} поездок`}
+          </div>
+          <div style={{fontSize: '14px'}}>
+            {trips.length === 0 ? 'Добавьте первую поездку, чтобы начать зарабатывать' : 'Измените фильтр для просмотра других поездок'}
+          </div>
         </div>
       ) : null}
 
-      {trips.map(trip => {
+      {filteredTrips.map(trip => {
         const departAt = new Date(trip.depart_at);
         const formattedDate = departAt.toLocaleDateString('ru-RU');
         const formattedTime = departAt.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
