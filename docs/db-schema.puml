@@ -3,14 +3,15 @@
 entity users {
   full_name : varchar
   rating : decimal
+  reviews_count : int
 }
 
 entity trips {
   ● user_id : bigint
-  origin : varchar
-  destination : varchar
+  origin / destination : varchar
   depart_at : timestamp
   capacity_kg : int
+  status : active | in_progress | completed | cancelled
 }
 
 entity parcels {
@@ -18,15 +19,16 @@ entity parcels {
   title : varchar
   weight_kg : decimal
   reward : decimal
-  status : open | assigned | delivered
+  status : open | assigned | delivered | cancelled
 }
 
 entity offers {
   ● trip_id : bigint
   ● parcel_id : bigint
+  ● user_id : bigint
   type : parcel_to_trip | trip_to_parcel
   price : decimal
-  status : pending | rejected | accepted
+  status : pending | accepted | rejected
 }
 
 entity deliveries {
@@ -36,7 +38,22 @@ entity deliveries {
   status : assigned | in_transit | delivered
 }
 
-' ========== СВЯЗИ ==========
+entity reviews {
+  ● delivery_id : bigint
+  ● reviewer_user_id : bigint
+  ● reviewed_user_id : bigint
+  rating : 1-5
+  comment : text
+}
+
+entity platform_fees {
+  ● delivery_id : bigint
+  amount : decimal
+  percentage : 10%
+  status : pending | paid | cancelled
+}
+
+' === Связи ===
 users ||--o{ trips
 users ||--o{ parcels
 users ||--o{ offers
@@ -47,5 +64,8 @@ parcels ||--o{ offers
 
 trips ||--o{ deliveries
 parcels ||--|| deliveries
+
+deliveries ||--o{ reviews
+deliveries ||--|| platform_fees
 
 @enduml

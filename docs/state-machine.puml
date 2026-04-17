@@ -1,0 +1,100 @@
+@startuml PeerPack_Parcel_State_Machine
+
+hide empty description
+left to right direction
+
+title PeerPack - Parcel Status Flow
+
+state open #LightBlue
+state assigned #Orange
+state delivered #LightGreen
+state cancelled_p #Lavender
+
+open --> assigned : sender accepts offer
+open --> cancelled_p : sender cancels
+
+assigned --> open : courier declines
+assigned --> cancelled_p : sender cancels
+assigned --> delivered : delivery completed
+
+@enduml
+
+@startuml PeerPack_Trip_State_Machine
+
+hide empty description
+left to right direction
+
+title PeerPack - Trip Status Flow
+
+state active #LightBlue
+state in_progress #Orange
+state completed #LightGreen
+state cancelled_t #Lavender
+
+active --> in_progress : first package accepted
+active --> completed : trip completed without packages
+active --> cancelled_t : courier cancels
+
+in_progress --> completed : all packages delivered
+
+@enduml
+
+@startuml PeerPack_Offer_State_Machine
+
+hide empty description
+left to right direction
+
+title PeerPack - Offer Status Flow
+
+state pending #LightBlue
+state accepted #LightGreen
+state rejected #Lavender
+
+pending --> accepted : sender accepts
+pending --> rejected : sender rejects or auto-expires
+
+
+
+
+
+
+@enduml
+
+@startuml PeerPack_Combined_Flow
+
+hide empty description
+left to right direction
+
+title PeerPack - Combined Status Flow (Parcel + Trip)
+
+state "Parcel: Open" as p_open #LightBlue
+state "Parcel: Assigned" as p_assigned #Orange
+state "Parcel: Delivered" as p_delivered #LightGreen
+state "Parcel: Cancelled" as p_cancelled #Lavender
+
+state "Trip: Active" as t_active #LightBlue
+state "Trip: In Progress" as t_in_progress #Orange
+state "Trip: Completed" as t_completed #LightGreen
+
+state "Offer: Pending" as o_pending #Azure
+
+note right of p_open
+  Sender creates parcel
+end note
+
+note right of t_active
+  Courier creates trip
+end note
+
+p_open --> o_pending : courier sends offer
+o_pending --> p_assigned : sender accepts offer
+p_assigned --> p_delivered : delivery completed
+p_assigned --> p_cancelled : cancelled by sender
+p_open --> p_cancelled : cancelled by sender
+
+t_active --> t_in_progress : first package accepted
+p_assigned -.-> t_in_progress : triggers trip status change
+t_in_progress --> t_completed : all packages delivered
+p_delivered -.-> t_completed : last package delivered
+
+@enduml
